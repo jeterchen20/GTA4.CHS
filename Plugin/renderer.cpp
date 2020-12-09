@@ -336,8 +336,8 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
         {
             auto dst_quad = dst_scan_line + col_index * 4;
 
-            dst_quad[0] = src_scan_line[col_index];
-            dst_quad[1] = dst_quad[2] = dst_quad[3] = 255;
+            dst_quad[0] = dst_quad[1] = dst_quad[2] = 255;
+            dst_quad[3] = src_scan_line[col_index];
         }
     }
 

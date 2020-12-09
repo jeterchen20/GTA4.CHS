@@ -2,10 +2,104 @@
 #include "font.h"
 #include "game.h"
 #include "batch_matching.h"
+#include "logger.hpp"
 #include <json/value.h>
 #include <json/reader.h>
 
 CPlugin PluginObject;
+
+std::string CPlugin::ReadFontFileName(const std::filesystem::path& filename)
+{
+    Json::Value value;
+    std::ifstream ifs(filename);
+
+    if (!ifs)
+        return std::string();
+
+    ifs >> value;
+
+    if (value.isObject())
+    {
+        auto ref = value["Font"];
+
+        if (ref.isString())
+            return ref.asString();
+        else
+            return std::string();
+    }
+    else
+    {
+        return std::string();
+    }
+}
+
+bool CPlugin::GetMemoryAddresses()
+{
+    batch_matching matcher;
+
+    //变量和函数的地址
+    matcher.register_step("8B 3D ? ? ? ? 89 54 24 10", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.ppDirect3DDevice9 = *addresses[0].p<IDirect3DDevice9**>(2);
+        });
+    matcher.register_step("A1 ? ? ? ? 80 7C 24 08 00", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pGraphics_SetRenderState = addresses[0].p();
+        });
+    matcher.register_step("8B 34 ED ? ? ? ? 0F 2E C1", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_Details = *addresses[0].p<CFontDetails*>(3);
+        });
+    matcher.register_step("81 3D ? ? ? ? AD 7F 33 31", 2, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_RenderState = *addresses[0].p<CFontRenderState*>(2);
+        });
+    matcher.register_step("F3 0F 11 05 ? ? ? ? 66 0F 6E 84 24 AC 00 00", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_ResolutionX = *addresses[0].p<float*>(4);
+        });
+    matcher.register_step("A1 ? ? ? ? 83 F8 FF 75 1E", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_GetRenderIndex = addresses[0].p();
+        });
+    matcher.register_step("83 EC 30 83 3D ? ? ? ? FF", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_PrintChar = addresses[0].p();
+        });
+    matcher.register_step("51 55 56 E8", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_GetCharacterSizeNormal = addresses[0].p();
+        });
+    matcher.register_step("8A 0D ? ? ? ? 0F B6 D1", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_GetCharacterSizeDrawing = addresses[0].p();
+        });
+    matcher.register_step("83 EC 10 8B 44 24 14 F3 0F 7E 00", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pFont_Render2DPrimitive = addresses[0].p();
+        });
+    matcher.register_step("8B 54 24 08 53 56 8B 74 24 0C 80 3E 22", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pHash_HashStringFromSeediCase = addresses[0].p();
+        });
+    matcher.register_step("53 55 56 57 8B F9 85 FF 74 3F", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            GameMeta.pDictionary_GetElementByKey = addresses[0].p();
+        });
+
+    //-----------------------------------------------------------------------------------------------------------------------------------
+    matcher.perform_search();
+
+    if (matcher.is_all_succeed())
+    {
+        matcher.run_callbacks();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 bool CPlugin::PatchGame()
 {
@@ -86,37 +180,14 @@ bool CPlugin::PatchGame()
     }
 }
 
-std::string CPlugin::ReadFontFileName(const std::filesystem::path& filename)
-{
-    Json::Value value;
-    std::ifstream ifs(filename);
-
-    if (!ifs)
-        return std::string();
-
-    ifs >> value;
-
-    if (value.isObject())
-    {
-        auto ref = value["Font"];
-
-        if (ref.isString())
-            return ref.asString();
-        else
-            return std::string();
-    }
-    else
-    {
-        return std::string();
-    }
-}
-
 bool CPlugin::Init(HMODULE module)
 {
     wchar_t PluginPath[512];
     GetModuleFileNameW(module, PluginPath, 512);
 
     auto plugin_folder = std::filesystem::path(PluginPath).parent_path();
+
+    logger::convience_instance().start_log(plugin_folder / "gta4.chs.log");
 
     //读取字体
     std::string font_name = ReadFontFileName(plugin_folder / "GTA4.CHS" / "font.json");
@@ -136,72 +207,4 @@ bool CPlugin::Init(HMODULE module)
     byte_pattern::shutdown_log();
 
     return result;
-}
-
-bool CPlugin::GetMemoryAddresses()
-{
-    batch_matching matcher;
-
-    //变量和函数的地址
-    matcher.register_step("8B 3D ? ? ? ? 89 54 24 10", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.ppDirect3DDevice9 = *addresses[0].p<IDirect3DDevice9**>(2);
-        });
-    matcher.register_step("A1 ? ? ? ? 80 7C 24 08 00", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pGraphics_SetRenderState = addresses[0].p();
-        });
-    matcher.register_step("8B 34 ED ? ? ? ? 0F 2E C1", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_Details = *addresses[0].p<CFontDetails*>(3);
-        });
-    matcher.register_step("81 3D ? ? ? ? AD 7F 33 31", 2, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_RenderState = *addresses[0].p<CFontRenderState*>(2);
-        });
-    matcher.register_step("F3 0F 11 05 ? ? ? ? 66 0F 6E 84 24 AC 00 00", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_ResolutionX = *addresses[0].p<float*>(4);
-        });
-    matcher.register_step("A1 ? ? ? ? 83 F8 FF 75 1E", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_GetRenderIndex = addresses[0].p();
-        });
-    matcher.register_step("83 EC 30 83 3D ? ? ? ? FF", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_PrintChar = addresses[0].p();
-        });
-    matcher.register_step("51 55 56 E8", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_GetCharacterSizeNormal = addresses[0].p();
-        });
-    matcher.register_step("8A 0D ? ? ? ? 0F B6 D1", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_GetCharacterSizeDrawing = addresses[0].p();
-        });
-    matcher.register_step("83 EC 10 8B 44 24 14 F3 0F 7E 00", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pFont_Render2DPrimitive = addresses[0].p();
-        });
-    matcher.register_step("8B 54 24 08 53 56 8B 74 24 0C 80 3E 22", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pHash_HashStringFromSeediCase = addresses[0].p();
-        });
-    matcher.register_step("53 55 56 57 8B F9 85 FF 74 3F", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            GameMeta.pDictionary_GetElementByKey = addresses[0].p();
-        });
-
-    //-----------------------------------------------------------------------------------------------------------------------------------
-    matcher.perform_search();
-
-    if (matcher.is_all_succeed())
-    {
-        matcher.run_callbacks();
-        return true;
-    }
-    else
-    {
-        return false;
-    }
 }
