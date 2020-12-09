@@ -318,20 +318,27 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
 {
     IDirect3DTexture9* result = nullptr;
 
-    dev->CreateTexture(width, height, 1, 0, D3DFMT_A8, D3DPOOL_MANAGED, &result, nullptr);
+    dev->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &result, nullptr);
 
     D3DLOCKED_RECT locked_rect;
 
     result->LockRect(0, &locked_rect, nullptr, 0);
 
-    auto pBits = reinterpret_cast<unsigned char*>(locked_rect.pBits);
+    auto src_bits = pixels.data();
+    auto dst_bits = reinterpret_cast<unsigned char*>(locked_rect.pBits);
 
     for (int row_index = 0; row_index < height; ++row_index)
     {
-        std::memcpy(
-            pBits + row_index * locked_rect.Pitch,
-            pixels.data() + row_index * width,
-            width);
+        auto src_scan_line = src_bits + row_index * width;
+        auto dst_scan_line = dst_bits + row_index * locked_rect.Pitch;
+
+        for (int col_index = 0; col_index < width; ++col_index)
+        {
+            auto dst_quad = dst_scan_line + col_index * 4;
+
+            dst_quad[0] = src_scan_line[col_index];
+            dst_quad[1] = dst_quad[2] = dst_quad[3] = 255;
+        }
     }
 
     result->UnlockRect(0);
