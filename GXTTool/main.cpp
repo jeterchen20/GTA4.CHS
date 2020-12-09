@@ -7,7 +7,9 @@ int main(int argc, char **argv)
 
     if (argc == 1)
     {
-        instance.Process0Arg();
+        instance.Process2Args("text", "out");
+
+        //instance.Process0Arg();
     }
     else if (argc == 3)
     {

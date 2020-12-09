@@ -94,7 +94,7 @@ void IVText::CollectCharacters(const string& text)
     {
         uint16_t character = *u8it;
 
-        if (!IsNativeCharacter(character))
+        if (!IsNativeCharacter(character) && character != 0x3000)
         {
             m_Collection.insert(character);
         }
@@ -132,8 +132,11 @@ void IVText::LoadText(const tPath& input_text)
     {
         ++line_no;
 
+        //去除头尾空格
         line.erase(0, line.find_first_not_of(' '));
         line.erase(line.find_last_not_of(' ') + 1);
+
+        //TODO: 将U+3000替换成2个空格
 
         if (line.empty() || line.front() == ';')
         {

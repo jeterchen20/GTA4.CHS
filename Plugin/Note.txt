@@ -6,7 +6,7 @@
 
 
 
-
+偏移/4+10
     STDMETHOD(QueryInterface)(THIS_ REFIID riid, void** ppvObj) PURE;
     STDMETHOD_(ULONG,AddRef)(THIS) PURE;
     STDMETHOD_(ULONG,Release)(THIS) PURE;
@@ -127,13 +127,10 @@
     STDMETHOD(DeletePatch)(THIS_ UINT Handle) PURE;
     STDMETHOD(CreateQuery)(THIS_ D3DQUERYTYPE Type,IDirect3DQuery9** ppQuery) PURE;
 
-17ED8D8一开始是Direct3DDevice的指针，其后内容被改变了
-42463E搬运
-4245B0 创建设备 172DFD80 变成了18DC2B8
-
-Esc菜单鼠标指向只变色一个word
+Esc菜单鼠标指向只变色一个
 存档名字只取低字节的问题
 不同语言字距不同的问题
+网页文本
 
 Ctrl+X显示所有函数的调用
 
