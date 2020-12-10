@@ -66,4 +66,7 @@
   <ItemGroup>
     <Text Include="Note.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="SCharTexture.natvis" />
+  </ItemGroup>
 </Project>

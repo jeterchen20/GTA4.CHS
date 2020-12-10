@@ -22,6 +22,8 @@ public:
     {
         if (_stream)
             _stream << text << '\n';
+
+        stop_log();
     }
 
     static logger &convience_instance()

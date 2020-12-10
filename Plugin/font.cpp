@@ -2,6 +2,7 @@
 #include "game.h"
 #include "plugin.h"
 #include "renderer.h"
+#include "logger.hpp"
 
 CFont FontObject;
 
@@ -120,7 +121,10 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
         return;
     }
 
-    auto char_texture = FontObject.renderer.LazyGetCharData(character);
+    auto& char_texture = FontObject.renderer.LazyGetCharData(character);
+
+    if (char_texture.texture == nullptr)
+        return;
 
     float character_width = (fChsWidth / *GameMeta.pFont_ResolutionX + GameMeta.pFont_RenderState->fEdgeSize) * GameMeta.pFont_RenderState->fScaleX;
     float character_height = GameMeta.pFont_RenderState->fScaleY * 0.06558f;
@@ -132,21 +136,31 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
 
 #if 1
     texturerect.fBottomLeftX = 0.0f;
-    texturerect.fBottomLeftY = 1.0f;
-    texturerect.fTopRightY = 7.0f / char_texture.height;
+    texturerect.fBottomLeftY = 82.8912f / char_texture.height;
+    texturerect.fTopRightY = 4.4f / char_texture.height;
     texturerect.fTopRightX = 1.0f;
 #else
-    //row*80+7
-    texturerect.fTopRightY = (pos.row - 0.045f / fRatio) * fSpriteHeight / fTextureResolution + 8.0f / fTextureResolution;
+    static const float fChsWidth = 32.0f;
+    static const float fSpriteWidth = 64.0f;
+    static const float fSpriteHeight = 80.0f;
+    static const float fTextureResolution = 4096.0f;
+    static const float fTextureRowsCount = 51.2f;
+    static const float fTextureColumnsCount = 64.0f;
+    static const float fTextureRatio = 4.0f;
+
+    //row * 80 - 3.6 + 8 = row * 80 + 4.4
+    texturerect.fTopRightY = (pos.row - 0.045f) * fSpriteHeight / fTextureResolution + 8.0f / fTextureResolution;
     if (texturerect.fTopRightY > 1.0f)
     {
         texturerect.fTopRightY = 1.0f;
     }
 
-    //row*80+82
-    texturerect.fBottomLeftY = (pos.row - 0.045f / fRatio) * fSpriteHeight / fTextureResolution + 79.0f / fTextureResolution - 0.001f / fRatio + 0.0048f / fRatio;
+    //row * 80 - 3.6 + 79.0 - 1.024 + 4.9152 = row * 80 + 82.8912
+    texturerect.fBottomLeftY = (pos.row - 0.045f) * fSpriteHeight / fTextureResolution + 79.0f / fTextureResolution - 0.001f / fTextureRatio + 0.0048f / fTextureRatio;
+
     texturerect.fBottomLeftX = pos.column / fTextureColumnsCount;
-    texturerect.fTopRightX = pos.column / fTextureColumnsCount + sprite_width;
+
+    texturerect.fTopRightX = pos.column / fTextureColumnsCount + fSpriteWidth / fTextureResolution;
 #endif
 
     switch (GameMeta.pFont_RenderState->nFont)
@@ -154,7 +168,23 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
     case 0:
     case 1:
     case 3:
-        dev->SetTexture(0, char_texture.texture);
+        if (dev->SetTexture(0, char_texture.texture) != D3D_OK)
+        {
+            char u8char[5] = { 0 };
+
+            utf8::utf16to8(&character, &character + 1, u8char);
+
+            logger::convience_instance().log_line(
+                fmt::sprintf(u8"SetTexture失败: 字符%s, 宽度%d, 高度%d", u8char, char_texture.width, char_texture.height)
+            );
+
+            return;
+        }
+
+        //dev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
+        //dev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
+        //dev->SetSamplerState(0, D3DSAMP_BORDERCOLOR, D3DCOLOR_ARGB(0, 255, 255, 255));
+
         break;
 
     default:

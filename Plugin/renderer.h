@@ -1,20 +1,18 @@
 #pragma once
 #define NOMINMAX
-#include <cstdint>
-#include <string>
-#include <vector>
-#include <filesystem>
-#include <unordered_map>
+#include "../common/stdinc.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_GLYPH_H
 
-#include <d3d9.h>
-
 struct SCharTexture
 {
+    std::vector<unsigned char> pixels;
+
     int width, height;
+    unsigned char* pixels_pointer;
+
     int gta_width;
     IDirect3DTexture9* texture;
 };
@@ -45,7 +43,7 @@ public:
     bool LoadFont(const std::filesystem::path& filename, int face_index = 0);
     void UnloadFont();
 
-    SCharTexture LazyGetCharData(std::uint16_t code);
+    const SCharTexture& LazyGetCharData(std::uint16_t code);
 
     void CacheChar(std::uint16_t code);
     void CacheChars(std::wstring_view wstr);
@@ -68,7 +66,7 @@ private:
     std::uint16_t Unicode2GB2312(std::uint16_t unic) const;
     SCharTexture MakeCharData(std::uint16_t code);
     SCharTexture MakeSpecialChar();
-    SCharTexture GetSpecialChar();
+    const SCharTexture& GetSpecialChar();
 
     static float Fix26_6ToFloat(long fix_point);
     static float Fix16_16ToFloat(long fix_point);

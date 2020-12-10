@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "logger.hpp"
 
 CCharRenderer::CCharRenderer()
     :m_ftLibrary(nullptr),
@@ -156,7 +157,7 @@ bool CCharRenderer::LoadFont(const std::filesystem::path& filename, int face_ind
     }
 }
 
-SCharTexture CCharRenderer::LazyGetCharData(std::uint16_t code)
+const SCharTexture& CCharRenderer::LazyGetCharData(std::uint16_t code)
 {
     if (!FaceLoaded())
         return m_specialChar;
@@ -169,7 +170,10 @@ SCharTexture CCharRenderer::LazyGetCharData(std::uint16_t code)
     }
     else
     {
-        return it->second;
+        if (it->second.texture == nullptr)
+            return m_specialChar;
+        else
+            return it->second;
     }
 }
 
@@ -267,6 +271,8 @@ SCharTexture CCharRenderer::MakeCharData(std::uint16_t code)
 
         result.width = texture_width;
         result.height = texture_height;
+        result.pixels = pixels;
+        result.pixels_pointer = result.pixels.data();
         result.gta_width = static_cast<int>(ceil(Fix26_6ToFloat(m_ftFace->glyph->advance.x) / 2)) + FTLeftAdjust;
         result.texture = PixelsToTexture(m_d3dDevice, pixels, texture_width, texture_height);
 
@@ -294,7 +300,7 @@ SCharTexture CCharRenderer::MakeSpecialChar()
     return result;
 }
 
-SCharTexture CCharRenderer::GetSpecialChar()
+const SCharTexture& CCharRenderer::GetSpecialChar()
 {
     if (m_specialChar.texture == nullptr)
     {
@@ -318,7 +324,17 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
 {
     IDirect3DTexture9* result = nullptr;
 
-    dev->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &result, nullptr);
+    if (dev == nullptr)
+        return result;
+
+    if (dev->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &result, nullptr) != D3D_OK)
+    {
+        logger::convience_instance().log_line(
+            fmt::sprintf(u8"CreateTextureÊ§°Ü: ¿í¶È%d, ¸ß¶È%d", width, height)
+        );
+
+        return nullptr;
+    }
 
     D3DLOCKED_RECT locked_rect;
 
@@ -330,14 +346,11 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
     for (int row_index = 0; row_index < height; ++row_index)
     {
         auto src_scan_line = src_bits + row_index * width;
-        auto dst_scan_line = dst_bits + row_index * locked_rect.Pitch;
+        auto dst_scan_line = reinterpret_cast<std::uint32_t*>(dst_bits + row_index * locked_rect.Pitch);
 
         for (int col_index = 0; col_index < width; ++col_index)
         {
-            auto dst_quad = dst_scan_line + col_index * 4;
-
-            dst_quad[0] = dst_quad[1] = dst_quad[2] = 255;
-            dst_quad[3] = src_scan_line[col_index];
+            dst_scan_line[col_index] = D3DCOLOR_ARGB(src_scan_line[col_index], 255, 255, 255);
         }
     }
 
