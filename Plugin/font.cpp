@@ -136,12 +136,12 @@ namespace Font
         screenrect.fTopRightX = posx + character_width;
         screenrect.fTopRightY = posy;
 
-        texturerect.fTopRightY = (pos.row - 0.045f / fRatio) * fSpriteHeight / fTextureResolution + 8.0f / fTextureResolution;
+        texturerect.fTopRightY = (pos.row - 0.045f) * fSpriteHeight / fTextureResolution + 8.0f / fTextureResolution;
         if (texturerect.fTopRightY > 1.0f)
         {
             texturerect.fTopRightY = 1.0f;
         }
-        texturerect.fBottomLeftY = (pos.row - 0.045f / fRatio) * fSpriteHeight / fTextureResolution + 79.0f / fTextureResolution - 0.001f / fRatio + 0.0048f / fRatio;
+        texturerect.fBottomLeftY = (pos.row - 0.045f) * fSpriteHeight / fTextureResolution + 79.0f / fTextureResolution - 0.001f / fRatio + 0.0048f / fRatio;
         texturerect.fBottomLeftX = pos.column / fTextureColumnsCount;
         texturerect.fTopRightX = pos.column / fTextureColumnsCount + sprite_width;
 
