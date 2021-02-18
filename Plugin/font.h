@@ -43,7 +43,7 @@ namespace Font
         std::int8_t pad3[3];
     };
 
-    VALIDATE_SIZE(CFontDetails, 0x48)
+    VALIDATE_SIZE(CFontDetails, 0x48);
 
     class CFontInfo
     {
@@ -70,7 +70,7 @@ namespace Font
         float field_250;
         float field_254;
     };
-    VALIDATE_SIZE(CFontInfo, 0x258)
+    VALIDATE_SIZE(CFontInfo, 0x258);
 
     class CFontRenderState
     {
@@ -96,7 +96,7 @@ namespace Font
         bool field_34;
         std::int8_t pad2[3];
     };
-    VALIDATE_SIZE(CFontRenderState, 0x38)
+    VALIDATE_SIZE(CFontRenderState, 0x38);
 
     bool IsNaiveCharacter(std::uint16_t);
 
@@ -113,4 +113,6 @@ namespace Font
 
     void* __fastcall LoadTextureCB(void*, int, std::uint32_t);
     void GetStringWidthHook();
+    void Epilog_922054();
+    void Prolog_9224A5();
 }

@@ -29,17 +29,15 @@ namespace Font
         return result;
     }
 
-    std::uint16_t* SkipAWord(std::uint16_t* text)
+    std::uint16_t* SkipAWord(std::uint16_t* current_text)
     {
-        //跳过一个英语单词，或者一个汉字
-
-        if (text == nullptr)
+        if (current_text == nullptr)
         {
-            return text;
+            return current_text;
         }
 
-        std::uint16_t* begin = text;
-        std::uint16_t* current = text;
+        std::uint16_t* begin = current_text;
+        std::uint16_t* current = current_text;
 
         while (true)
         {
@@ -66,6 +64,100 @@ namespace Font
         }
 
         return current;
+    }
+
+    bool compare_token_result;
+
+    __declspec(naked) void Epilog_922054()
+    {
+        static void* ret_addr;
+
+        __asm
+        {
+            pop ret_addr;
+
+            movzx eax, word ptr[edi];
+            cmp eax, '~';
+            jz compare_true;
+
+        compare_false:
+            mov compare_token_result, 0;
+            jmp back;
+
+        compare_true:
+            mov compare_token_result, 1;
+
+        back:
+            push ret_addr;
+            ret;
+        }
+    }
+
+    __declspec(naked) void Prolog_9224A5()
+    {
+        static void* ret_addr;
+
+        __asm
+        {
+            pop ret_addr;
+
+            mov al, compare_token_result;
+            test al, al;
+            jnz not_skip;
+            call SkipAWord;
+            jmp back;
+
+        not_skip:
+            mov eax, edi;
+
+        back:
+            push ret_addr;
+            ret;
+        }
+    }
+
+    __declspec(naked) void GetStringWidthHook()
+    {
+        static void* ret_addr;
+
+        __asm
+        {
+            pop ret_addr;
+
+            movzx eax, word ptr[esi];
+            mov cl, [ebp + 0xC];
+            cmp ax, ' ';
+            jz space;
+            push eax;
+            call IsNaiveCharacter;
+            add esp, 4;
+            test al, al;
+            movzx eax, word ptr[esi];
+            mov cl, [ebp + 0xC];
+            jnz normal;
+            jmp chs;
+
+        space:
+            add ret_addr, 0x3;
+            push ret_addr;
+            ret;
+
+        normal:
+            add ret_addr, 0xB;
+            push ret_addr;
+            ret;
+
+        chs:
+            test cl, cl; //get all
+            jnz normal;
+            mov dx, word ptr[esp + 0x12]; //has char1 & has char 2
+            test dx, dx;
+            mov edx, 807Eh;
+            jz normal;
+            add ret_addr, 0x22E;
+            push ret_addr;
+            ret;
+        }
     }
 
     float GetCHSCharacterSizeNormal()
@@ -169,49 +261,6 @@ namespace Font
         else
         {
             PrintCHSChar(posx, posy, character + 0x20);
-        }
-    }
-
-    __declspec(naked) void GetStringWidthHook()
-    {
-        static void* retaddr;
-
-        __asm
-        {
-            pop retaddr; //DDBE45
-
-            movzx eax, word ptr[esi];
-            mov cl, [ebp + 0xC];
-            cmp ax, ' ';
-            jz space;
-            push eax;
-            call IsNaiveCharacter;
-            add esp, 4;
-            test al, al;
-            movzx eax, word ptr[esi];
-            mov cl, [ebp + 0xC];
-            jnz normal;
-            jmp chs;
-
-        space:
-            add retaddr, 0x3;
-            push retaddr;
-            ret;
-
-        normal:
-            add retaddr, 0xB;
-            push retaddr;
-            ret;
-
-        chs:
-            test cl, cl; //get all
-            jnz normal;
-            mov dl, [esp + 0x12]; //has char
-            test dl, dl;
-            jz normal;
-            add retaddr, 0x22E;
-            push retaddr;
-            ret;
         }
     }
 }

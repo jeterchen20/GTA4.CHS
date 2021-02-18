@@ -8,12 +8,16 @@ CFontRenderState的魔数是31337FAD
 "[PROP]"定位第一个CFontInfo
 "[RESOLUTION]"
 
-FontDetails有2个，在GetCharacterSize里面通过GetRenderIndex选择
+FontDetails有2个，通过GetRenderIndex选择
 CFontInfo有4个，1342
 
-对于混淆的函数，根据实际运行情况确定pattern
+MAIN-0x9899E5EE
+ROMBLIP-0xA88586FC
 
+0. 看看有空格和无空格的行为有什么不同
+1. GXT生成时给中文和非中文之间加空格
 
+有无空格时9220FC跳转不一样?
 
 -------------1.2.0.43----------------------
 E85F28 虚表

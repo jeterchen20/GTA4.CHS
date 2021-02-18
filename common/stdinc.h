@@ -46,4 +46,4 @@ struct CharacterData
     CharacterPos pos;
 };
 
-#define VALIDATE_SIZE(expr, size) static_assert(sizeof(expr) == size, "Wrong size.");
+#define VALIDATE_SIZE(expr, size) static_assert(sizeof(expr) == size, "Wrong size.")
