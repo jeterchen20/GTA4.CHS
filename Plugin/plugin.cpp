@@ -2,7 +2,6 @@
 #include "font.h"
 #include "game.h"
 #include "batch_matching.h"
-#include "logger.hpp"
 #include <json/value.h>
 #include <json/reader.h>
 
@@ -186,8 +185,6 @@ bool CPlugin::Init(HMODULE module)
     GetModuleFileNameW(module, PluginPath, 512);
 
     auto plugin_folder = std::filesystem::path(PluginPath).parent_path();
-
-    logger::convience_instance().start_log(plugin_folder / "gta4.chs.log");
 
     //读取字体
     std::string font_name = ReadFontFileName(plugin_folder / "GTA4.CHS" / "font.json");

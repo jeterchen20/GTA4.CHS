@@ -1,5 +1,4 @@
 #include "renderer.h"
-#include "logger.hpp"
 
 CCharRenderer::CCharRenderer()
     :m_ftLibrary(nullptr),
@@ -170,7 +169,7 @@ const SCharTexture& CCharRenderer::LazyGetCharData(std::uint16_t code)
     }
     else
     {
-        if (it->second.texture == nullptr)
+        if (it->second.dx_texture == nullptr)
             return m_specialChar;
         else
             return it->second;
@@ -274,7 +273,7 @@ SCharTexture CCharRenderer::MakeCharData(std::uint16_t code)
         result.pixels = pixels;
         result.pixels_pointer = result.pixels.data();
         result.gta_width = static_cast<int>(ceil(Fix26_6ToFloat(m_ftFace->glyph->advance.x) / 2)) + FTLeftAdjust;
-        result.texture = PixelsToTexture(m_d3dDevice, pixels, texture_width, texture_height);
+        result.dx_texture = PixelsToTexture(m_d3dDevice, pixels, texture_width, texture_height);
 
         return result;
     }
@@ -295,14 +294,14 @@ SCharTexture CCharRenderer::MakeSpecialChar()
     result.width = GTABitmapWidth;
     result.height = GTABitmapHeight;
     result.gta_width = GTABitmapWidth / 2;
-    result.texture = PixelsToTexture(m_d3dDevice, pixels, GTABitmapWidth, GTABitmapHeight);
+    result.dx_texture = PixelsToTexture(m_d3dDevice, pixels, GTABitmapWidth, GTABitmapHeight);
 
     return result;
 }
 
 const SCharTexture& CCharRenderer::GetSpecialChar()
 {
-    if (m_specialChar.texture == nullptr)
+    if (m_specialChar.dx_texture == nullptr)
     {
         m_specialChar = MakeSpecialChar();
     }
@@ -328,13 +327,7 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
         return result;
 
     if (dev->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &result, nullptr) != D3D_OK)
-    {
-        logger::convience_instance().log_line(
-            fmt::sprintf(u8"CreateTextureÊ§°Ü: ¿í¶È%d, ¸ß¶È%d", width, height)
-        );
-
         return nullptr;
-    }
 
     D3DLOCKED_RECT locked_rect;
 

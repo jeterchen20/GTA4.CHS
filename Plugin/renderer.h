@@ -8,13 +8,12 @@
 
 struct SCharTexture
 {
-    std::vector<unsigned char> pixels;
-
+    int gta_width; //游戏中的字符宽度
     int width, height;
-    unsigned char* pixels_pointer;
-
-    int gta_width;
-    IDirect3DTexture9* texture;
+    int dx_width, dx_height; //是向上取2的整数次幂
+    unsigned char* pixels_pointer; //Image Watch调试用
+    std::vector<unsigned char> pixels;
+    IDirect3DTexture9* dx_texture;
 };
 
 class CCharRenderer

@@ -2,7 +2,6 @@
 #include "game.h"
 #include "plugin.h"
 #include "renderer.h"
-#include "logger.hpp"
 
 CFont FontObject;
 
@@ -123,7 +122,7 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
 
     auto& char_texture = FontObject.renderer.LazyGetCharData(character);
 
-    if (char_texture.texture == nullptr)
+    if (char_texture.dx_texture == nullptr)
         return;
 
     float character_width = (fChsWidth / *GameMeta.pFont_ResolutionX + GameMeta.pFont_RenderState->fEdgeSize) * GameMeta.pFont_RenderState->fScaleX;
@@ -163,34 +162,7 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
     texturerect.fTopRightX = pos.column / fTextureColumnsCount + fSpriteWidth / fTextureResolution;
 #endif
 
-    switch (GameMeta.pFont_RenderState->nFont)
-    {
-    case 0:
-    case 1:
-    case 3:
-        if (dev->SetTexture(0, char_texture.texture) != D3D_OK)
-        {
-            char u8char[5] = { 0 };
-
-            utf8::utf16to8(&character, &character + 1, u8char);
-
-            logger::convience_instance().log_line(
-                fmt::sprintf(u8"SetTexture失败: 字符%s, 宽度%d, 高度%d", u8char, char_texture.width, char_texture.height)
-            );
-
-            return;
-        }
-
-        //dev->SetSamplerState(0, D3DSAMP_ADDRESSU, D3DTADDRESS_BORDER);
-        //dev->SetSamplerState(0, D3DSAMP_ADDRESSV, D3DTADDRESS_BORDER);
-        //dev->SetSamplerState(0, D3DSAMP_BORDERCOLOR, D3DCOLOR_ARGB(0, 255, 255, 255));
-
-        break;
-
-    default:
-        break;
-    }
-
+    dev->SetTexture(0, char_texture.dx_texture);
     CGame::Font_Render2DPrimitive(&screenrect, &texturerect, GameMeta.pFont_RenderState->field_18, false);
 }
 
