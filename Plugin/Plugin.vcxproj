@@ -58,7 +58,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>../common;../common/json;../common/freetype;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -77,7 +77,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>../common;../common/json;../common/freetype;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -94,6 +94,7 @@
     <ClInclude Include="batch_matching.h" />
     <ClInclude Include="byte_pattern.h" />
     <ClInclude Include="chars.h" />
+    <ClInclude Include="logger.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="font.h" />
     <ClInclude Include="game.h" />
@@ -102,6 +103,7 @@
   <ItemGroup>
     <ClCompile Include="batch_matching.cpp" />
     <ClCompile Include="byte_pattern.cpp" />
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="font.cpp" />

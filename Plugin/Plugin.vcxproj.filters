@@ -36,6 +36,9 @@
     <ClInclude Include="chars.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="byte_pattern.cpp">
@@ -57,6 +60,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="renderer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

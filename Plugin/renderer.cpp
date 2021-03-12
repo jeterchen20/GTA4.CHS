@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include "Logger.h"
 
 CCharRenderer::CCharRenderer()
     :m_ftLibrary(nullptr),
@@ -327,7 +328,11 @@ IDirect3DTexture9* CCharRenderer::PixelsToTexture(IDirect3DDevice9* dev, const s
         return result;
 
     if (dev->CreateTexture(width, height, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &result, nullptr) != D3D_OK)
+    {
+        Logger::LogLine(fmt::sprintf(u8"创建纹理失败: 宽度%d, 高度%d", width, height));
+
         return nullptr;
+    }
 
     D3DLOCKED_RECT locked_rect;
 

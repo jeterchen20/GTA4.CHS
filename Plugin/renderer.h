@@ -1,5 +1,4 @@
 #pragma once
-#define NOMINMAX
 #include "../common/stdinc.h"
 
 #include <ft2build.h>
@@ -9,11 +8,11 @@
 struct SCharTexture
 {
     int gta_width; //游戏中的字符宽度
-    int width, height;
-    int dx_width, dx_height; //是向上取2的整数次幂
-    unsigned char* pixels_pointer; //Image Watch调试用
-    std::vector<unsigned char> pixels;
-    IDirect3DTexture9* dx_texture;
+    int width, height; //freetype渲染出的大小
+    int dx_width, dx_height; //IDirect3DTexture9，是freetype大小向上取2^n
+    unsigned char* pixels_pointer; //Image Watch调试用，指向原始像素数据
+    std::vector<unsigned char> pixels; //原始像素数据
+    IDirect3DTexture9* dx_texture; //DirectX纹理
 };
 
 class CCharRenderer
