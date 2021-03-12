@@ -4,7 +4,7 @@ std::ofstream Logger::_stream;
 
 void Logger::StartLog(const char* filename)
 {
-    if (_stream)
+    if (_stream.is_open())
         return;
 
     _stream.open(filename);
@@ -12,7 +12,7 @@ void Logger::StartLog(const char* filename)
 
 void Logger::LogLine(const std::string& text)
 {
-    if (!_stream)
+    if (!_stream.is_open())
         return;
 
     _stream << text << std::endl;

@@ -17,18 +17,6 @@ bool CFont::IsNaiveCharacter(std::uint16_t character)
 void* __fastcall CFont::LoadTextureHook(void* pDictionary, int, std::uint32_t hash)
 {
     //预先渲染文本中出现的字符
-    D3DCAPS9 caps;
-    (*GameMeta.ppDirect3DDevice9)->GetDeviceCaps(&caps);
-
-    bool pow_of_2_set = ((caps.TextureCaps & D3DPTEXTURECAPS_POW2) != 0);
-    bool non_pow_of_2_conditional_set =((caps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL) != 0);
-
-    if (pow_of_2_set)
-        Logger::LogLine(u8"纹理必须是2^n大小");
-
-    if (non_pow_of_2_conditional_set)
-        Logger::LogLine(u8"纹理有时候可以不是2^n大小");
-
     FontObject.renderer.SetD3DDevice(*GameMeta.ppDirect3DDevice9);
     FontObject.renderer.CacheChars(cache_chars);
 
@@ -178,7 +166,19 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
     dev->SetTexture(0, char_texture.dx_texture);
     CGame::Font_Render2DPrimitive(&screenrect, &texturerect, GameMeta.pFont_RenderState->field_18, false);
 
-    //TODO: 是否要切换回原来的字库
+    //切换回原版字库
+    switch (GameMeta.pFont_RenderState->nFont)
+    {
+    case 0:
+    case 1:
+    case 3:
+        //先加上CFontInfo数组的Pattern
+        //CGame::Graphics_SetRenderState(GameMeta.pf);
+        break;
+
+    default:
+        break;
+    }
 }
 
 void CFont::PrintCharDispatch(float posx, float posy, std::uint16_t character, bool buffered)

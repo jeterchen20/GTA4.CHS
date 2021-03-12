@@ -202,6 +202,18 @@ void CCharRenderer::CacheChar(std::uint16_t code)
 
 void CCharRenderer::CacheChars(std::wstring_view wstr)
 {
+    D3DCAPS9 caps;
+    m_d3dDevice->GetDeviceCaps(&caps);
+
+    bool pow_of_2_set = ((caps.TextureCaps & D3DPTEXTURECAPS_POW2) != 0);
+    bool non_pow_of_2_conditional_set = ((caps.TextureCaps & D3DPTEXTURECAPS_NONPOW2CONDITIONAL) != 0);
+
+    if (pow_of_2_set)
+        Logger::LogLine(u8"纹理必须是2^n大小");
+
+    if (non_pow_of_2_conditional_set)
+        Logger::LogLine(u8"纹理有时候可以不是2^n大小");
+
     for (auto chr : wstr)
     {
         CacheChar(chr);
