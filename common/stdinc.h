@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-#define NOMINMAX
 #define _CRT_SECURE_NO_WARNINGS
-#define _SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING
 
 #include <Windows.h>
 #include <d3d9.h>
@@ -29,11 +27,9 @@
 #include "injector/hooking.hpp"
 #include "injector/calling.hpp"
 #include "injector/utility.hpp"
-#include "utf8cpp/utf8.h"
 #include "BinaryFile.hpp"
 
-#define FMT_HEADER_ONLY
-#include "fmt/printf.h"
+#include <fmt/printf.h>
 
 struct CharacterPos
 {
