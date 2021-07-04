@@ -3,7 +3,7 @@
 
 struct IVTextTableSorting
 {
-    bool operator()(const std::string &lhs, const std::string &rhs) const
+    bool operator()(const std::string& lhs, const std::string& rhs) const
     {
         if (rhs == "MAIN")
         {
@@ -67,49 +67,46 @@ struct DataBlock
 class IVText
 {
 public:
-    typedef std::uint32_t tHash;
-    typedef std::basic_string<std::uint16_t> tWideString;
-    typedef std::pair<tHash, std::string> tEntry;
-    typedef std::pair<std::string, std::vector<tEntry>> tTable;
-    typedef std::filesystem::path tPath;
+    typedef std::uint16_t CharType;
+    typedef std::uint32_t HashType;
+    typedef tiny_utf8::utf8_string StringType;
+    typedef std::pair<HashType, StringType> EntryType;
+    typedef std::pair<std::string, std::vector<EntryType>> TableType;
+    typedef std::filesystem::path PathType;
 
     //不带参数，读取同一目录下GTA4.txt生成汉化补丁相关文件
     void Process0Arg();
 
     //文件, 目录，读取GXT文件并存放在指定目录下
     //目录, 目录，读取文件夹内所有txt生成汉化补丁相关文件
-    void Process2Args(const tPath &arg1, const tPath &arg2);
+    void Process2Args(const PathType& arg1, const PathType& arg2);
 
 private:
-    static void SkipUTF8Signature(std::ifstream &stream);
-    static void AddUTF8Signature(std::ofstream &stream);
+    static void SkipUTF8Signature(std::ifstream& stream);
 
-    static tWideString ConvertToWide(const std::string &in);
-    static std::string ConvertToNarrow(const tWideString &in);
+    static bool IsNativeCharacter(char32_t character);
+    void CollectCharacters(const StringType& text);
 
-    static bool IsNativeCharacter(uint16_t character);
-    void CollectCharacters(const std::string &text);
+    void LoadText(const PathType& input_text);
+    void LoadTexts(const PathType& input_texts);
 
-    void LoadText(const tPath &input_text);
-    void LoadTexts(const tPath &input_texts);
-
-    void GenerateBinary(const tPath &output_binary) const;
-    void GenerateCollection(const tPath &output_text) const;
-    void GenerateTable(const tPath &output_binary) const;
+    void GenerateBinary(const PathType& output_binary) const;
+    void GenerateCollection(const PathType& output_text) const;
+    void GenerateTable(const PathType& output_binary) const;
 
     //修正原版GXT中的混乱字符
-    static void FixCharacters(tWideString &wtext);
+    static void FixCharacters(StringType& wtext);
 
     //标准编码转到游戏编码
-    static void LiteralToGame(tWideString &wtext);
+    static void LiteralToGame(StringType& wtext);
 
     //游戏编码转到标准编码
-    static void GameToLiteral(tWideString &wtext);
+    static void GameToLiteral(StringType& wtext);
 
-    void LoadBinary(const tPath &input_binary);
+    void LoadBinary(const PathType& input_binary);
 
-    void GenerateTexts(const tPath &output_texts) const;
+    void GenerateTexts(const PathType& output_texts) const;
 
-    std::map<std::string, std::vector<tEntry>, IVTextTableSorting> m_Data;
-    std::set<uint16_t> m_Collection;
+    std::map<std::string, std::vector<EntryType>, IVTextTableSorting> m_Data;
+    std::set<char32_t> m_Collection;
 };

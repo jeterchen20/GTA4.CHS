@@ -1,8 +1,5 @@
 ﻿#include "IVText.h"
 
-using namespace std;
-using namespace std::filesystem;
-
 void IVText::Process0Arg()
 {
     wchar_t temp[512];
@@ -10,7 +7,7 @@ void IVText::Process0Arg()
     HMODULE self = GetModuleHandleW(NULL);
     GetModuleFileNameW(self, temp, 512);
 
-    tPath text_path = temp;
+    PathType text_path = temp;
     text_path = text_path.parent_path();
 
     m_Data.clear();
@@ -26,7 +23,7 @@ void IVText::Process0Arg()
     }
 }
 
-void IVText::Process2Args(const tPath& arg1, const tPath& arg2)
+void IVText::Process2Args(const PathType& arg1, const PathType& arg2)
 {
     m_Data.clear();
     m_Collection.clear();
@@ -47,7 +44,7 @@ void IVText::Process2Args(const tPath& arg1, const tPath& arg2)
     }
 }
 
-void IVText::SkipUTF8Signature(ifstream& stream)
+void IVText::SkipUTF8Signature(std::ifstream& stream)
 {
     char bom[3];
 
@@ -62,73 +59,48 @@ void IVText::SkipUTF8Signature(ifstream& stream)
     stream.seekg(0);
 }
 
-void IVText::AddUTF8Signature(ofstream& stream)
-{
-    stream << "\xEF\xBB\xBF";
-}
-
-IVText::tWideString IVText::ConvertToWide(const string& in)
-{
-    tWideString result;
-    utf8::utf8to16(in.begin(), in.end(), back_inserter(result));
-    return result;
-}
-
-string IVText::ConvertToNarrow(const tWideString& in)
-{
-    string result;
-    utf8::utf16to8(in.begin(), in.end(), back_inserter(result));
-    return result;
-}
-
-bool IVText::IsNativeCharacter(uint16_t character)
+bool IVText::IsNativeCharacter(char32_t character)
 {
     return (character < 0x100 || character == L'™');
 }
 
-void IVText::CollectCharacters(const string& text)
+void IVText::CollectCharacters(const tiny_utf8::utf8_string& text)
 {
-    utf8::iterator<string::const_iterator> u8it(text.begin(), text.begin(), text.end());
-
-    while (u8it.base() != text.end())
+    for (auto character : text)
     {
-        uint16_t character = *u8it;
-
         if (!IsNativeCharacter(character))
         {
             m_Collection.insert(character);
         }
-
-        ++u8it;
     }
 }
 
-void IVText::LoadText(const tPath& input_text)
+void IVText::LoadText(const PathType& input_text)
 {
-    regex table_regex(R"(\[([0-9a-zA-Z_]{1,7})\])");
-    regex entry_regex(R"((0[xX][0-9a-fA-F]{8})=(.*))");
-    regex origin_regex(R"(;(0[xX][0-9a-fA-F]{8})=(.*))");
+    std::regex table_regex(R"(\[([0-9a-zA-Z_]{1,7})\])");
+    std::regex entry_regex(R"((0[xX][0-9a-fA-F]{8})=(.*))");
+    std::regex origin_regex(R"(;(0[xX][0-9a-fA-F]{8})=(.*))");
 
-    smatch matches;
+    std::smatch matches;
 
-    string line;
+    std::string line;
 
     auto table_iter = m_Data.end();
     std::string filename = input_text.filename().string();
 
     size_t line_no = 0;
 
-    ifstream stream(input_text);
+    std::ifstream stream(input_text);
 
     if (!stream)
     {
-        cout << "打开文件 " << input_text.string() << " 失败。" << endl;
+        std::cout << "打开文件 " << input_text.string() << " 失败。" << std::endl;
         return;
     }
 
     SkipUTF8Signature(stream);
 
-    while (getline(stream, line))
+    while (std::getline(stream, line))
     {
         ++line_no;
 
@@ -144,7 +116,7 @@ void IVText::LoadText(const tPath& input_text)
             if (table_iter != m_Data.end())
             {
                 uint32_t hash = stoul(matches.str(1), nullptr, 16);
-                string text = matches.str(2);
+                tiny_utf8::utf8_string text = matches.str(2);
 
                 CollectCharacters(text);
 
@@ -152,31 +124,27 @@ void IVText::LoadText(const tPath& input_text)
             }
             else
             {
-                cout << filename << ": " << "第" << line_no << "行没有所属的表。" << endl;
+                std::cout << filename << ": " << "第" << line_no << "行没有所属的表。" << std::endl;
             }
         }
         else if (line.front() == '[' && regex_match(line, matches, table_regex))
         {
-            string table_name = matches.str(1);
-
-            tTable temp;
-            temp.first = table_name;
-            table_iter = m_Data.insert(temp).first;
+            table_iter = m_Data.emplace(matches.str(1), std::vector<EntryType>()).first;
         }
         else
         {
-            cout << filename << ": " << "第" << line_no << "行无法识别。" << endl;
+            std::cout << filename << ": " << "第" << line_no << "行无法识别。" << std::endl;
         }
     }
 }
 
-void IVText::LoadTexts(const tPath& input_texts)
+void IVText::LoadTexts(const PathType& input_texts)
 {
-    directory_iterator dir_it{ input_texts };
+    std::filesystem::directory_iterator dir_it{ input_texts };
 
-    while (dir_it != directory_iterator{})
+    while (dir_it != std::filesystem::directory_iterator{})
     {
-        tPath filename = dir_it->path();
+        PathType filename = dir_it->path();
 
         LoadText(filename);
 
@@ -184,7 +152,7 @@ void IVText::LoadTexts(const tPath& input_texts)
     }
 }
 
-void IVText::GenerateBinary(const tPath& output_binary) const
+void IVText::GenerateBinary(const PathType& output_binary) const
 {
     BinaryFile file(output_binary, BinaryFile::OpenMode::WriteOnly);
 
@@ -201,15 +169,13 @@ void IVText::GenerateBinary(const tPath& output_binary) const
     TableEntry tableEntry;
     KeyEntry keyEntry;
 
-    vector<TableEntry> tables;
-    vector<KeyEntry> keys;
-    vector<uint16_t> datas;
-
-    tWideString wideText;
+    std::vector<TableEntry> tables;
+    std::vector<KeyEntry> keys;
+    std::vector<uint16_t> datas;
 
     if (!file)
     {
-        cout << "创建输出文件 " << output_binary.string() << " 失败。" << endl;
+        std::cout << "创建输出文件 " << output_binary.string() << " 失败。" << std::endl;
         return;
     }
 
@@ -256,10 +222,10 @@ void IVText::GenerateBinary(const tPath& output_binary) const
             keyEntry.Hash = key.first;
             keyEntry.Offset = datas.size() * 2;
 
-            wideText = ConvertToWide(key.second);
+            auto wideText = key.second;
             LiteralToGame(wideText);
 
-            copy(wideText.begin(), wideText.end(), back_inserter(datas));
+            std::copy(wideText.begin(), wideText.end(), back_inserter(datas));
             datas.push_back(0);
 
             keys.push_back(keyEntry);
@@ -289,34 +255,32 @@ void IVText::GenerateBinary(const tPath& output_binary) const
     file.WriteArray(tables);
 }
 
-void IVText::GenerateCollection(const tPath& output_text) const
+void IVText::GenerateCollection(const PathType& output_text) const
 {
-    vector<char> sequence;
-
     size_t count = 0;
+    tiny_utf8::utf8_string u8_text;
 
-    for (auto char_it = m_Collection.begin(); char_it != m_Collection.end(); ++char_it)
+    for (auto character : m_Collection)
     {
         if (count == 64)
         {
-            sequence.push_back('\n');
+            u8_text += L'\n';
             count = 0;
         }
 
-        utf8::append(*char_it, back_inserter(sequence));
+        u8_text += character;
+
         ++count;
     }
 
-    ofstream stream(output_text, ios::trunc);
+    std::ofstream stream(output_text, std::ios::trunc);
 
-    AddUTF8Signature(stream);
-
-    copy(sequence.begin(), sequence.end(), ostreambuf_iterator<char>(stream));
+    std::copy(u8_text.raw_begin(), u8_text.raw_end(), std::ostreambuf_iterator<char>(stream));
 }
 
-void IVText::GenerateTable(const tPath& output_binary) const
+void IVText::GenerateTable(const PathType& output_binary) const
 {
-    vector<CharacterData> datas;
+    std::vector<CharacterData> datas;
 
     CharacterData data;
 
@@ -341,12 +305,14 @@ void IVText::GenerateTable(const tPath& output_binary) const
     stream.WriteArray(datas);
 }
 
-void IVText::FixCharacters(tWideString& wtext)
+void IVText::FixCharacters(tiny_utf8::utf8_string& wtext)
 {
     //bad character in IV stock text: 0x85 0x92 0x94 0x96 0x97 0xA0
     //bad character in EFLC stock text: 0x93
 
-    for (auto& character : wtext)
+    tiny_utf8::utf8_string new_string;
+
+    for (auto character : wtext)
     {
         switch (character)
         {
@@ -374,12 +340,18 @@ void IVText::FixCharacters(tWideString& wtext)
         default:
             break;
         }
+
+        new_string += character;
     }
+
+    wtext = new_string;
 }
 
-void IVText::LiteralToGame(tWideString& wtext)
+void IVText::LiteralToGame(tiny_utf8::utf8_string& wtext)
 {
-    for (auto& character : wtext)
+    tiny_utf8::utf8_string new_string;
+
+    for (auto character : wtext)
     {
         switch (character)
         {
@@ -390,12 +362,18 @@ void IVText::LiteralToGame(tWideString& wtext)
         default:
             break;
         }
+
+        new_string += character;
     }
+
+    wtext = new_string;
 }
 
-void IVText::GameToLiteral(tWideString& wtext)
+void IVText::GameToLiteral(tiny_utf8::utf8_string& wtext)
 {
-    for (auto& character : wtext)
+    tiny_utf8::utf8_string new_string;
+
+    for (auto character : wtext)
     {
         switch (character)
         {
@@ -406,19 +384,23 @@ void IVText::GameToLiteral(tWideString& wtext)
         default:
             break;
         }
+
+        new_string += character;
     }
+
+    wtext = new_string;
 }
 
-void IVText::LoadBinary(const tPath& input_binary)
+void IVText::LoadBinary(const PathType& input_binary)
 {
     GXTHeader gxtHeader;
     TableBlock tableBlock;
     KeyBlockOthers keyBlock;
     DataBlock tdatHeader;
 
-    vector<TableEntry> tables;
-    vector<KeyEntry> keys;
-    vector<uint16_t> datas;
+    std::vector<TableEntry> tables;
+    std::vector<KeyEntry> keys;
+    std::vector<CharType> datas;
 
     m_Data.clear();
 
@@ -428,7 +410,7 @@ void IVText::LoadBinary(const tPath& input_binary)
 
     if (!file)
     {
-        cout << "打开输入文件 " << input_binary.string() << " 失败。" << endl;
+        std::cout << "打开输入文件 " << input_binary.string() << " 失败。" << std::endl;
         return;
     }
 
@@ -440,7 +422,7 @@ void IVText::LoadBinary(const tPath& input_binary)
 
     for (TableEntry& table : tables)
     {
-        tableIter = m_Data.insert(tTable(table.Name, vector<tEntry>())).first;
+        tableIter = m_Data.emplace(table.Name, std::vector<EntryType>()).first;
 
         file.Seek(table.Offset, BinaryFile::SeekMode::Begin);
 
@@ -461,37 +443,44 @@ void IVText::LoadBinary(const tPath& input_binary)
 
         for (auto& key : keys)
         {
-            tWideString wtext = &datas[key.Offset];
+            tiny_utf8::utf8_string wtext;
+            auto offset = key.Offset;
+
+            while (datas[offset] != 0)
+            {
+                wtext += datas[offset];
+                ++offset;
+            }
 
             FixCharacters(wtext);
             GameToLiteral(wtext);
 
-            tableIter->second.emplace_back(key.Hash, ConvertToNarrow(wtext));
+            tableIter->second.emplace_back(key.Hash, wtext);
         }
     }
 }
 
-void IVText::GenerateTexts(const tPath& output_texts) const
+void IVText::GenerateTexts(const PathType& output_texts) const
 {
-    ofstream stream;
+    std::ofstream stream;
     std::string line;
 
     for (auto& table : m_Data)
     {
-        stream.open(output_texts / (table.first + ".txt"), ios::trunc);
+        stream.open(output_texts / (table.first + ".txt"), std::ios::trunc);
 
         if (!stream)
         {
-            cout << "创建输出文件失败" << endl;
+            std::cout << "创建输出文件失败" << std::endl;
         }
 
-        AddUTF8Signature(stream);
+        stream.write("\xEF\xBB\xBF", 3);
 
         stream << fmt::sprintf("[%s]\n", table.first);
 
         for (auto& entry : table.second)
         {
-            line = fmt::sprintf("0x%08X=%s\n", entry.first, entry.second);
+            line = fmt::sprintf("0x%08X=%s\n", entry.first, entry.second.cpp_str());
             stream << ';' << line << line;
         }
 

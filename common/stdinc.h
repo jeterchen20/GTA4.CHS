@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
+#define NOMINMAX
+#pragma warning(disable:4244)
 
 #include <Windows.h>
 #include <d3d9.h>
@@ -29,7 +31,11 @@
 #include "injector/utility.hpp"
 #include "BinaryFile.hpp"
 
+#include "../common/tinyutf8/tinyutf8.h"
+
+//vcpkg
 #include <fmt/printf.h>
+#include <range/v3/algorithm.hpp>
 
 struct CharacterPos
 {
