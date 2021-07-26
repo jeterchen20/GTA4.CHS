@@ -2,6 +2,7 @@
 #include "game.h"
 #include "plugin.h"
 #include "renderer.h"
+#include "logger.h"
 
 CFont FontObject;
 
@@ -164,6 +165,20 @@ void CFont::PrintCHSChar(float posx, float posy, std::uint16_t character)
 
     dev->SetTexture(0, char_texture.dx_texture);
     CGame::Font_Render2DPrimitive(&screenrect, &texturerect, GameMeta.pFont_RenderState->field_18, false);
+
+    //切换回原版字库
+    switch (GameMeta.pFont_RenderState->nFont)
+    {
+    case 0:
+    case 1:
+    case 3:
+        //先加上CFontInfo数组的Pattern
+        //CGame::Graphics_SetRenderState(GameMeta.pf);
+        break;
+
+    default:
+        break;
+    }
 }
 
 void CFont::PrintCharDispatch(float posx, float posy, std::uint16_t character, bool buffered)
