@@ -31,11 +31,10 @@
 #include "injector/utility.hpp"
 #include "BinaryFile.hpp"
 
-#include "../common/tinyutf8/tinyutf8.h"
+#include "../common/tinyutf8.h"
 
 //vcpkg
 #include <fmt/printf.h>
-#include <range/v3/algorithm.hpp>
 
 struct CharacterPos
 {
