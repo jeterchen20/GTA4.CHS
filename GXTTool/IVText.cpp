@@ -275,7 +275,8 @@ void IVText::GenerateCollection(const PathType& output_text) const
 
     std::ofstream stream(output_text, std::ios::trunc);
 
-    std::copy(u8_text.raw_begin(), u8_text.raw_end(), std::ostreambuf_iterator<char>(stream));
+    auto u8_std_str = u8_text.cpp_str(true);
+    std::copy(u8_std_str.begin(), u8_std_str.end(), std::ostreambuf_iterator<char>(stream));
 }
 
 void IVText::GenerateTable(const PathType& output_binary) const
