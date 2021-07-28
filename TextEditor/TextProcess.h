@@ -3,12 +3,20 @@
 #include <QString>
 #include "Text.h"
 
+struct TextMeta
+{
+    int token_char_count = 0;
+    int token_count = 0;
+    QVector<int> token_char_indexes;
+    QSet<QString> tokens;
+};
+
 class TextProcess
 {
 public:
-    static QSet<QString> ExtractTokens(const QString& text);
+    static TextMeta AnalyseText(const QString& text);
     static bool CompareTokens(const QString& text1, const QString& text2);
-    static bool ValidateTokens(const QString& text);
+
     static QVector<Text> ReadText(const QString& filename);
     static void WriteText(const QVector<Text>& texts, const QString& filename);
 };

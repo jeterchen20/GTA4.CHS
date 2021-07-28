@@ -195,7 +195,7 @@ void TextEditor::ChangeLine(const QModelIndex& current, const QModelIndex& previ
     ui.line_translated->setText(translated);
 
     //Éú³ÉToken°´Å¥
-    FillTokensWidget(TextProcess::ExtractTokens(translated));
+    FillTokensWidget(TextProcess::AnalyseText(translated).tokens);
 
     ui.line_translated->setFocus();
 }

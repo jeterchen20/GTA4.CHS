@@ -5,25 +5,25 @@
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
-QSet<QString> TextProcess::ExtractTokens(const QString& text)
+TextMeta TextProcess::AnalyseText(const QString& text)
 {
-    QSet<QString> result;
-    QVector<int> token_char_indexes;
+    TextMeta result;
 
     int token_index = text.indexOf('~');
 
     while (token_index != -1)
     {
-        token_char_indexes += token_index;
+        result.token_char_indexes += token_index;
         token_index = text.indexOf('~', token_index + 1);
     }
 
-    token_char_indexes.resize(token_char_indexes.size() & (~1));
+    result.token_char_count = result.token_char_indexes.size();
+    result.token_count = result.token_char_indexes.size() / 2;
 
-    for (token_index = 0; token_index < token_char_indexes.size() / 2; ++token_index)
+    for (token_index = 0; token_index < result.token_count; ++token_index)
     {
-        QString token_str = text.mid(token_char_indexes[token_index * 2], token_char_indexes[token_index * 2 + 1] - token_char_indexes[token_index * 2] + 1);
-        result += token_str;
+        result.tokens += text.mid(result.token_char_indexes[token_index * 2],
+            result.token_char_indexes[token_index * 2 + 1] - result.token_char_indexes[token_index * 2] + 1);
     }
 
     return result;
@@ -31,7 +31,7 @@ QSet<QString> TextProcess::ExtractTokens(const QString& text)
 
 bool TextProcess::CompareTokens(const QString& text1, const QString& text2)
 {
-    return ExtractTokens(text1) == ExtractTokens(text2);
+    return false;
 }
 
 QVector<Text> TextProcess::ReadText(const QString& filename)
