@@ -99,6 +99,7 @@ namespace Font
     VALIDATE_SIZE(CFontRenderState, 0x38);
 
     bool IsNaiveCharacter(std::uint16_t);
+    bool IsNotNaiveCharacter(std::uint16_t); //替换IsJapaneseChar
 
     float GetCharacterSizeNormalDispatch(std::uint16_t);
     float GetCHSCharacterSizeNormal();

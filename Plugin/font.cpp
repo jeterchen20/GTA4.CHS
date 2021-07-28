@@ -17,7 +17,12 @@ namespace Font
 
     bool IsNaiveCharacter(std::uint16_t character)
     {
-        return (character < 0x100 || character == 0xFFFF);
+        return character < 0x100;
+    }
+
+    bool IsNotNaiveCharacter(std::uint16_t character)
+    {
+        return !IsNaiveCharacter(character);
     }
 
     void* __fastcall LoadTextureCB(void* pDictionary, int, std::uint32_t hash)

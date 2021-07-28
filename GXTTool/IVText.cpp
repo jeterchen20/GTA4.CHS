@@ -275,8 +275,7 @@ void IVText::GenerateCollection(const PathType& output_text) const
 
     std::ofstream stream(output_text, std::ios::trunc);
 
-    auto u8_std_str = u8_text.cpp_str(true);
-    std::copy(u8_std_str.begin(), u8_std_str.end(), std::ostreambuf_iterator<char>(stream));
+    std::copy(u8_text.c_str(), u8_text.c_str() + u8_text.size(), std::ostreambuf_iterator<char>(stream));
 }
 
 void IVText::GenerateTable(const PathType& output_binary) const
@@ -311,9 +310,7 @@ void IVText::FixCharacters(tiny_utf8::utf8_string& wtext)
     //bad character in IV stock text: 0x85 0x92 0x94 0x96 0x97 0xA0
     //bad character in EFLC stock text: 0x93
 
-    tiny_utf8::utf8_string new_string;
-
-    for (auto character : wtext)
+    for (auto& character : wtext)
     {
         switch (character)
         {
@@ -341,18 +338,12 @@ void IVText::FixCharacters(tiny_utf8::utf8_string& wtext)
         default:
             break;
         }
-
-        new_string += character;
     }
-
-    wtext = new_string;
 }
 
 void IVText::LiteralToGame(tiny_utf8::utf8_string& wtext)
 {
-    tiny_utf8::utf8_string new_string;
-
-    for (auto character : wtext)
+    for (auto& character : wtext)
     {
         switch (character)
         {
@@ -363,18 +354,12 @@ void IVText::LiteralToGame(tiny_utf8::utf8_string& wtext)
         default:
             break;
         }
-
-        new_string += character;
     }
-
-    wtext = new_string;
 }
 
 void IVText::GameToLiteral(tiny_utf8::utf8_string& wtext)
 {
-    tiny_utf8::utf8_string new_string;
-
-    for (auto character : wtext)
+    for (auto& character : wtext)
     {
         switch (character)
         {
@@ -385,11 +370,7 @@ void IVText::GameToLiteral(tiny_utf8::utf8_string& wtext)
         default:
             break;
         }
-
-        new_string += character;
     }
-
-    wtext = new_string;
 }
 
 void IVText::LoadBinary(const PathType& input_binary)
