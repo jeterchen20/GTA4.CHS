@@ -41,4 +41,5 @@ ESC菜单抬头文本
 尝试利用日语逻辑
 字符>7F||==7E||==0x807E则为日语字符
 日语字符在gxt中的数值是(字库索引|0x8000)
-日语flag与eflc flag
+日语flag与语言flag
+尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
