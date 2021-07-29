@@ -6,7 +6,7 @@ Translator::Translator(QObject* parent)
     SetupNetwork();
 }
 
-void Translator::translate_text(QString text, QString api_url)
+void Translator::translate_text(QString text)
 {
 
 }

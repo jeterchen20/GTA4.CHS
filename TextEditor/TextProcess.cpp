@@ -29,9 +29,25 @@ TextMeta TextProcess::AnalyseText(const QString& text)
     return result;
 }
 
-bool TextProcess::CompareTokens(const QString& text1, const QString& text2)
+QString TextProcess::ValidateText(const QString& translated, const QString& origin)
 {
-    return false;
+    QString result;
+
+    auto translated_meta = AnalyseText(translated);
+    auto origin_meta = AnalyseText(origin);
+
+    if ((translated_meta.token_char_count & 1) == 1)
+        result += QStringLiteral("\"~\"字符个数不是偶数-");
+
+    if (translated_meta.tokens != origin_meta.tokens)
+        result += QStringLiteral("原文/译文token种类不一致-");
+
+    if (!result.isEmpty())
+        result.chop(1);
+    else
+        result = QStringLiteral("没有发现问题");
+
+    return result;
 }
 
 QVector<Text> TextProcess::ReadText(const QString& filename)
@@ -130,6 +146,14 @@ void TextProcess::WriteText(const QVector<Text>& texts, const QString& filename)
     stream.setDevice(&file);
     stream.setCodec("UTF-8");
     stream.setGenerateByteOrderMark(true);
+
+    //增加一行表名(如: [MAIN])
+    int slash_pos = filename.lastIndexOf('/');
+    int dot_pos = filename.lastIndexOf('.');
+
+    QString stem = filename.mid(slash_pos + 1, dot_pos - slash_pos - 1);
+
+    stream << '[' << stem << ']' << '\n' << '\n';
 
     for (auto& text : texts)
     {

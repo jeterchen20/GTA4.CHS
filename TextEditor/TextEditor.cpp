@@ -12,6 +12,9 @@ TextEditor::TextEditor(QWidget* parent)
 {
     ui.setupUi(this);
 
+    ui.btn_open->setHidden(true);
+    ui.btn_close->setHidden(true);
+
     _saved = true;
     UpdateWindowTitle();
 
@@ -36,15 +39,28 @@ void TextEditor::log_message(QString text)
 
 }
 
-void TextEditor::translated_text(QString text)
+void TextEditor::machine_translated_text(QString text)
 {
-    ui.line_translated->setText(text);
+    ui.line_machine_translated->setText(text);
 }
 
 void TextEditor::on_line_translated_textChanged(const QString& text)
 {
     _saved = false;
     UpdateWindowTitle();
+
+    auto current_index = ui.table_texts->currentIndex();
+
+    if (!current_index.isValid())
+    {
+        statusBar()->clearMessage();
+    }
+    else
+    {
+        QString original = _table_model->data(current_index.siblingAtColumn(1), Qt::DisplayRole).toString();
+
+        statusBar()->showMessage(TextProcess::ValidateText(text, original));
+    }
 }
 
 void TextEditor::on_table_texts_currentRowChanged(const QModelIndex& current, const QModelIndex& previous)
@@ -108,7 +124,7 @@ void TextEditor::on_token_button_clicked()
 
 void TextEditor::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (event->mimeData()->hasFormat("text/uri-list"))
+    if (_filename.isEmpty() && event->mimeData()->hasFormat("text/uri-list"))
         event->acceptProposedAction();
 }
 
@@ -124,7 +140,9 @@ void TextEditor::dropEvent(QDropEvent* event)
 
 void TextEditor::closeEvent(QCloseEvent* event)
 {
+    SaveText();
 
+    event->accept();
 }
 
 void TextEditor::UpdateWindowTitle()
@@ -182,7 +200,10 @@ void TextEditor::StoreSingleText(const QModelIndex& index)
     if (!index.isValid())
         return;
 
-    _table_model->setData(index.siblingAtColumn(2), ui.line_translated->text(), Qt::DisplayRole);
+    QString translated = ui.line_translated->text();
+
+    if (!translated.isEmpty())
+        _table_model->setData(index.siblingAtColumn(2), translated, Qt::DisplayRole);
 }
 
 void TextEditor::ChangeLine(const QModelIndex& current, const QModelIndex& previous)
@@ -190,12 +211,19 @@ void TextEditor::ChangeLine(const QModelIndex& current, const QModelIndex& previ
     StoreSingleText(previous);
 
     QString translated = _table_model->data(current.siblingAtColumn(2), Qt::DisplayRole).toString();
+    QString original = _table_model->data(current.siblingAtColumn(1), Qt::DisplayRole).toString();
 
-    ui.line_original->setText(_table_model->data(current.siblingAtColumn(1), Qt::DisplayRole).toString());
-    ui.line_translated->setText(translated);
+    ui.line_original->setText(original);
+
+    if (original != translated)
+        ui.line_translated->setText(translated);
+    else
+        ui.line_translated->clear();
+
+    statusBar()->showMessage(TextProcess::ValidateText(translated, original));
 
     //Éú³ÉToken°´Å¥
-    FillTokensWidget(TextProcess::AnalyseText(translated).tokens);
+    FillTokensWidget(TextProcess::AnalyseText(original).tokens);
 
     ui.line_translated->setFocus();
 }
@@ -242,7 +270,7 @@ void TextEditor::CreateTranslator()
     _translator->moveToThread(&_translate_thread);
 
     connect(this, &TextEditor::translate_text, _translator, &Translator::translate_text);
-    connect(_translator, &Translator::translated_text, this, &TextEditor::translated_text);
+    connect(_translator, &Translator::machine_translated_text, this, &TextEditor::machine_translated_text);
 
     _translate_thread.start();
 }

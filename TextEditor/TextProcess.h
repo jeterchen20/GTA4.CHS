@@ -15,8 +15,7 @@ class TextProcess
 {
 public:
     static TextMeta AnalyseText(const QString& text);
-    static bool CompareTokens(const QString& text1, const QString& text2);
-
+    static QString ValidateText(const QString& translated, const QString& origin);
     static QVector<Text> ReadText(const QString& filename);
     static void WriteText(const QVector<Text>& texts, const QString& filename);
 };

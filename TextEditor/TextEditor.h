@@ -25,7 +25,7 @@ public slots:
     void log_message(QString text);
 
 private slots:
-    void translated_text(QString text);
+    void machine_translated_text(QString text);
 
     void on_line_translated_textChanged(const QString &text);
     void on_table_texts_currentRowChanged(const QModelIndex& current, const QModelIndex& previous);

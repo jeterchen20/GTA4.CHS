@@ -14,10 +14,10 @@ public:
     Translator(QObject* parent = Q_NULLPTR);
 
 signals:
-    void translated_text(QString text);
+    void machine_translated_text(QString text);
 
 public slots:
-    void translate_text(QString text, QString api_url);
+    void translate_text(QString text);
 
 private slots:
     void network_finished(QNetworkReply* reply);
