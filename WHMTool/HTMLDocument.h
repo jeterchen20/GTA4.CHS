@@ -1,14 +1,14 @@
 #pragma once
 #include "pgBase.h"
 
-enum HtmlNodeType :unsigned {
+enum HtmlNodeType :uint {
     Node_HtmlNode = 0,
     Node_HtmlDataNode = 1,
     Node_HtmlTableNode = 2,
     Node_HtmlTableElementNode = 3
 };
 
-enum HtmlTag :unsigned {
+enum HtmlTag :uint {
     HTMLTAG_HTML = 0,
     HTMLTAG_TITLE = 1,
     HTMLTAG_A = 2,
@@ -51,7 +51,7 @@ enum HtmlTag :unsigned {
     HTMLTAG_SCRIPTOBJ = 39
 };
 
-enum HtmlAttrValue :unsigned {
+enum HtmlAttrValue :uint {
     HTMLATTRVAL_LEFT = 0,
     HTMLATTRVAL_RIGHT = 1,
     HTMLATTRVAL_CENTER = 2,
@@ -84,7 +84,7 @@ enum HtmlAttrValue :unsigned {
     HTMLATTRVAL_UNDEFINED = 0xFFFFFFFF
 };
 
-enum CssProperty :unsigned {
+enum CssProperty :uint {
     CSS_WIDTH = 0,
     CSS_HEIGHT = 1,
     CSS_DISPLAY = 2,
@@ -136,36 +136,36 @@ struct HtmlRenderState {
     uchar               _f14[4];
     float               _f18;
     float               _f1C;
-    uint                dwBgColor;  
+    uint                dwBgColor;
     pgPtr               pBackgroundImage;
     uint                _f28h;
     uint                _f28l;
     HtmlAttrValue       _f30;   // TODO: background-repeat? 
-    uint                dwColor;    
+    uint                dwColor;
     HtmlAttrValue       eAlign;
     HtmlAttrValue       eValign;
     HtmlAttrValue       eTextDecoration;
     uint                _f44;
     HtmlAttrValue       eFontSize;
     int                 nFontStyle;
-    int                 nFontWeight;    
+    int                 nFontWeight;
     float               _f54;
-    uint                dwBorderBottomColor;    
+    uint                dwBorderBottomColor;
     HtmlAttrValue       eBorderBottomStyle;
     float               fBorderBottomWidth;
-    uint                dwBorderLeftColor;      
+    uint                dwBorderLeftColor;
     HtmlAttrValue       eBorderLeftStyle;
     float               dwBorderLeftWidth;
-    uint                dwBorderRightColor;     
+    uint                dwBorderRightColor;
     HtmlAttrValue       eBorderRightStyle;
     float               fBorderRightWidth;
-    uint                dwBorderTopColor;       
+    uint                dwBorderTopColor;
     HtmlAttrValue       eBorderTopStyle;
-    float               fBorderTopWidth;        
+    float               fBorderTopWidth;
     float               fMarginBottom;
     float               fMarginLeft;
     float               fMarginRight;
-    float               fMarginTop; 
+    float               fMarginTop;
     float               fPaddingBottom;
     float               fPaddingLeft;
     float               fPaddingRight;
@@ -177,25 +177,93 @@ struct HtmlRenderState {
     uchar               _fB8;
     uchar               _fB9;
     uchar               _BA[2];
-    uint                dwAlink;    
+    uint                dwAlink;
     HtmlAttrValue       _fC0;
 };
 
 struct CHtmlCssDeclaration {
     CssProperty m_eProperty;
-    uint       _f4 <format=hex>; // data1
-    uint       _f8 <format=hex>; // data2
+    uint       _f4; // data1
+    uint       _f8; // data2
     uint       m_eDataType; // data type (0 - int, 1 - float, .., 3 - color, ..., 6 - unused)    
 };
 
-struct CHtmlDocument {    
-    pgPtr_CHtmlNode                 m_pRootElement;   
-    pgPtr                           m_pBody;    // simple pgPtr to avoid circular links      
+struct pgPtr_CHtmlNode : pgPtr
+{
+
+};
+
+struct pgPtr_pgDictionary_grcTexturePC : pgPtr
+{
+
+};
+
+struct pgObjectArray_CHtmlNode : pgPtr
+{
+
+};
+
+struct pgObjectArray_CHtmlStylesheet : pgPtr
+{
+
+};
+
+//指向char[sCount]
+struct CCharCollection {
+    uint    fixupOffset : 28;
+    uint    fixupType : 4;
+    ushort  sCount;
+    ushort  sSize;
+};
+
+//TODO: 检查继承关系
+struct CHtmlNode
+{
+    uint                    vtbl;
+    HtmlNodeType            m_eNodeType;
+    pgPtr                   m_pParentNode;
+    pgObjectArray_CHtmlNode m_children;
+    HtmlRenderState m_renderState;
+};
+
+struct CHtmlDataNode :CHtmlNode
+{
+    pgPtr_String m_pData;
+};
+
+struct CHtmlElementNode :CHtmlNode
+{
+    HtmlTag         m_eHtmlTag;
+    pgPtr_String    m_pszTagName;
+    CCharCollection m_nodeParam;
+};
+
+struct CHtmlTableElementNode :CHtmlElementNode
+{
+    int    _fE8;
+    int    _fEC;
+};
+
+struct CHtmlTableNode :CHtmlElementNode
+{
+    pgPtr   _fE8;
+    pgPtr   _fEC;
+    pgPtr   _fF0;
+    pgPtr   _fF4;
+    pgPtr   _fF8;
+    uint   m_dwCellCount;
+    uint   _f100;
+};
+
+struct CHtmlDocument
+{
+    pgPtr_CHtmlNode                 m_pRootElement;
+    pgPtr                           m_pBody;
     pgPtr_String                    m_pszTitle;
     pgPtr_pgDictionary_grcTexturePC m_pTxd;
     CPtrCollection                  _f10;
     pgObjectArray_CHtmlNode         m_childNodes;
     pgObjectArray_CHtmlStylesheet   m_pStylesheet;
-    BYTE                            _pad[3];
-    BYTE                            _f2B;
+    uchar                            _pad[3];
+    uchar                            _f2B;
 };

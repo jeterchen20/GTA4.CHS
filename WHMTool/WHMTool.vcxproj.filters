@@ -43,16 +43,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WHM_IO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="spec.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pgBase.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HTMLDocument.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pgBase.h">
+      <Filter>Rage</Filter>
+    </ClInclude>
+    <ClInclude Include="WHM_IO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="iv-types.bth">
+      <Filter>Rage</Filter>
+    </None>
+    <None Include="iv-whm.bt">
+      <Filter>Rage</Filter>
+    </None>
   </ItemGroup>
 </Project>

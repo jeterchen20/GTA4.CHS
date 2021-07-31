@@ -162,6 +162,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="WHM_IO.cpp" />
     <QtRcc Include="WHMTool.qrc" />
     <QtUic Include="WHMTool.ui" />
     <QtMoc Include="WHMTool.h" />
@@ -174,6 +175,11 @@
   <ItemGroup>
     <ClInclude Include="HTMLDocument.h" />
     <ClInclude Include="pgBase.h" />
+    <ClInclude Include="WHM_IO.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="iv-types.bth" />
+    <None Include="iv-whm.bt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

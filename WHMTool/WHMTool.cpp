@@ -11,7 +11,6 @@ QByteArray inflate_array(QByteArray& compressed, uint uncompressed_size)
     uncompressed.resize(uncompressed_size);
     ulong dest_size = uncompressed_size;
 
-    //估计是从header算出SystemMemorySize+GraphicsMemorySize作为解压后数据大小
     uncompress(reinterpret_cast<unsigned char*>(uncompressed.data()), &dest_size, reinterpret_cast<unsigned char*>(compressed.data()), compressed.size());
 
     return uncompressed;
@@ -19,6 +18,9 @@ QByteArray inflate_array(QByteArray& compressed, uint uncompressed_size)
 
 void uncompress_rsc(const QString& filename)
 {
+    if (!filename.endsWith(".whm"))
+        return;
+
     QFile file;
 
     file.setFileName(filename);

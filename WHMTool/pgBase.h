@@ -4,7 +4,7 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
-//SparkIV
+//SparkIV.ResourceFile.cs
 enum ResourceType :uint
 {
     TextureXBOX = 0x7, // xtd
@@ -30,7 +30,39 @@ struct RSCHeader
     uint magic;
     ResourceType rtype;
     uint flags;
-    CompressionType ctype;
+    //CompressionType ctype;
 };
 
-//SparkIV.ResourceFile.cs
+//type为5时，在文件中的Offset位置放着指向的对象，否则不读
+//以下所有都是一样的逻辑
+struct pgPtr
+{
+    int offset : 28;
+    int type : 4;
+};
+
+//一个C风格字符串
+struct pgPtr_String : pgPtr
+{
+
+};
+
+//一个DWORD
+struct pgPtr_DWORD : pgPtr
+{
+
+};
+
+//一个pgPtr_DWORD数组，占据的空间是sCount和sSize的较大者*4
+struct CPtrCollection : pgPtr
+{
+    ushort  sCount;
+    ushort  sSize;
+};
+
+//一个pgPtr数组，占据的空间是size个对象的大小
+struct pgObjectArray : pgPtr
+{
+    ushort  count;
+    ushort  size;
+};
