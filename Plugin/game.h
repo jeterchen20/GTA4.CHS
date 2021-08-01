@@ -21,9 +21,9 @@ namespace Game
         IDirect3DDevice9** ppDirect3DDevice9;
 
         //8D 0C C5 (? ? ? ?) 51 8D
-        Font::CFontDetails* pFont_Details;
+        CFontDetails* pFont_Details;
         //83 C6 2C 83 C7 01 81 FE (? ? ? ?)
-        Font::CFontRenderState* pFont_RenderState;
+        CFontRenderState* pFont_RenderState;
         //D8 35 (? ? ? ?) 5E D8 05
         float* pFont_ResolutionX;
         //A1 ? ? ? ? 83 F8 FF 75 1E
@@ -44,13 +44,13 @@ namespace Game
 
     void Graphics_SetRenderState(void* texture, int = 1);
 
-    void* Dictionary_GetElementByKey(void* dictionary, std::uint32_t hash);
+    void* Dictionary_GetElementByKey(void* dictionary, uint hash);
 
-    std::uint32_t Hash_HashStringFromSeediCase(const char* str, std::uint32_t hash = 0);
+    uint Hash_HashStringFromSeediCase(const char* str, uint hash = 0);
 
-    std::uint8_t Font_GetRenderIndex();
-    float Font_GetCharacterSizeNormal(std::uint16_t character);
-    float Font_GetCharacterSizeDrawing(std::uint16_t character, bool use_extra_width);
-    void Font_Render2DPrimitive(const Font::CRageRect* screen_rect, const Font::CRageRect* texture_rect, std::uint32_t color, bool buffered);
-    void Font_PrintChar(float posx, float posy, std::uint16_t character, bool buffered);
+    uchar Font_GetRenderIndex();
+    float Font_GetCharacterSizeNormal(GTAChar character);
+    float Font_GetCharacterSizeDrawing(GTAChar character, bool use_extra_width);
+    void Font_Render2DPrimitive(const CRect* screen_rect, const CRect* texture_rect, uint color, bool buffered);
+    void Font_PrintChar(float posx, float posy, GTAChar character, bool buffered);
 }

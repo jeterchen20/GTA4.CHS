@@ -22,7 +22,7 @@ void CCharacterTable::LoadTable(const std::filesystem::path& filename)
     }
 }
 
-CharacterPos CCharacterTable::GetCharPos(std::uint16_t chr) const
+CharacterPos CCharacterTable::GetCharPos(GTAChar chr) const
 {
     auto it = m_Table.find(chr);
 

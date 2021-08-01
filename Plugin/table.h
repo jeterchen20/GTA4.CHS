@@ -5,10 +5,10 @@ class CCharacterTable
 {
 public:
     void LoadTable(const std::filesystem::path& filename);
-    CharacterPos GetCharPos(std::uint16_t chr) const;
+    CharacterPos GetCharPos(GTAChar chr) const;
 
     static CCharacterTable GlobalTable;
 
 private:
-    std::unordered_map<std::uint32_t, CharacterPos> m_Table;
+    std::unordered_map<uint, CharacterPos> m_Table;
 };

@@ -4,6 +4,8 @@
 #define NOMINMAX
 #pragma warning(disable:4244)
 
+#define VALIDATE_SIZE(expr, size) static_assert(sizeof(expr) == size, "Wrong size.")
+
 #include <Windows.h>
 #include <d3d9.h>
 #include <cstdint>
@@ -36,15 +38,26 @@
 //vcpkg
 #include <fmt/printf.h>
 
+typedef std::uint16_t GTAChar;
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+
+struct CRect
+{
+    float fBottomLeftX;
+    float fBottomLeftY;
+    float fTopRightX;
+    float fTopRightY;
+};
+
 struct CharacterPos
 {
-    std::uint32_t row, column;
+    uchar row, column;
 };
 
 struct CharacterData
 {
-    std::uint32_t code;
+    GTAChar code;
     CharacterPos pos;
 };
-
-#define VALIDATE_SIZE(expr, size) static_assert(sizeof(expr) == size, "Wrong size.")
