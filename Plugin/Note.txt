@@ -43,3 +43,5 @@ ESC菜单抬头文本
 日语字符在gxt中的数值是(字库索引|0x8000)
 日语flag与语言flag
 尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
+
+0x922525根据Token分析结果决定是不是增加一个空格个数

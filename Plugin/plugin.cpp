@@ -11,11 +11,6 @@ static const char* __stdcall GetTextFileName(int)
 
 namespace Plugin
 {
-    float return_zero_width(int)
-    {
-        return 0.0f;
-    }
-
     void RegisterPatchSteps()
     {
         byte_pattern::set_log_base(0x570000);
@@ -23,47 +18,52 @@ namespace Plugin
         //变量和函数的地址
         batch_matching::get_instance().register_step("A1 ? ? ? ? 80 7C 24 08 00", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pGraphics_SetRenderState = addresses[0].p();
+                CGame::Addresses.pGraphics_SetRenderState = addresses[0].p();
             });
         batch_matching::get_instance().register_step("8B 34 ED ? ? ? ? 0F 2E C1", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_Details = *addresses[0].p<CFontDetails*>(3);
+                CGame::Addresses.pFont_Details = *addresses[0].p<CFontDetails*>(3);
             });
         batch_matching::get_instance().register_step("81 3D ? ? ? ? AD 7F 33 31", 2, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_RenderState = *addresses[0].p<CFontRenderState*>(2);
+                CGame::Addresses.pFont_RenderState = *addresses[0].p<CFontRenderState*>(2);
             });
         batch_matching::get_instance().register_step("F3 0F 11 05 ? ? ? ? 66 0F 6E 84 24 AC 00 00", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_ResolutionX = *addresses[0].p<float*>(4);
+                CGame::Addresses.pFont_ResolutionX = *addresses[0].p<float*>(4);
             });
         batch_matching::get_instance().register_step("A1 ? ? ? ? 83 F8 FF 75 1E", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_GetRenderIndex = addresses[0].p();
+                CGame::Addresses.pFont_GetRenderIndex = addresses[0].p();
             });
         batch_matching::get_instance().register_step("83 EC 30 83 3D ? ? ? ? FF", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_PrintChar = addresses[0].p();
+                CGame::Addresses.pFont_PrintChar = addresses[0].p();
             });
         batch_matching::get_instance().register_step("51 55 56 E8", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_GetCharacterSizeNormal = addresses[0].p();
+                CGame::Addresses.pFont_GetCharacterSizeNormal = addresses[0].p();
             });
         batch_matching::get_instance().register_step("8A 0D ? ? ? ? 0F B6 D1", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_GetCharacterSizeDrawing = addresses[0].p();
+                CGame::Addresses.pFont_GetCharacterSizeDrawing = addresses[0].p();
             });
         batch_matching::get_instance().register_step("83 EC 10 8B 44 24 14 F3 0F 7E 00", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pFont_Render2DPrimitive = addresses[0].p();
+                CGame::Addresses.pFont_Render2DPrimitive = addresses[0].p();
             });
         batch_matching::get_instance().register_step("8B 54 24 08 53 56 8B 74 24 0C 80 3E 22", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pHash_HashStringFromSeediCase = addresses[0].p();
+                CGame::Addresses.pHash_HashStringFromSeediCase = addresses[0].p();
             });
         batch_matching::get_instance().register_step("53 55 56 57 8B F9 85 FF 74 3F", 1, [](const std::vector<memory_pointer>& addresses)
             {
-                Game::Addresses.pDictionary_GetElementByKey = addresses[0].p();
+                CGame::Addresses.pDictionary_GetElementByKey = addresses[0].p();
+            });
+
+        batch_matching::get_instance().register_step("83 EC 34 57 8B 7C 24 3C", 1, [](const std::vector<memory_pointer>& addresses)
+            {
+                CGame::Addresses.pFont_ParseToken = addresses[0].p();
             });
 
         //获取字符串宽度
