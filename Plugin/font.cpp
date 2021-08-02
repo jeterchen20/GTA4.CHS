@@ -20,22 +20,22 @@ bool CFont::IsNaiveCharacter(GTAChar chr)
 
 void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
 {
-    void* result = Game::Dictionary_GetElementByKey(pDictionary, hash);
+    void* result = CGame::Dictionary_GetElementByKey(pDictionary, hash);
 
-    pChsFont = Game::Dictionary_GetElementByKey(pDictionary, Game::Hash_HashStringFromSeediCase("font_chs"));
+    pChsFont = CGame::Dictionary_GetElementByKey(pDictionary, CGame::Hash_HashStringFromSeediCase("font_chs"));
 
     return result;
 }
 
-const GTAChar* CFont::SkipAWord(const GTAChar* current_text)
+const GTAChar* CFont::SkipAWord(const GTAChar* str)
 {
-    if (current_text == nullptr)
+    if (str == nullptr)
     {
-        return current_text;
+        return str;
     }
 
-    auto begin = current_text;
-    auto current = current_text;
+    auto begin = str;
+    auto current = str;
 
     while (true)
     {
@@ -114,6 +114,11 @@ __declspec(naked) void CFont::Prolog_9224A5()
     }
 }
 
+int CFont::ParseToken(const GTAChar* str, GTAChar* token_string, TokenStruct* token_data)
+{
+    return injector::cstd<int(const GTAChar*, GTAChar*, TokenStruct*)>::call(CGame::Addresses.pFont_ParseToken, str, token_string, token_data);
+}
+
 __declspec(naked) void CFont::GetStringWidthHook()
 {
     static void* ret_addr;
@@ -160,16 +165,16 @@ __declspec(naked) void CFont::GetStringWidthHook()
 
 float CFont::GetCHSCharacterSizeNormal()
 {
-    uchar index = Game::Font_GetRenderIndex();
+    uchar index = CGame::Font_GetRenderIndex();
 
-    return ((fChsWidth / *Game::Addresses.pFont_ResolutionX + Game::Addresses.pFont_Details[index].fEdgeSize2) * Game::Addresses.pFont_Details[index].fScaleX);
+    return ((fChsWidth / *CGame::Addresses.pFont_ResolutionX + CGame::Addresses.pFont_Details[index].fEdgeSize2) * CGame::Addresses.pFont_Details[index].fScaleX);
 }
 
 float CFont::GetCharacterSizeNormalDispatch(GTAChar chr)
 {
     if (IsNaiveCharacter(chr + 0x20))
     {
-        return Game::Font_GetCharacterSizeNormal(chr);
+        return CGame::Font_GetCharacterSizeNormal(chr);
     }
     else
     {
@@ -186,14 +191,14 @@ float CFont::GetCHSCharacterSizeDrawing(bool use_extra_width)
         extrawidth = 1.0f;
     }
 
-    return (((fChsWidth + extrawidth) / *Game::Addresses.pFont_ResolutionX + Game::Addresses.pFont_RenderState->fEdgeSize) * Game::Addresses.pFont_RenderState->fScaleX);
+    return (((fChsWidth + extrawidth) / *CGame::Addresses.pFont_ResolutionX + CGame::Addresses.pFont_RenderState->fEdgeSize) * CGame::Addresses.pFont_RenderState->fScaleX);
 }
 
 float CFont::GetCharacterSizeDrawingDispatch(GTAChar character, bool use_extra_width)
 {
     if (IsNaiveCharacter(character + 0x20))
     {
-        return Game::Font_GetCharacterSizeDrawing(character, use_extra_width);
+        return CGame::Font_GetCharacterSizeDrawing(character, use_extra_width);
     }
     else
     {
@@ -210,7 +215,7 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
         return;
     }
 
-    if (-(GetCHSCharacterSizeDrawing(true) / Game::Addresses.pFont_RenderState->fScaleX) > x || x > 1.0f)
+    if (-(GetCHSCharacterSizeDrawing(true) / CGame::Addresses.pFont_RenderState->fScaleX) > x || x > 1.0f)
     {
         return;
     }
@@ -218,8 +223,8 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
     auto pos = CCharacterTable::GlobalTable.GetCharPos(chr);
 
     float sprite_width = fSpriteWidth / fTextureResolution;
-    float character_width = (fChsWidth / *Game::Addresses.pFont_ResolutionX + Game::Addresses.pFont_RenderState->fEdgeSize) * Game::Addresses.pFont_RenderState->fScaleX;
-    float character_height = Game::Addresses.pFont_RenderState->fScaleY * 0.06558f;
+    float character_width = (fChsWidth / *CGame::Addresses.pFont_ResolutionX + CGame::Addresses.pFont_RenderState->fEdgeSize) * CGame::Addresses.pFont_RenderState->fScaleX;
+    float character_height = CGame::Addresses.pFont_RenderState->fScaleY * 0.06558f;
 
     screenrect.fBottomLeftX = x;
     screenrect.fBottomLeftY = y + character_height;
@@ -235,26 +240,26 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
     texturerect.fBottomLeftX = pos.column / fTextureColumnsCount;
     texturerect.fTopRightX = pos.column / fTextureColumnsCount + sprite_width;
 
-    switch (Game::Addresses.pFont_RenderState->nFont)
+    switch (CGame::Addresses.pFont_RenderState->nFont)
     {
     case 0:
     case 1:
     case 3:
-        Game::Graphics_SetRenderState(pChsFont);
+        CGame::Graphics_SetRenderState(pChsFont);
         break;
 
     default:
         break;
     }
 
-    Game::Font_Render2DPrimitive(&screenrect, &texturerect, Game::Addresses.pFont_RenderState->field_18, false);
+    CGame::Font_Render2DPrimitive(&screenrect, &texturerect, CGame::Addresses.pFont_RenderState->field_18, false);
 }
 
 void CFont::PrintCharDispatch(float x, float y, GTAChar chr, bool buffered)
 {
-    if (Game::Addresses.pFont_RenderState->TokenType != 0 || IsNaiveCharacter(chr + 0x20))
+    if (CGame::Addresses.pFont_RenderState->TokenType != 0 || IsNaiveCharacter(chr + 0x20))
     {
-        Game::Font_PrintChar(x, y, chr, buffered);
+        CGame::Font_PrintChar(x, y, chr, buffered);
     }
     else
     {

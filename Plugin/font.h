@@ -102,7 +102,7 @@ struct CFontStringProcess
     virtual ~CFontStringProcess() = default;
 
     //4
-    virtual bool f4(float x, float y, const GTAChar *str_beg, const GTAChar *str_end, float word_width) = 0;
+    virtual bool f4(float x, float y, const GTAChar *str_beg, const GTAChar *str_end, float space_width) = 0;
 
     //8
     virtual bool f8() = 0;
@@ -120,7 +120,6 @@ public:
     static float GetCHSCharacterSizeDrawing(bool use_extra_width);
 
     static const GTAChar* SkipAWord(const GTAChar* str);
-    static const GTAChar* SkipSpaces(const GTAChar* str);
 
     static void PrintCharDispatch(float x, float y, GTAChar chr, bool buffered);
     static void PrintCHSChar(float x, float y, GTAChar chr);
@@ -130,7 +129,7 @@ public:
     static void Epilog_922054();
     static void Prolog_9224A5();
 
+    static int ParseToken(const GTAChar* str, GTAChar* token_string, TokenStruct* token_data); //返回的是一个代表token类型的整数
     static float GetStringWidth(const GTAChar* str, bool get_all);
     static void ProcessString(float x, float y, const GTAChar* str, CFontStringProcess* processor);
-    static int ParseToken(const GTAChar* str, GTAChar* token_string, TokenStruct* token_data); //返回的是一个代表token类型的整数
 };
