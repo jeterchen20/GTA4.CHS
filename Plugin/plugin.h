@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "../common/stdinc.h"
 
-namespace Plugin
+class CPlugin
 {
-    bool Init(HMODULE);
+public:
+    static bool Init(HMODULE);
 };

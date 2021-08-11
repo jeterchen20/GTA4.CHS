@@ -27,7 +27,7 @@ void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
     return result;
 }
 
-const GTAChar* CFont::SkipAWord(const GTAChar* str)
+const GTAChar* CFont::SkipWord(const GTAChar* str)
 {
     if (str == nullptr)
     {
@@ -64,59 +64,63 @@ const GTAChar* CFont::SkipAWord(const GTAChar* str)
     return current;
 }
 
-bool compare_token_result;
-
-__declspec(naked) void CFont::Epilog_922054()
+const GTAChar* CFont::SkipSpaces(const GTAChar* text)
 {
-    static void* ret_addr;
-
-    __asm
-    {
-        pop ret_addr;
-
-        movzx eax, word ptr[edi];
-        cmp eax, '~';
-        jz compare_true;
-
-    compare_false:
-        mov compare_token_result, 0;
-        jmp back;
-
-    compare_true:
-        mov compare_token_result, 1;
-
-    back:
-        push ret_addr;
-        ret;
-    }
+    return text;
 }
 
-__declspec(naked) void CFont::Prolog_9224A5()
+float CFont::GetStringWidth(const GTAChar* text, bool get_all)
 {
-    static void* ret_addr;
+    GTAChar str_buf[2048];
+    TokenStruct token_data;
+    GTAChar token_string[64];
 
-    __asm
+    if (text == nullptr)
+        return 0.0f;
+
+    float current_line_width = 0.0f; //当前行的宽度
+    float max_line_width = 0.0f; //最宽一行的宽度
+    bool had_width = false;
+    bool has_continuous_tokens = false;
+
+    auto render_index = CGame::Font_GetRenderIndex();
+
+    int str_length;
+
+    for (str_length = 0; text[str_length] != 0; ++str_length)
     {
-        pop ret_addr;
+        str_buf[str_length] = text[str_length];
 
-        mov al, compare_token_result;
-        test al, al;
-        jnz not_skip;
-        call SkipAWord;
-        jmp back;
-
-    not_skip:
-        mov eax, edi;
-
-    back:
-        push ret_addr;
-        ret;
+        if (str_length > 2047)
+            throw std::out_of_range("String too long.");
     }
+
+    str_buf[str_length] = 0;
+    auto buf_pointer = str_buf;
+
+    while (true)
+    {
+        auto chr = *buf_pointer;
+
+        if (chr == 0 || (chr == ' ' && !get_all))
+            break;
+
+        if (chr == '~')
+        {
+            if (!get_all && (has_continuous_tokens || had_width))
+                break;
+
+            ParseToken()
+        }
+    }
+
+
+    return std::max(current_line_width, max_line_width);
 }
 
-int CFont::ParseToken(const GTAChar* str, GTAChar* token_string, TokenStruct* token_data)
+void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor)
 {
-    return injector::cstd<int(const GTAChar*, GTAChar*, TokenStruct*)>::call(CGame::Addresses.pFont_ParseToken, str, token_string, token_data);
+    bool multi_line = processor->MultiLine();
 }
 
 __declspec(naked) void CFont::GetStringWidthHook()
@@ -163,6 +167,31 @@ __declspec(naked) void CFont::GetStringWidthHook()
     }
 }
 
+static bool processed_token = false;
+
+const GTAChar* CFont::SkipWord_Prolog(const GTAChar* text)
+{
+    if (processed_token)
+    {
+        processed_token = false;
+        return text;
+    }
+    else
+    {
+        return SkipWord(text);
+    }
+}
+
+const GTAChar* CFont::ProcessToken_Prolog(const GTAChar* text, int* color, bool get_color_code_only, char* color_code,
+    int* key_number, bool* is_new_line_token, GTAChar* text_to_show,
+    TokenStruct* token_data)
+{
+    processed_token = true;
+
+    return CGame::Font_ProcessToken(text, color, get_color_code_only, color_code, key_number, is_new_line_token, text_to_show,
+        token_data);
+}
+
 float CFont::GetCHSCharacterSizeNormal()
 {
     uchar index = CGame::Font_GetRenderIndex();
@@ -194,11 +223,11 @@ float CFont::GetCHSCharacterSizeDrawing(bool use_extra_width)
     return (((fChsWidth + extrawidth) / *CGame::Addresses.pFont_ResolutionX + CGame::Addresses.pFont_RenderState->fEdgeSize) * CGame::Addresses.pFont_RenderState->fScaleX);
 }
 
-float CFont::GetCharacterSizeDrawingDispatch(GTAChar character, bool use_extra_width)
+float CFont::GetCharacterSizeDrawingDispatch(GTAChar chr, bool use_extra_width)
 {
-    if (IsNaiveCharacter(character + 0x20))
+    if (IsNaiveCharacter(chr + 0x20))
     {
-        return CGame::Font_GetCharacterSizeDrawing(character, use_extra_width);
+        return CGame::Font_GetCharacterSizeDrawing(chr, use_extra_width);
     }
     else
     {
@@ -220,7 +249,7 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
         return;
     }
 
-    auto pos = CCharacterTable::GlobalTable.GetCharPos(chr);
+    auto pos = GlobalTable.GetCharPos(chr);
 
     float sprite_width = fSpriteWidth / fTextureResolution;
     float character_width = (fChsWidth / *CGame::Addresses.pFont_ResolutionX + CGame::Addresses.pFont_RenderState->fEdgeSize) * CGame::Addresses.pFont_RenderState->fScaleX;

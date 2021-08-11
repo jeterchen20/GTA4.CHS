@@ -38,10 +38,15 @@ ESC菜单抬头文本
 5AD64C 画面
 5ADAF1 游戏
 
-尝试利用日语逻辑
-字符>7F||==7E||==0x807E则为日语字符
-日语字符在gxt中的数值是(字库索引|0x8000)
-日语flag与语言flag
 尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
 
-0x922525根据Token分析结果决定是不是增加一个空格个数
+9224A5默认Token之后是一个空格，导致多跳过一个中文字符
+
+ProcessString
+路径1: GetStringWidth->ProcessToken->SkipAWord
+路径2: GetStringWidth->SkipAWord
+看看原版游戏处理~z~text的行为
+原版游戏里，有宽度的token跟文本用空格分开
+
+GetStringWidth会忽略无宽度的token
+感觉还是要重写ProcessString和GetStringWidth

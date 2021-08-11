@@ -1,6 +1,12 @@
 ﻿#pragma once
 #include "../common/stdinc.h"
 
+enum eTextAlignment
+{
+    ALIGN_CENTER = 0,
+    ALIGN_RIGHT = 2
+};
+
 class CFontDetails
 {
 public:
@@ -8,7 +14,7 @@ public:
     float fScaleX;
     float fScaleY;
     float fButtonScaleX;
-    int alignment;
+    eTextAlignment alignment;
     bool bDrawBox;
     bool field_15;
     bool bProportional;
@@ -92,20 +98,16 @@ struct TokenStruct
 {
     int f0[4];
     GTAChar f10[4][32];
-    bool f110[4];
+    int f110 = 0;
 };
 VALIDATE_SIZE(TokenStruct, 0x114);
 
-struct CFontStringProcess
+class CFontStringProcess
 {
-    //0
+public:
     virtual ~CFontStringProcess() = default;
-
-    //4
-    virtual bool f4(float x, float y, const GTAChar *str_beg, const GTAChar *str_end, float space_width) = 0;
-
-    //8
-    virtual bool f8() = 0;
+    virtual bool OnLineFeed() const; //行宽度达到限制时执行
+    virtual bool MultiLine() const; //是否需要换行
 };
 
 class CFont
@@ -119,17 +121,17 @@ public:
     static float GetCharacterSizeDrawingDispatch(GTAChar chr, bool use_extra_width);
     static float GetCHSCharacterSizeDrawing(bool use_extra_width);
 
-    static const GTAChar* SkipAWord(const GTAChar* str);
-
     static void PrintCharDispatch(float x, float y, GTAChar chr, bool buffered);
     static void PrintCHSChar(float x, float y, GTAChar chr);
 
     static void* __fastcall LoadTextureCB(void*, int, uint);
     static void GetStringWidthHook();
-    static void Epilog_922054();
-    static void Prolog_9224A5();
+    static const GTAChar* SkipWord_Prolog(const GTAChar* text);
+    static const GTAChar* ProcessToken_Prolog(const GTAChar* text, int* color, bool get_color_code_only, char* color_code, int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data);
 
-    static int ParseToken(const GTAChar* str, GTAChar* token_string, TokenStruct* token_data); //返回的是一个代表token类型的整数
-    static float GetStringWidth(const GTAChar* str, bool get_all);
-    static void ProcessString(float x, float y, const GTAChar* str, CFontStringProcess* processor);
+    static const GTAChar* SkipWord(const GTAChar* text);
+    static const GTAChar* SkipSpaces(const GTAChar* text);
+
+    static float GetStringWidth(const GTAChar* text, bool get_all);
+    static void ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor);
 };

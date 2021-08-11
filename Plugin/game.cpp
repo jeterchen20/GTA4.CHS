@@ -41,3 +41,17 @@ void CGame::Font_PrintChar(float posx, float posy, GTAChar chr, bool buffered)
 {
     injector::cstd<void(float, float, GTAChar, bool)>::call(Addresses.pFont_PrintChar, posx, posy, chr, buffered);
 }
+
+int CGame::Font_ParseToken(const GTAChar* text, GTAChar* text_to_show, TokenStruct* token_data)
+{
+    return injector::cstd<int(const GTAChar*, GTAChar*, TokenStruct*)>::call(
+        Addresses.pFont_ParseToken, text, text_to_show, token_data);
+}
+
+const GTAChar* CGame::Font_ProcessToken(const GTAChar* text, int* color, bool get_color_code_only, char* color_code,
+    int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data)
+{
+    return injector::cstd<const GTAChar* (const GTAChar*, int*, bool, char*, int*, bool*, GTAChar*, TokenStruct*)>::call(
+        Addresses.pFont_ProcessToken, text, color, get_color_code_only, color_code, key_number, is_new_line_token,
+        text_to_show, token_data);
+}

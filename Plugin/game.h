@@ -36,7 +36,11 @@ struct StockAddresses
     //83 EC 10 8B 44 24 14 F3 0F 7E 00
     void* pFont_Render2DPrimitive;
 
-    void *pFont_ParseToken;
+    //83 C7 02 53 57 E8
+    void* pFont_ParseToken;
+
+    //83 EC 34 57 8B 7C 24 3C
+    void* pFont_ProcessToken;
 };
 
 class CGame
@@ -55,4 +59,11 @@ public:
     static float Font_GetCharacterSizeDrawing(GTAChar chr, bool use_extra_width);
     static void Font_Render2DPrimitive(const CRect* screen_rect, const CRect* texture_rect, uint color, bool buffered);
     static void Font_PrintChar(float posx, float posy, GTAChar chr, bool buffered);
+
+    //ParseToken逻辑
+    //1000+ BLIP
+    //256-300 按键类
+    //全部strcmp都不通过则当成单字符token，返回此字符
+    static int Font_ParseToken(const GTAChar* text, GTAChar* text_to_show, TokenStruct* token_data);
+    static const GTAChar* Font_ProcessToken(const GTAChar* text, int* color, bool get_color_code_only, char* color_code, int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data);
 };

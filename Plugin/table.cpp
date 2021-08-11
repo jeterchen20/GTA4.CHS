@@ -1,8 +1,8 @@
 ﻿#include "table.h"
 
-CCharacterTable CCharacterTable::GlobalTable;
+CTable GlobalTable;
 
-void CCharacterTable::LoadTable(const std::filesystem::path& filename)
+void CTable::LoadTable(const std::filesystem::path& filename)
 {
     std::vector<CharacterData> buffer;
 
@@ -22,7 +22,7 @@ void CCharacterTable::LoadTable(const std::filesystem::path& filename)
     }
 }
 
-CharacterPos CCharacterTable::GetCharPos(GTAChar chr) const
+CharacterPos CTable::GetCharPos(GTAChar chr) const
 {
     auto it = m_Table.find(chr);
 
