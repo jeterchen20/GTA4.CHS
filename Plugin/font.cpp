@@ -66,6 +66,14 @@ const GTAChar* CFont::SkipWord(const GTAChar* str)
 
 const GTAChar* CFont::SkipSpaces(const GTAChar* text)
 {
+    while (true)
+    {
+        if (text == nullptr || *text != ' ')
+            break;
+
+        ++text;
+    }
+
     return text;
 }
 
@@ -82,20 +90,16 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
     float max_line_width = 0.0f; //最宽一行的宽度
     bool had_width = false;
     bool has_continuous_tokens = false;
-
+    bool had_drawable_token = false;
     auto render_index = CGame::Font_GetRenderIndex();
 
-    int str_length;
+    auto text_length = std::char_traits<GTAChar>::length(text);
+    if (text_length > 2047)
+        throw std::out_of_range("String too long.");
 
-    for (str_length = 0; text[str_length] != 0; ++str_length)
-    {
-        str_buf[str_length] = text[str_length];
+    std::char_traits<GTAChar>::copy(str_buf, text, text_length);
+    str_buf[text_length] = 0;
 
-        if (str_length > 2047)
-            throw std::out_of_range("String too long.");
-    }
-
-    str_buf[str_length] = 0;
     auto buf_pointer = str_buf;
 
     while (true)
@@ -110,10 +114,81 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
             if (!get_all && (has_continuous_tokens || had_width))
                 break;
 
-            ParseToken()
-        }
-    }
+            token_string[0] = 0;
+            int token_id = CGame::Font_ParseToken(buf_pointer, token_string, &token_data);
+            auto token_string_length = std::char_traits<GTAChar>::length(token_string);
 
+            if (token_data.f110 == 0)
+            {
+                if (token_id > 300)
+                {
+                    if (token_string_length > 0)
+                    {
+                        //91C122
+                    }
+                }
+                else
+                {
+                    //91C0C3
+                }
+            }
+            else
+            {
+                //91BF11
+                for (int type_index = 0; type_index < 4; ++type_index)
+                {
+                    auto type = reinterpret_cast<uchar *>(&token_data.f110)[type_index];
+
+                    if (type == 1)
+                    {
+                        //91BF26
+                    }
+                    else if (type == 2)
+                    {
+                        //91BF53
+                    }
+
+                    had_drawable_token = true;
+                }
+            }
+
+            if (token_id >= 1000)
+            {
+                //91BFA6
+            }
+
+            while (*buf_pointer != '~')
+            {
+                //91BFE0
+                if (*buf_pointer == 'n')
+                {
+                    if (current_line_width > max_line_width)
+                        max_line_width = current_line_width;
+
+                    current_line_width = 0.0f;
+                }
+
+                ++buf_pointer;
+            }
+
+            ++buf_pointer;
+
+            if (had_drawable_token || *buf_pointer == '~')
+                has_continuous_tokens = true;
+        }
+        else
+        {
+            //TODO: 增加中文分词判断
+            if (!get_all && chr == ' ' && has_continuous_tokens)
+            {
+                break;
+            }
+
+            current_line_width += GetCharacterSizeNormalDispatch(chr - 0x20);
+        }
+
+        ++buf_pointer;
+    }
 
     return std::max(current_line_width, max_line_width);
 }
