@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
-    <height>843</height>
+    <width>1206</width>
+    <height>1083</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -17,7 +17,7 @@
    <string>幻梦自由 - GTA4翻译小工具</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="4,1,1,1,0,0">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
@@ -107,68 +107,53 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
       <item>
        <widget class="QLabel" name="label">
         <property name="text">
          <string>原文</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="line_original">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-         </font>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
+       <widget class="QPlainTextEdit" name="plain_original"/>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,1">
+     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0">
       <item>
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>机翻(参考用)</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="line_machine_translated">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-         </font>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
+       <widget class="QPlainTextEdit" name="plain_machine_translated"/>
       </item>
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
       <item>
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>译文</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="line_translated">
-        <property name="font">
-         <font>
-          <family>微软雅黑</family>
-         </font>
-        </property>
-       </widget>
+       <widget class="QPlainTextEdit" name="plain_translated"/>
       </item>
      </layout>
     </item>

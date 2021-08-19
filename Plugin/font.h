@@ -106,7 +106,7 @@ class CFontStringProcess
 {
 public:
     virtual ~CFontStringProcess() = default;
-    virtual bool OnLineFeed() const; //行宽度达到限制时执行
+    virtual bool OnLineFeed(float x, float y, const GTAChar* str_beg, const GTAChar* str_end, float spaces_width) const; //行宽度达到限制时执行
     virtual bool MultiLine() const; //是否需要换行
 };
 

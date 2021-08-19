@@ -41,10 +41,10 @@ void TextEditor::log_message(QString text)
 
 void TextEditor::machine_translated_text(QString text)
 {
-    ui.line_machine_translated->setText(text);
+    ui.plain_machine_translated->setPlainText(text);
 }
 
-void TextEditor::on_line_translated_textChanged(const QString& text)
+void TextEditor::on_plain_translated_textChanged()
 {
     _saved = false;
     UpdateWindowTitle();
@@ -59,7 +59,7 @@ void TextEditor::on_line_translated_textChanged(const QString& text)
     {
         QString original = _table_model->data(current_index.siblingAtColumn(1), Qt::DisplayRole).toString();
 
-        statusBar()->showMessage(TextProcess::ValidateText(text, original));
+        statusBar()->showMessage(TextProcess::ValidateText(ui.plain_translated->toPlainText(), original));
     }
 }
 
@@ -111,14 +111,14 @@ void TextEditor::on_token_button_clicked()
 
     //将data插入到光标位置
 
-    if (ui.line_translated->hasFocus())
+    if (ui.plain_translated->hasFocus())
     {
-        //int cur_pos = ui.line_translated->cursorPosition();
-        //QString new_text = ui.line_translated->text();
+        //int cur_pos = ui.plain_translated->cursorPosition();
+        //QString new_text = ui.plain_translated->text();
         //
-        //ui.line_translated->setText(new_text);
-        //ui.line_translated->setCursorPosition(cur_pos + token_string.length());
-        ui.line_translated->insert(token_string);
+        //ui.plain_translated->setText(new_text);
+        //ui.plain_translated->setCursorPosition(cur_pos + token_string.length());
+        ui.plain_translated->insertPlainText(token_string);
     }
 }
 
@@ -200,7 +200,7 @@ void TextEditor::StoreSingleText(const QModelIndex& index)
     if (!index.isValid())
         return;
 
-    QString translated = ui.line_translated->text();
+    QString translated = ui.plain_translated->toPlainText();
 
     if (!translated.isEmpty())
         _table_model->setData(index.siblingAtColumn(2), translated, Qt::DisplayRole);
@@ -213,19 +213,19 @@ void TextEditor::ChangeLine(const QModelIndex& current, const QModelIndex& previ
     QString translated = _table_model->data(current.siblingAtColumn(2), Qt::DisplayRole).toString();
     QString original = _table_model->data(current.siblingAtColumn(1), Qt::DisplayRole).toString();
 
-    ui.line_original->setText(original);
+    ui.plain_original->setPlainText(original);
 
     if (original != translated)
-        ui.line_translated->setText(translated);
+        ui.plain_translated->setPlainText(translated);
     else
-        ui.line_translated->clear();
+        ui.plain_translated->clear();
 
     statusBar()->showMessage(TextProcess::ValidateText(translated, original));
 
     //生成Token按钮
     FillTokensWidget(TextProcess::AnalyseText(original).tokens);
 
-    ui.line_translated->setFocus();
+    ui.plain_translated->setFocus();
 }
 
 void TextEditor::ClearTokenButtons()

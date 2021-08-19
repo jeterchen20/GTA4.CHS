@@ -27,7 +27,7 @@ public slots:
 private slots:
     void machine_translated_text(QString text);
 
-    void on_line_translated_textChanged(const QString &text);
+    void on_plain_translated_textChanged();
     void on_table_texts_currentRowChanged(const QModelIndex& current, const QModelIndex& previous);
     void on_btn_open_clicked();
     void on_btn_save_clicked();

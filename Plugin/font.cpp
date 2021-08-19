@@ -110,7 +110,7 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
             if (!get_all && (has_continuous_tokens || had_width))
                 break;
 
-            ParseToken()
+            //ParseToken()
         }
     }
 
@@ -129,7 +129,7 @@ __declspec(naked) void CFont::GetStringWidthHook()
 
     __asm
     {
-        pop ret_addr;
+        pop ret_addr; //91BE45
 
         movzx eax, word ptr[esi];
         mov cl, [ebp + 0xC];
@@ -174,10 +174,19 @@ const GTAChar* CFont::SkipWord_Prolog(const GTAChar* text)
     if (processed_token)
     {
         processed_token = false;
-        return text;
+
+        if (text[0] == ' ')
+        {
+            return SkipWord(text);
+        }
+        else
+        {
+            return text;
+        }
     }
     else
     {
+        processed_token = false;
         return SkipWord(text);
     }
 }
