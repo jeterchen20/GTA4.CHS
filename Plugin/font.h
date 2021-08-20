@@ -13,8 +13,8 @@ public:
     uint field_0;
     float fScaleX;
     float fScaleY;
-    float fButtonScaleX;
-    eTextAlignment alignment;
+    float fBlipScaleX;
+    int alignment;
     bool bDrawBox;
     bool field_15;
     bool bProportional;
@@ -35,7 +35,7 @@ public:
     float fEdgeSize;
     float fLineHeight;
     float field_40;
-    bool field_44;
+    bool bUseJapaneseSpace;
     char pad3[3];
 };
 
@@ -133,5 +133,7 @@ public:
     static const GTAChar* SkipSpaces(const GTAChar* text);
 
     static float GetStringWidth(const GTAChar* text, bool get_all);
+    static float GetStringWidthRemake(const GTAChar* text, bool get_all);
     static void ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor);
+    static void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor);
 };
