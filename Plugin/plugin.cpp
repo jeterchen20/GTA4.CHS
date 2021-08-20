@@ -69,6 +69,12 @@ static void RegisterPatchSteps()
             CGame::Addresses.pFont_ProcessToken = addresses[0].p();
         });
 
+    //GetMaxWordWidth
+    batch_matching::get_instance().register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
+        });
+
     //GetStringWidth
     batch_matching::get_instance().register_step("B8 B4 10 00 00", 1, [](const std::vector<memory_pointer>& addresses)
         {
@@ -79,29 +85,6 @@ static void RegisterPatchSteps()
     batch_matching::get_instance().register_step("81 EC 8C 0A 00 00", 1, [](const std::vector<memory_pointer>& addresses)
         {
             injector::MakeJMP(addresses[0].i(), CFont::ProcessString);
-        });
-
-    //获取字符串宽度
-    batch_matching::get_instance().register_step("0F B7 06 83 F8 20", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            injector::MakeCALL(addresses[0].i(), CFont::GetStringWidthHook);
-        });
-
-    //跳过单词的函数
-    batch_matching::get_instance().register_step("57 8B 7C 24 08 85 FF 75 04 33 C0 5F C3 56", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            injector::MakeJMP(addresses[0].i(), CFont::SkipWord);
-        });
-
-    //修正无脑跳单词的逻辑
-    batch_matching::get_instance().register_step("89 AC 24 80 00 00 00 E8", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            injector::MakeCALL(addresses[0].i(7), CFont::ProcessToken_Prolog);
-        });
-
-    batch_matching::get_instance().register_step("33 F6 F3 0F 11 54 24 28 E8", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            injector::MakeCALL(addresses[0].i(8), CFont::SkipWord_Prolog);
         });
 
     //获取字符宽度

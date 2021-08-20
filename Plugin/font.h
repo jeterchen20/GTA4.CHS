@@ -98,7 +98,12 @@ struct TokenStruct
 {
     int f0[4];
     GTAChar f10[4][32];
-    int f110 = 0;
+
+    union 
+    {
+        int f110 = 0;
+        uchar a110[4];
+    };
 };
 VALIDATE_SIZE(TokenStruct, 0x114);
 
@@ -106,13 +111,15 @@ class CFontStringProcess
 {
 public:
     virtual ~CFontStringProcess() = default;
-    virtual bool OnLineFeed(float x, float y, const GTAChar* str_beg, const GTAChar* str_end, float spaces_width) const; //行宽度达到限制时执行
-    virtual bool MultiLine() const; //是否需要换行
+    virtual bool ProcessStringPart(float x, float y, const GTAChar* str_beg, const GTAChar* str_end, float spaces_width) const;
+    virtual bool Func8() const;
 };
 
 class CFont
 {
 public:
+    static void* __fastcall LoadTextureCB(void*, int, uint);
+
     static bool IsNaiveCharacter(GTAChar chr);
 
     static float GetCharacterSizeNormalDispatch(GTAChar chr);
@@ -124,16 +131,10 @@ public:
     static void PrintCharDispatch(float x, float y, GTAChar chr, bool buffered);
     static void PrintCHSChar(float x, float y, GTAChar chr);
 
-    static void* __fastcall LoadTextureCB(void*, int, uint);
-    static void GetStringWidthHook();
-    static const GTAChar* SkipWord_Prolog(const GTAChar* text);
-    static const GTAChar* ProcessToken_Prolog(const GTAChar* text, int* color, bool get_color_code_only, char* color_code, int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data);
-
     static const GTAChar* SkipWord(const GTAChar* text);
     static const GTAChar* SkipSpaces(const GTAChar* text);
 
     static float GetStringWidth(const GTAChar* text, bool get_all);
-    static float GetStringWidthRemake(const GTAChar* text, bool get_all);
     static void ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor);
-    static void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor);
+    static float GetMaxWordWidth(const GTAChar *text);
 };

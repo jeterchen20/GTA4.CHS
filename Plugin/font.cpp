@@ -79,136 +79,6 @@ const GTAChar* CFont::SkipSpaces(const GTAChar* text)
 
 float CFont::GetStringWidth(const GTAChar* text, bool get_all)
 {
-    GTAChar str_buf[2048];
-    TokenStruct token_data;
-    GTAChar token_string[64];
-
-    if (text == nullptr)
-        return 0.0f;
-
-    auto& using_details = CGame::Addresses.pFont_Details[CGame::Font_GetRenderIndex()];
-    float current_line_width = 0.0f; //当前行的宽度
-    float current_line_width2 = 0.0f; //当前行的宽度2
-    float max_line_width = 0.0f; //最宽一行的宽度
-    bool had_width = false;
-    bool has_continuous_tokens = false;
-    bool false_value = false;
-
-
-    auto text_length = std::char_traits<GTAChar>::length(text);
-    if (text_length > 2047)
-        throw std::out_of_range("String too long.");
-
-    std::char_traits<GTAChar>::copy(str_buf, text, text_length);
-    str_buf[text_length] = 0;
-
-    auto buf_pointer = str_buf;
-
-    while (true)
-    {
-        auto chr = *buf_pointer;
-
-        if (chr == 0 || (chr == ' ' && !get_all))
-            break;
-
-        if (chr == '~')
-        {
-            if (!get_all && (has_continuous_tokens || had_width))
-                break;
-
-            token_string[0] = 0;
-            int token_id = CGame::Font_ParseToken(++buf_pointer, token_string, &token_data);
-            auto token_string_length = std::char_traits<GTAChar>::length(token_string);
-
-            if (token_data.f110 == 0)
-            {
-                if (token_id < 256 || token_id > 300)
-                {
-                    //91C666
-                    if (token_string_length > 0)
-                    {
-                        //91C122
-                    }
-
-                    if (token_id >= 1000)
-                    {
-                        //91BFA6
-                    }
-                }
-                else
-                {
-                    //91C0C3
-                }
-            }
-            else
-            {
-                //91BF11
-                for (int type_index = 0; type_index < 4; ++type_index)
-                {
-                    auto type = reinterpret_cast<uchar*>(&token_data.f110)[type_index];
-
-                    if (type == 1)
-                    {
-                        //91BF26
-                        had_width = true;
-                        current_line_width2 = current_line_width;
-                    }
-                    else if (type == 2)
-                    {
-                        //91BF53
-                        had_width = true;
-                        current_line_width2 = current_line_width;
-                    }
-                }
-            }
-
-            if (token_id >= 1000)
-            {
-                //91BFA6
-            }
-
-            while (*buf_pointer != '~')
-            {
-                //91BFE0
-                if (*buf_pointer == 'n')
-                {
-                    if (current_line_width > max_line_width)
-                        max_line_width = current_line_width;
-
-                    current_line_width = 0.0f;
-                    current_line_width2 = 0.0f;
-                }
-
-                ++buf_pointer;
-            }
-
-            ++buf_pointer;
-
-            if (had_width || *buf_pointer == '~')
-                has_continuous_tokens = true;
-        }
-        else
-        {
-            //TODO: 增加中文分词判断
-            if (!get_all && chr == ' ' && has_continuous_tokens)
-            {
-                break;
-            }
-
-            current_line_width += GetCharacterSizeNormalDispatch(chr - 0x20);
-            ++buf_pointer;
-        }
-
-        //91C030
-        if (false_value && !get_all && using_details.bUseJapaneseSpace)
-            break;
-    }
-
-    return std::max(current_line_width, max_line_width);
-}
-
-float CFont::GetStringWidthRemake(const GTAChar* text, bool get_all)
-{
     if (text == nullptr)
         return 0.0f;
 
@@ -310,7 +180,6 @@ float CFont::GetStringWidthRemake(const GTAChar* text, bool get_all)
         }
         else
         {
-            //单个字符就是一个分词单位
             auto chr_width = GetCharacterSizeNormalDispatch(chr - 0x20);
             current_line_width += chr_width;
 
@@ -345,7 +214,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
     float wrap_x = using_details.fWrapX;
     bool is_new_line_token = false;
     float centre_wrap = using_details.fCentreWrapX;
-    bool multi_line = processor->MultiLine();
+    bool multi_line = processor->Func8();
     char temp_color_code = 0;
     float a44 = 0.0f;
     int total_space_count = 0;
@@ -536,7 +405,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
 
                 //92237E
                 a74 = draw_x;
-                if (processor->OnLineFeed(draw_x, y, str_beg, text_pointer, spaces_width))
+                if (processor->ProcessStringPart(draw_x, y, str_beg, text_pointer, spaces_width))
                 {
                     //92238E
                 }
@@ -571,82 +440,24 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
     using_details = temp_details;
 }
 
-__declspec(naked) void CFont::GetStringWidthHook()
+float CFont::GetMaxWordWidth(const GTAChar* text)
 {
-    static void* ret_addr;
+    if (text == nullptr)
+        return 0.0f;
 
-    __asm
+    float max_word_width = 0.0f;
+
+    while (*text != 0)
     {
-        pop ret_addr; //91BE45
+        float word_width = GetStringWidth(text, false);
 
-        movzx eax, word ptr[esi];
-        mov cl, [ebp + 0xC];
-        cmp ax, ' ';
-        jz space;
-        push eax;
-        call IsNaiveCharacter;
-        add esp, 4;
-        test al, al;
-        movzx eax, word ptr[esi];
-        mov cl, [ebp + 0xC];
-        jnz normal;
-        jmp chs;
+        if (word_width > max_word_width)
+            max_word_width = word_width;
 
-    space:
-        add ret_addr, 0x3;
-        push ret_addr;
-        ret;
-
-    normal:
-        add ret_addr, 0xB;
-        push ret_addr;
-        ret;
-
-    chs:
-        test cl, cl; //get all
-        jnz normal;
-        mov dx, word ptr[esp + 0x12]; //has char1 & has char 2
-        test dx, dx;
-        mov edx, 807Eh;
-        jz normal;
-        add ret_addr, 0x22E;
-        push ret_addr;
-        ret;
+        text = SkipSpaces(SkipWord(text));
     }
-}
 
-static bool processed_token = false;
-
-const GTAChar* CFont::SkipWord_Prolog(const GTAChar* text)
-{
-    if (processed_token)
-    {
-        processed_token = false;
-
-        if (text[0] == ' ')
-        {
-            return SkipWord(text);
-        }
-        else
-        {
-            return text;
-        }
-    }
-    else
-    {
-        processed_token = false;
-        return SkipWord(text);
-    }
-}
-
-const GTAChar* CFont::ProcessToken_Prolog(const GTAChar* text, int* color, bool get_color_code_only, char* color_code,
-    int* key_number, bool* is_new_line_token, GTAChar* text_to_show,
-    TokenStruct* token_data)
-{
-    processed_token = true;
-
-    return CGame::Font_ProcessToken(text, color, get_color_code_only, color_code, key_number, is_new_line_token, text_to_show,
-        token_data);
+    return max_word_width;
 }
 
 float CFont::GetCHSCharacterSizeNormal()
