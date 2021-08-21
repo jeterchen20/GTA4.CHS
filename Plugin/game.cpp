@@ -48,10 +48,15 @@ int CGame::Font_ParseToken(const GTAChar* text, GTAChar* text_to_show, TokenStru
         Addresses.pFont_ParseToken, text, text_to_show, token_data);
 }
 
-const GTAChar* CGame::Font_ProcessToken(const GTAChar* text, int* color, bool get_color_code_only, char* color_code,
+const GTAChar* CGame::Font_ProcessToken(const GTAChar* text, int* color, bool get_color, char* color_code,
     int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data)
 {
     return injector::cstd<const GTAChar* (const GTAChar*, int*, bool, char*, int*, bool*, GTAChar*, TokenStruct*)>::call(
-        Addresses.pFont_ProcessToken, text, color, get_color_code_only, color_code, key_number, is_new_line_token,
+        Addresses.pFont_ProcessToken, text, color, get_color, color_code, key_number, is_new_line_token,
         text_to_show, token_data);
+}
+
+void CGame::Font_AddTokenStringWidth(const GTAChar* text, float* width, int render_index)
+{
+    return injector::cstd<void(const GTAChar*, float*, int)>::call(Addresses.pFont_AddTokenStringWidth, text, width, render_index);
 }

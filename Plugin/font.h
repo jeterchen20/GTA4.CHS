@@ -20,7 +20,7 @@ public:
     bool bProportional;
     bool field_17;
     bool bUseUnderscore;
-    bool field_19;
+    bool bUseColor;
     bool field_1A;
     char pad1[1];
     uint BoxColor;

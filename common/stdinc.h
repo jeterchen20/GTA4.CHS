@@ -30,7 +30,7 @@
 #include <chrono>
 #include "injector/hooking.hpp"
 #include "injector/calling.hpp"
-#include "injector/utility.hpp"
+#include "injector/injector.hpp"
 #include "BinaryFile.hpp"
 
 #include "../common/tinyutf8.h"

@@ -39,7 +39,10 @@ ESC菜单抬头文本
 5ADAF1 游戏
 
 尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
-调试原版GetStringWidth和ProcessString理解逻辑
 
 不让标点符号出现在换行的行首..
 加上91BB30
+跳单词逻辑(无脑SkipSpaces)
+
+调试原版GetStringWidth和ProcessString理解逻辑
+测试字符串要包含 ~z~/~BLIP_~/~INPUT~/空格/中/英任意混合
