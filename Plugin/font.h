@@ -35,7 +35,7 @@ public:
     float fEdgeSize;
     float fLineHeight;
     float field_40;
-    bool bUseJapaneseSpace;
+    bool bIgnoreWidthLimit;
     char pad3[3];
 };
 

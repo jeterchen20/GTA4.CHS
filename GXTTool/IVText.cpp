@@ -426,7 +426,7 @@ void IVText::LoadBinary(const PathType& input_binary)
         for (auto& key : keys)
         {
             tiny_utf8::utf8_string wtext;
-            auto offset = key.Offset;
+            auto offset = key.Offset / 2;
 
             while (datas[offset] != 0)
             {
@@ -463,7 +463,7 @@ void IVText::GenerateTexts(const PathType& output_texts) const
         for (auto& entry : table.second)
         {
             line = fmt::sprintf("0x%08X=%s\n", entry.first, entry.second.cpp_str());
-            stream << ';' << line << line;
+            stream << ';' << line << line << '\n';
         }
 
         stream.close();

@@ -41,8 +41,15 @@ ESC菜单抬头文本
 尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
 
 不让标点符号出现在换行的行首..
-加上91BB30
-跳单词逻辑(无脑SkipSpaces)
 
 调试原版GetStringWidth和ProcessString理解逻辑
 测试字符串要包含 ~z~/~BLIP_~/~INPUT~/空格/中/英任意混合
+
+//原版测试文本: 
+0x9899E5EE=fuckingloooooooooooooooooooooooooooooooooooooooooongtext ~r~fuckingfuckingloooooooooooooooooooooooooooooooooooooooooongtext tail~n~~PAD_Y~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~ tail~n~~x~whatshit.       text after multi spaces.
+
+;0x9899E5EE=Press ~PAD_Y~ to save your game.
+;0x9899E5EE=按~PAD_Y~保存游戏进度。
+0x9899E5EE=~z~~BLIP_29~中文English~PAD_UP~中文~BLIP_29~English小地图~y~上~s~闪烁的~BLIP_29~表示这间公寓的入口。你可以在这里保存游戏进度。
+
+GXTTool通过扩展名确定参数是文件还是文件夹

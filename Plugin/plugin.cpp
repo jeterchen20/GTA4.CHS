@@ -22,16 +22,12 @@ static void RegisterPatchSteps()
     batch_matching::get_instance().register_step("0F B6 84 08 ? ? ? ? 66 0F 6E C0", 1, [](const std::vector<memory_pointer>& addresses)
         {
             CGame::Addresses.pFont_Datas = *addresses[0].p<CFontInfo*>(4);
+            CGame::Addresses.pFont_ButtonWidths = reinterpret_cast<float*>(&CGame::Addresses.pFont_Datas[4]);
         });
 
     batch_matching::get_instance().register_step("F3 0F 59 05 ? ? ? ? 88 4C 24 12", 1, [](const std::vector<memory_pointer>& addresses)
         {
             CGame::Addresses.pFont_BlipWidth = *addresses[0].p<float*>(4);
-        });
-
-    batch_matching::get_instance().register_step("", 1, [](const std::vector<memory_pointer>& addresses)
-        {
-            CGame::Addresses.pFont_BlipWidth = *addresses[0].p<float*>(3);
         });
 
     batch_matching::get_instance().register_step("8B 34 ED ? ? ? ? 0F 2E C1", 1, [](const std::vector<memory_pointer>& addresses)
@@ -88,6 +84,11 @@ static void RegisterPatchSteps()
     batch_matching::get_instance().register_step("83 EC 10 53 8B 5C 24 18 55 56", 1, [](const std::vector<memory_pointer>& addresses)
         {
             CGame::Addresses.pFont_AddTokenStringWidth = addresses[0].p();
+        });
+
+    batch_matching::get_instance().register_step("51 E8 ? ? ? ? 8D 04 C0 F3 0F 10 04 C5 ? ? ? ? F3 0F 59 05 ? ? ? ? F3 0F 59 04 C5", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            CGame::Addresses.pFont_GetActualLineHeight = addresses[0].p();
         });
 
     //GetMaxWordWidth

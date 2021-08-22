@@ -60,3 +60,8 @@ void CGame::Font_AddTokenStringWidth(const GTAChar* text, float* width, int rend
 {
     return injector::cstd<void(const GTAChar*, float*, int)>::call(Addresses.pFont_AddTokenStringWidth, text, width, render_index);
 }
+
+float CGame::Font_GetActualLineHeight()
+{
+    return injector::cstd<float()>::call(Addresses.pFont_GetActualLineHeight);
+}
