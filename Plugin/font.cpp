@@ -85,7 +85,6 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
     float current_line_width = 0.0f;
     float max_line_width = 0.0f;
     bool had_width = false;
-    bool had_continuous_tokens = false;
     auto render_index = CGame::Font_GetRenderIndex();
     auto& using_details = CGame::Addresses.pFont_Details[render_index];
     auto single_char_width = CGame::Font_GetCharacterSizeNormal(0);
@@ -105,13 +104,13 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
         if (chr == ' ' && !get_all)
             break;
 
-        //"english|中文" 的分词
+        //应对中文在后面的分词
         if (is_chinese_char && had_width && !get_all)
             break;
 
         if (chr == '~')
         {
-            if ((had_width || had_continuous_tokens) && !get_all)
+            if (had_width && !get_all)
                 break;
 
             token_string[0] = 0;
@@ -132,6 +131,10 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
                 else
                 {
                     current_line_width += CGame::Addresses.pFont_ButtonWidths[token_type - 0x100 + 1] * using_details.fBlipScaleX;
+
+                    if (using_details.bIgnoreWidthLimit)
+                        current_line_width *= 2.0f; //行首的Button2倍宽度？
+
                     had_width = true;
                 }
             }
@@ -154,7 +157,6 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
                 }
             }
 
-            //91BF9E
             if (token_type >= 1000)
             {
                 current_line_width += using_details.fBlipScaleX * *CGame::Addresses.pFont_BlipWidth;
@@ -174,8 +176,9 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
 
             ++text_pointer;
 
-            if (*text_pointer == '~')
-                had_continuous_tokens = true;
+            //在非get_all的情况下，处理一个Token后立即跳出
+            if (had_width && !get_all)
+                break;
         }
         else
         {
@@ -221,6 +224,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
     auto str_beg = text_pointer;
     float line_width_limit = centre_wrap - wrap_x;
     float current_x;
+    bool had_width = false;
 
     GTAChar chopped_string[1200];
 
@@ -447,7 +451,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
                 if (temp_color_code != 0)
                 {
                     chopped_string[0] = '~';
-                    chopped_string[1] = static_cast<GTAChar>(temp_color_code);
+                    chopped_string[1] = static_cast<uchar>(temp_color_code);
                     chopped_string[2] = '~';
 
                     auto rest_length = std::char_traits<GTAChar>::length(text_pointer);
