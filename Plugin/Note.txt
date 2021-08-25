@@ -1,30 +1,8 @@
 ﻿Esc菜单鼠标指向只变色一个词
-存档名字只取低字节的问题
-不同语言字距不同的问题
-
-Ctrl+X显示所有函数的调用
-
-CFontRenderState的魔数是31337FAD
-"[PROP]"定位第一个CFontInfo
-"[RESOLUTION]"
-
-FontDetails有2个，通过GetRenderIndex选择
-CFontInfo有4个，1342
-
-MAIN-0x9899E5EE
-ROMBLIP-0xA88586FC
-
-0. 看看有空格和无空格的行为有什么不同
-1. GXT生成时给中文和非中文之间加空格
-
-有无空格时9220FC跳转不一样?
+存档名字只取1字节的问题
 
 -------------1.2.0.43----------------------
-E85F28 虚表
-CFontRenderString : CFontStringProcess
-CFontGetNumberlines : CFontStringProcess
-从"~%c~"找到CFont_ProcessStringToDisplay
-
+从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
 94ABD4
 
@@ -40,16 +18,25 @@ ESC菜单抬头文本
 
 尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
 
-不让标点符号出现在换行的行首..
+不让标点符号出现在行首..
 
 调试原版GetStringWidth和ProcessString理解逻辑
 测试字符串要包含 ~z~/~BLIP_~/~INPUT~/空格/中/英任意混合
 
+MAIN-0x9899E5EE
+ROMBLIP-0xA88586FC
+
 //原版测试文本: 
 0x9899E5EE=fuckingloooooooooooooooooooooooooooooooooooooooooongtext ~r~fuckingfuckingloooooooooooooooooooooooooooooooooooooooooongtext tail~n~~PAD_Y~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~ tail~n~~x~whatshit.       text after multi spaces.
+0x9899E5EE=text after multi spaces text after multi spaces text after multi spaces text after multi spaces.
 
 ;0x9899E5EE=Press ~PAD_Y~ to save your game.
 ;0x9899E5EE=按~PAD_Y~保存游戏进度。
 0x9899E5EE=~z~~BLIP_29~中文English~PAD_UP~中文~BLIP_29~English小地图~y~上~s~闪烁的~BLIP_29~表示这间公寓的入口。你可以在这里保存游戏进度。
 
 GXTTool通过扩展名确定参数是文件还是文件夹
+
+922D80 RenderFontBuffer?
+
+调试现有ProcessString找问题
+调试原版代码，理解warp_x/x/centre_wrap/a44/a70的关系

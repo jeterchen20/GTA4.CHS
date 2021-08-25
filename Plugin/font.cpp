@@ -27,15 +27,15 @@ void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
     return result;
 }
 
-const GTAChar* CFont::SkipWord(const GTAChar* str)
+const GTAChar* CFont::SkipWord(const GTAChar* text)
 {
-    if (str == nullptr)
+    if (text == nullptr)
     {
-        return str;
+        return text;
     }
 
-    auto begin = str;
-    auto current = str;
+    auto begin = text;
+    auto current = text;
 
     while (true)
     {
@@ -279,6 +279,287 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
     int key_token_minus_255;
 
     while (true)
+    {
+        key_token_minus_255 = 0;
+
+        float word_width = GetStringWidth(text_pointer, false);
+        token_string[0] = 0;
+        token_data.f110 = 0;
+
+        if (multi_line && !using_details.bIgnoreWidthLimit && word_width > line_width_limit)
+        {
+            text_pointer = str_beg;
+            line_width = 0.0f;
+            using_details.bIgnoreWidthLimit = true;
+        }
+        else
+        {
+            bool processed_token = false;
+
+            if (*text_pointer == '~')
+            {
+                color = -1;
+                color_code = 0;
+                text_pointer = CGame::Font_ProcessToken(text_pointer, &color, true, &color_code, &key_token_minus_255, &is_new_line_token, token_string, &token_data);
+                processed_token = true;
+                temp_color_code = color_code;
+
+                if (is_new_line_token)
+                {
+                    line_width += single_space_width;
+                }
+            }
+
+            float val1 = word_width + line_width + a70;
+
+            if ((val1 <= line_width_limit || multi_line) && !is_new_line_token)
+            {
+                line_width += word_width;
+                spaces_width += word_width;
+
+                int space_count = 0;
+
+                auto skiped_word_pointer = text_pointer;
+                if (!processed_token)
+                {
+                    skiped_word_pointer = SkipWord(text_pointer);
+                }
+
+                text_pointer = SkipSpaces(skiped_word_pointer);
+
+
+                if (!using_details.bIgnoreWidthLimit)
+                {
+                    space_count = text_pointer - skiped_word_pointer;
+
+                    if (using_details.alignment == 3 && key_token_minus_255 != 0)
+                        ++space_count;
+
+                    line_width += static_cast<float>(space_count) * single_space_width;
+                    spaces_width += static_cast<float>(space_count) * single_space_width;
+                }
+                else
+                {
+                    if (*skiped_word_pointer == ' ')
+                    {
+                        line_width += single_space_width;
+                        spaces_width += single_space_width;
+                    }
+                }
+
+                if (*text_pointer == 0)
+                {
+                    switch (using_details.alignment)
+                    {
+                    case 0:
+                    {
+                        xstart = current_x - line_width * 0.5f;
+                        break;
+                    }
+
+                    case 1:
+                    {
+                        xstart = current_x;
+                        break;
+                    }
+
+                    case 2:
+                    {
+                        xstart = centre_wrap - line_width;
+                        break;
+                    }
+
+                    case 3:
+                    {
+                        using_details.field_40 = 0.0f;
+                        xstart = current_x;
+                        break;
+                    }
+
+                    default:
+                    {
+                        break;
+                    }
+                    }
+
+                    processor->ProcessStringPart(xstart, y, str_beg, text_pointer, spaces_width);
+                }
+
+                if (!multi_line)
+                    total_space_count += space_count;
+
+                multi_line = false;
+                a44 = line_width;
+            }
+            else
+            {
+                if (key_token_minus_255 != 0 || token_string[0] != 0 || token_data.f110 != 0)
+                {
+                    text_pointer -= 2;
+
+                    while (*text_pointer != '~')
+                    {
+                        --text_pointer;
+                    }
+                }
+
+                multi_line = using_details.bIgnoreWidthLimit;
+                if (multi_line)
+                {
+                    //TODO: 922153  
+                }
+
+                if (using_details.alignment == 0)
+                {
+                    xstart = current_x - (line_width - single_space_width) * 0.5f;
+                }
+                else if (using_details.alignment == 2)
+                {
+                    current_x = centre_wrap;
+                    xstart = centre_wrap - (line_width - single_space_width);
+                }
+                else
+                {
+                    if (using_details.alignment != 1)
+                    {
+                        if (is_new_line_token || multi_line)
+                        {
+                            using_details.field_40 = 0.0f;
+                        }
+                        else
+                        {
+                            using_details.field_40 = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
+                        }
+                    }
+
+                    xstart = current_x;
+                    current_x = wrap_x;
+                }
+
+                if (processor->ProcessStringPart(xstart, y, str_beg, text_pointer, spaces_width))
+                {
+                    y += CGame::Font_GetActualLineHeight();
+                }
+
+                if (!use_japanese_space)
+                    using_details.bIgnoreWidthLimit = false;
+
+                line_width = 0.0f;
+                spaces_width = 0.0f;
+                is_new_line_token = false;
+
+                if (temp_color_code != 0)
+                {
+                    chopped_string[0] = '~';
+                    chopped_string[1] = static_cast<uchar>(temp_color_code);
+                    chopped_string[2] = '~';
+
+                    auto rest_length = std::char_traits<GTAChar>::length(text_pointer);
+                    if (rest_length + 3 < 1200)
+                    {
+                        std::char_traits<GTAChar>::copy(&chopped_string[3], text_pointer, rest_length);
+                        chopped_string[rest_length + 3] = 0;
+                        text_pointer = chopped_string;
+                    }
+
+                    temp_color_code = 0;
+                }
+
+                str_beg = text_pointer;
+                total_space_count = 0;
+                a70 = 0.0f;
+                multi_line = true;
+                a44 = 0.0f;
+            }
+        }
+
+        if (*text_pointer == 0)
+            break;
+    }
+
+    using_details = temp_details;
+}
+
+void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor)
+{
+    auto text_pointer = text;
+
+    if (text_pointer == nullptr)
+        return;
+
+    auto& using_details = CGame::Addresses.pFont_Details[CGame::Font_GetRenderIndex()];
+    float single_space_width = GetCharacterSizeNormalDispatch(0);
+    float line_width = 0.0f;
+    float spaces_width = 0.0f;
+    float a70 = 0.0f;
+    float xstart = 0.0f;
+    using_details.bUseColor = false;
+    float wrap_x = using_details.fWrapX;
+    bool is_new_line_token = false;
+    float centre_wrap = using_details.fCentreWrapX;
+    bool multi_line = processor->Func8();
+    char temp_color_code = 0;
+    float a44 = 0.0f;
+    int total_space_count = 0;
+    auto temp_details = using_details;
+    auto str_beg = text_pointer;
+    float line_width_limit = centre_wrap - wrap_x;
+    float current_x;
+    bool had_width = false;
+
+    GTAChar chopped_string[1200];
+
+    switch (using_details.alignment)
+    {
+    case 1:
+    case 2:
+    case 3:
+    {
+        current_x = x;
+        a70 = x - wrap_x;
+        if (a70 < 0.0f)
+            a70 = 0.0f;
+
+        break;
+    }
+
+    default:
+    {
+        auto diff1 = centre_wrap - x;
+        auto diff2 = x - wrap_x;
+        current_x = x;
+
+        if (diff2 < diff1)
+            diff1 = diff2;
+
+        if (diff1 >= 0.0f)
+        {
+            wrap_x = x - diff1;
+            centre_wrap = diff1 + x;
+            line_width_limit = diff1 * 2.0f;
+        }
+        else
+        {
+            current_x = (centre_wrap + wrap_x) * 0.5f;
+        }
+
+        break;
+    }
+    }
+
+    auto use_japanese_space = using_details.bIgnoreWidthLimit;
+    GTAChar token_string[64];
+    std::fill(std::begin(token_string), std::end(token_string), 0);
+    TokenStruct token_data;
+
+    if (*text_pointer == 0)
+        return;
+
+    int color;
+    char color_code;
+    int key_token_minus_255;
+
+    while (true) //https://github.com/WMHHZ/VC.SA.Plugin/blob/master/wm_sachs/CFont.cpp
     {
         key_token_minus_255 = 0;
 
