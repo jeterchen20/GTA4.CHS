@@ -4,7 +4,9 @@
 enum eTextAlignment
 {
     ALIGN_CENTER = 0,
-    ALIGN_RIGHT = 2
+    ALIGN_LEFT = 1,
+    ALIGN_RIGHT = 2,
+    ALIGN_LEFT_RIGHT = 3 //多余的宽度会平分到每个空格中
 };
 
 class CFontDetails

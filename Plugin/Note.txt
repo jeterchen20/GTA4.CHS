@@ -27,8 +27,7 @@ MAIN-0x9899E5EE
 ROMBLIP-0xA88586FC
 
 //原版测试文本: 
-0x9899E5EE=fuckingloooooooooooooooooooooooooooooooooooooooooongtext ~r~fuckingfuckingloooooooooooooooooooooooooooooooooooooooooongtext tail~n~~PAD_Y~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~~BLIP_29~ tail~n~~x~whatshit.       text after multi spaces.
-0x9899E5EE=text after multi spaces text after multi spaces text after multi spaces text after multi spaces.
+0x9899E5EE=text ~BLIP_29~ ~INPUT_NEXT_CAMERA~ after ~PAD_UP~multi ~r~ spa~PAD_DOWN~ces ~y~text after multi spaces text after multi spaces text after multi spaces.
 
 ;0x9899E5EE=Press ~PAD_Y~ to save your game.
 ;0x9899E5EE=按~PAD_Y~保存游戏进度。
