@@ -371,7 +371,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
 
                     case 3:
                     {
-                        using_details.field_40 = 0.0f;
+                        using_details.fSpaceWidth = 0.0f;
                         xstart = current_x;
                         break;
                     }
@@ -424,11 +424,11 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
                     {
                         if (is_new_line_token || multi_line)
                         {
-                            using_details.field_40 = 0.0f;
+                            using_details.fSpaceWidth = 0.0f;
                         }
                         else
                         {
-                            using_details.field_40 = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
+                            using_details.fSpaceWidth = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
                         }
                     }
 
@@ -652,7 +652,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
 
                     case 3:
                     {
-                        using_details.field_40 = 0.0f;
+                        using_details.fSpaceWidth = 0.0f;
                         xstart = a7c;
                         break;
                     }
@@ -705,11 +705,11 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                     {
                         if (is_new_line_token || multi_line)
                         {
-                            using_details.field_40 = 0.0f;
+                            using_details.fSpaceWidth = 0.0f;
                         }
                         else
                         {
-                            using_details.field_40 = (centre_wrap - a44 - a7c) / static_cast<float>(total_space_count);
+                            using_details.fSpaceWidth = (centre_wrap - a44 - a7c) / static_cast<float>(total_space_count);
                         }
                     }
 

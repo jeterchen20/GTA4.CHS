@@ -39,3 +39,4 @@ GXTTool通过扩展名确定参数是文件还是文件夹
 
 调试现有ProcessString找问题
 调试原版代码，理解warp_x/x/centre_wrap/a44/a70的关系
+看一下textbox和legal的align值
