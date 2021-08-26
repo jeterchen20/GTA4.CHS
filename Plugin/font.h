@@ -3,9 +3,9 @@
 
 enum eTextAlignment
 {
-    ALIGN_CENTER = 0,
-    ALIGN_LEFT = 1,
-    ALIGN_RIGHT = 2,
+    ALIGN_CENTER = 0, //居中对齐
+    ALIGN_LEFT = 1, //左对齐
+    ALIGN_RIGHT = 2, //右对齐
     ALIGN_LEFT_RIGHT = 3 //多余的宽度会平分到每个空格中
 };
 

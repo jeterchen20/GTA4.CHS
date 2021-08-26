@@ -37,13 +37,14 @@ GXTTool通过扩展名确定参数是文件还是文件夹
 
 922D80 RenderFontBuffer?
 
-看一下textbox和legal的align值
 请在分支中频繁提交..
 
 调试原版代码，理解warp_x/x/centre_wrap/a44/a70的关系
 调试现有ProcessString找问题
+改变wrapx 等数值查看效果
 
-如: LEGAL_PC_2中
-WrapX是0.15/0.07
-CenterWrap是0.93/0.85
-x是0.15
+测试textbox中
+WrapX是0.054 一行的空白宽度?
+CenterWrapX是0.264  一行的总宽度?
+x是0.054
+a70是x和wrapx的差(最小0.0)
