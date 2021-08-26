@@ -36,7 +36,7 @@ public:
     float fEdgeSize2;
     float fEdgeSize;
     float fLineHeight;
-    float fSpaceWidth;
+    float fExtraSpaceWidth;
     bool bIgnoreWidthLimit;
     char pad3[3];
 };

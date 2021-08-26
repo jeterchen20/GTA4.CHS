@@ -371,7 +371,7 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
 
                     case 3:
                     {
-                        using_details.fSpaceWidth = 0.0f;
+                        using_details.fExtraSpaceWidth = 0.0f;
                         xstart = current_x;
                         break;
                     }
@@ -424,11 +424,11 @@ void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProc
                     {
                         if (is_new_line_token || multi_line)
                         {
-                            using_details.fSpaceWidth = 0.0f;
+                            using_details.fExtraSpaceWidth = 0.0f;
                         }
                         else
                         {
-                            using_details.fSpaceWidth = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
+                            using_details.fExtraSpaceWidth = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
                         }
                     }
 
@@ -490,7 +490,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
     auto& using_details = CGame::Addresses.pFont_Details[CGame::Font_GetRenderIndex()];
     float single_space_width = GetCharacterSizeNormalDispatch(0);
     float line_width = 0.0f;
-    float a78 = 0.0f;
+    float spaces_width = 0.0f;
     float a70 = 0.0f;
     float xstart = 0.0f;
     using_details.bUseColor = false;
@@ -504,7 +504,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
     auto temp_details = using_details;
     auto str_beg = text_pointer;
     float line_width_limit = centre_wrap - wrap_x;
-    float a7c;
+    float current_x;
     bool had_width = false;
 
     GTAChar chopped_string[1200];
@@ -515,7 +515,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
     case 2:
     case 3:
     {
-        a7c = x;
+        current_x = x;
         a70 = x - wrap_x;
         if (a70 < 0.0f)
             a70 = 0.0f;
@@ -527,7 +527,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
     {
         auto diff1 = centre_wrap - x;
         auto diff2 = x - wrap_x;
-        a7c = x;
+        current_x = x;
 
         if (diff2 < diff1)
             diff1 = diff2;
@@ -540,7 +540,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
         }
         else
         {
-            a7c = (centre_wrap + wrap_x) * 0.5f;
+            current_x = (centre_wrap + wrap_x) * 0.5f;
         }
 
         break;
@@ -559,7 +559,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
     char color_code;
     int key_token_minus_255;
 
-    while (true) //https://github.com/WMHHZ/VC.SA.Plugin/blob/master/wm_sachs/CFont.cpp
+    while (true)
     {
         key_token_minus_255 = 0;
 
@@ -596,7 +596,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
             if ((val1 <= line_width_limit || multi_line) && !is_new_line_token)
             {
                 line_width += word_width;
-                a78 += word_width;
+                spaces_width += word_width;
 
                 int space_count = 0;
 
@@ -617,14 +617,14 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                         ++space_count;
 
                     line_width += static_cast<float>(space_count) * single_space_width;
-                    a78 += static_cast<float>(space_count) * single_space_width;
+                    spaces_width += static_cast<float>(space_count) * single_space_width;
                 }
                 else
                 {
                     if (*skiped_word_pointer == ' ')
                     {
                         line_width += single_space_width;
-                        a78 += single_space_width;
+                        spaces_width += single_space_width;
                     }
                 }
 
@@ -634,13 +634,13 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                     {
                     case 0:
                     {
-                        xstart = a7c - line_width * 0.5f;
+                        xstart = current_x - line_width * 0.5f;
                         break;
                     }
 
                     case 1:
                     {
-                        xstart = a7c;
+                        xstart = current_x;
                         break;
                     }
 
@@ -652,8 +652,8 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
 
                     case 3:
                     {
-                        using_details.fSpaceWidth = 0.0f;
-                        xstart = a7c;
+                        using_details.fExtraSpaceWidth = 0.0f;
+                        xstart = current_x;
                         break;
                     }
 
@@ -663,7 +663,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                     }
                     }
 
-                    processor->ProcessStringPart(xstart, y, str_beg, text_pointer, a78);
+                    processor->ProcessStringPart(xstart, y, str_beg, text_pointer, spaces_width);
                 }
 
                 if (!multi_line)
@@ -692,11 +692,11 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
 
                 if (using_details.alignment == 0)
                 {
-                    xstart = a7c - (line_width - single_space_width) * 0.5f;
+                    xstart = current_x - (line_width - single_space_width) * 0.5f;
                 }
                 else if (using_details.alignment == 2)
                 {
-                    a7c = centre_wrap;
+                    current_x = centre_wrap;
                     xstart = centre_wrap - (line_width - single_space_width);
                 }
                 else
@@ -705,19 +705,19 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                     {
                         if (is_new_line_token || multi_line)
                         {
-                            using_details.fSpaceWidth = 0.0f;
+                            using_details.fExtraSpaceWidth = 0.0f;
                         }
                         else
                         {
-                            using_details.fSpaceWidth = (centre_wrap - a44 - a7c) / static_cast<float>(total_space_count);
+                            using_details.fExtraSpaceWidth = (centre_wrap - a44 - current_x) / static_cast<float>(total_space_count);
                         }
                     }
 
-                    xstart = a7c;
-                    a7c = wrap_x;
+                    xstart = current_x;
+                    current_x = wrap_x;
                 }
 
-                if (processor->ProcessStringPart(xstart, y, str_beg, text_pointer, a78))
+                if (processor->ProcessStringPart(xstart, y, str_beg, text_pointer, spaces_width))
                 {
                     y += CGame::Font_GetActualLineHeight();
                 }
@@ -726,7 +726,7 @@ void CFont::ProcessStringRemake(float x, float y, const GTAChar* text, CFontStri
                     using_details.bIgnoreWidthLimit = false;
 
                 line_width = 0.0f;
-                a78 = 0.0f;
+                spaces_width = 0.0f;
                 is_new_line_token = false;
 
                 if (temp_color_code != 0)
