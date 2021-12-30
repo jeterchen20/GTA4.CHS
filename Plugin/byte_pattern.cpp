@@ -7,8 +7,6 @@ using namespace std;
 using namespace std::chrono;
 using namespace std::filesystem;
 
-std::uintptr_t byte_pattern::_log_base = 0x400000;
-
 memory_pointer byte_pattern::get(size_t index) const
 {
     if (this->_results.size() < (index + 1))
@@ -29,24 +27,6 @@ std::vector<memory_pointer> byte_pattern::get() const
 memory_pointer byte_pattern::get_first() const
 {
     return this->get(0);
-}
-
-void byte_pattern::start_log(const char *log_name)
-{
-    char exe_path[512];
-
-    shutdown_log();
-
-    std::string filename = fmt::sprintf("pattern.%s.log", log_name);
-
-    GetModuleFileNameA(nullptr, exe_path, 512);
-
-    log_stream().open(path{ exe_path }.parent_path() / filename, ios::trunc);
-}
-
-void byte_pattern::shutdown_log()
-{
-    log_stream().close();
 }
 
 byte_pattern::byte_pattern()
@@ -95,21 +75,13 @@ byte_pattern &byte_pattern::set_range(memory_pointer beg, memory_pointer end)
 {
     this->_range.first = beg;
     this->_range.second = end;
-    _log_base = beg;
 
     return *this;
-}
-
-void byte_pattern::set_log_base(std::uintptr_t address)
-{
-    _log_base = address;
 }
 
 byte_pattern &byte_pattern::search()
 {
     this->bm_search();
-
-    debug_output();
 
     return *this;
 }
@@ -126,13 +98,6 @@ byte_pattern & byte_pattern::find_pattern(const void *pattern_binary, size_t siz
     this->set_pattern(pattern_binary, size).search();
 
     return *this;
-}
-
-std::ofstream & byte_pattern::log_stream()
-{
-    static ofstream instance;
-
-    return instance;
 }
 
 std::vector<std::string> byte_pattern::split_pattern(const char *literal)
@@ -251,7 +216,6 @@ void byte_pattern::get_module_range(memory_pointer module)
 
     _range.first = module;
     _range.second = module.i(ntHeader->OptionalHeader.SizeOfImage);
-    _log_base = module;
 }
 
 void byte_pattern::clear()
@@ -362,27 +326,4 @@ std::string byte_pattern::make_bytes_literal(memory_pointer pointer, std::size_t
     }
 
     return result;
-}
-
-void byte_pattern::debug_output() const
-{
-    if (!log_stream().is_open())
-        return;
-
-    log_stream() << fmt::sprintf("Result(s) of pattern in %.2lfms: %s\n", _spent, _literal);
-
-    if (count() > 0)
-    {
-        for_each_result(
-            [this](memory_pointer pointer)
-        {
-            log_stream() << fmt::sprintf("0x%08X | %s\n", (pointer.i() - this->_range.first + _log_base), make_bytes_literal(pointer, _pattern.size()));
-        });
-    }
-    else
-    {
-        log_stream() << "None\n";
-    }
-
-    log_stream() << '\n' << flush;
 }
