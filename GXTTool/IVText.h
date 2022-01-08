@@ -69,8 +69,9 @@ class IVText
 public:
     typedef std::uint16_t CharType;
     typedef std::uint32_t HashType;
-    typedef tiny_utf8::utf8_string StringType;
-    typedef std::pair<HashType, StringType> EntryType;
+    typedef tiny_utf8::utf8_string u8StringType;
+    typedef std::basic_string<std::uint16_t> wStringType;
+    typedef std::pair<HashType, u8StringType> EntryType;
     typedef std::pair<std::string, std::vector<EntryType>> TableType;
     typedef std::filesystem::path PathType;
 
@@ -82,31 +83,39 @@ public:
     void Process2Args(const PathType& arg1, const PathType& arg2);
 
 private:
+    //读取流时跳过UTF8签名
     static void SkipUTF8Signature(std::ifstream& stream);
 
     static bool IsNativeCharacter(char32_t character);
-    void CollectCharacters(const StringType& text);
 
+    //收集文本中需要加到字库的字符
+    void CollectChars(const u8StringType& text);
+
+    //收集文本中的Token
+    void CollectTokens(const std::string& text, std::set<std::string>& tokens);
+
+    void LoadBinary(const PathType& input_binary);
     void LoadText(const PathType& input_text);
     void LoadTexts(const PathType& input_texts);
 
+    void GenerateTexts(const PathType& output_texts) const;
     void GenerateBinary(const PathType& output_binary) const;
     void GenerateCollection(const PathType& output_text) const;
     void GenerateTable(const PathType& output_binary) const;
 
     //修正原版GXT中的混乱字符
-    static void FixCharacters(StringType& wtext);
+    static void FixCharacters(u8StringType& wtext);
 
     //标准编码转到游戏编码
-    static void LiteralToGame(StringType& wtext);
+    static void LiteralToGame(u8StringType& wtext);
 
     //游戏编码转到标准编码
-    static void GameToLiteral(StringType& wtext);
+    static void GameToLiteral(u8StringType& wtext);
 
-    void LoadBinary(const PathType& input_binary);
-
-    void GenerateTexts(const PathType& output_texts) const;
+    //在中/英/按键/BLIP之间添加空格(直接转换成写入gxt的状态)
+    static wStringType SpaceCEKB(const u8StringType& u8_text);
 
     std::map<std::string, std::vector<EntryType>, IVTextTableSorting> m_Data;
-    std::set<char32_t> m_Collection;
+    std::set<std::string> m_Tokens;
+    std::set<char32_t> m_Chars;
 };
