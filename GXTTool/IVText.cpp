@@ -2,6 +2,7 @@
 
 void IVText::Process0Arg()
 {
+    //text文件夹->gxt
     wchar_t temp[512];
 
     HMODULE self = GetModuleHandleW(NULL);
@@ -11,14 +12,8 @@ void IVText::Process0Arg()
     text_path = text_path.parent_path();
 
     m_Data.clear();
-    m_Tokens.clear();
-    m_Chars.clear();
 
-#ifdef _DEBUG
     LoadTexts(text_path / "text");
-#else
-    LoadText(text_path / "GTA4.txt");
-#endif
 
     if (!m_Data.empty())
     {
@@ -30,9 +25,8 @@ void IVText::Process0Arg()
 
 void IVText::Process2Args(const PathType& arg1, const PathType& arg2)
 {
+    //指定路径的文件夹/gxt互转
     m_Data.clear();
-    m_Tokens.clear();
-    m_Chars.clear();
 
     if (is_directory(arg1))
     {
@@ -70,13 +64,15 @@ bool IVText::IsNativeCharacter(char32_t character)
     return (character < 0x100 || character == L'™');
 }
 
-void IVText::CollectChars(const u8StringType& text)
+void IVText::CollectChars(const bStringType& text)
 {
-    for (auto character : text)
+    tiny_utf8::utf8_string u8_string = text;
+
+    for (auto code_point : u8_string)
     {
-        if (!IsNativeCharacter(character))
+        if (!IsNativeCharacter(code_point))
         {
-            m_Chars.insert(character);
+            m_Chars.insert(code_point);
         }
     }
 }
@@ -121,19 +117,21 @@ void IVText::LoadText(const PathType& input_text)
         {
             if (table_iter != m_Data.end())
             {
-                uint32_t hash = stoul(matches.str(1), nullptr, 16);
-                std::string b_text = matches.str(2);
+                TextEntry entry;
 
-                if ((std::count(b_text.begin(), b_text.end(), '~') % 2) != 0)
+                entry.hash = std::stoul(matches.str(1), nullptr, 16);
+                auto b_string = matches.str(2);
+                entry.u8_string = b_string;
+                entry.w_string = U8ToWide(entry.u8_string);
+
+                if ((std::count(b_string.begin(), b_string.end(), '~') % 2) != 0)
                 {
                     std::cout << filename << ": " << "第" << line_no << "行的 \'~\' 个数不是偶数！" << std::endl;
                 }
 
-                u8StringType u8_text = b_text;
-                CollectChars(u8_text);
-                CollectTokens(b_text, m_Tokens);
+                LiteralToGame(entry.w_string);
 
-                table_iter->second.emplace_back(hash, u8_text);
+                table_iter->second.emplace_back(std::move(entry));
             }
             else
             {
@@ -142,7 +140,7 @@ void IVText::LoadText(const PathType& input_text)
         }
         else if (line.front() == '[' && regex_match(line, matches, table_regex))
         {
-            table_iter = m_Data.emplace(matches.str(1), std::vector<EntryType>()).first;
+            table_iter = m_Data.emplace(matches.str(1), std::vector<TextEntry>()).first;
         }
         else
         {
@@ -232,16 +230,12 @@ void IVText::GenerateBinary(const PathType& output_binary) const
         strcpy(keyBlock.Name, table.first.c_str());
         keyBlock.Body.Size = table.second.size() * sizeof(KeyEntry);
 
-        for (auto& key : table.second)
+        for (auto& entry : table.second)
         {
-            keyEntry.Hash = key.first;
+            keyEntry.Hash = entry.hash;
             keyEntry.Offset = datas.size() * 2;
 
-            auto wideText = key.second;
-            LiteralToGame(wideText);
-
-            std::copy(wideText.begin(), wideText.end(), back_inserter(datas));
-            datas.push_back(0);
+            std::copy(entry.w_string.begin(), entry.w_string.end(), std::back_inserter(datas));
 
             keys.push_back(keyEntry);
         }
@@ -320,28 +314,29 @@ void IVText::GenerateTable(const PathType& output_binary) const
     stream.WriteArray(datas);
 }
 
-void IVText::CollectTokens(const std::string& text, std::set<std::string>& tokens)
+IVText::wStringType IVText::U8ToWide(const u8StringType& u8_string)
 {
-    std::vector<std::string::size_type> wave_sign_positions;
+    wStringType result;
 
-    for (std::string::size_type index = 0; index < text.length(); ++index)
-    {
-        //收集所有'~'的位置
-        if (text[index] == '~')
-            wave_sign_positions.push_back(index);
-    }
+    result.assign(u8_string.begin(), u8_string.end());
+    result.push_back(0);
 
-    //2个'~'为一组生成token
-    for (std::string::size_type wave_pair_index = 0; wave_pair_index < wave_sign_positions.size() / 2; ++wave_pair_index)
-    {
-        auto start_index = wave_sign_positions[wave_pair_index * 2];
-        auto end_index = wave_sign_positions[wave_pair_index * 2 + 1];
-
-        tokens.insert(std::string(text, start_index, end_index - start_index));
-    }
+    return result;
 }
 
-void IVText::FixCharacters(u8StringType& wtext)
+IVText::u8StringType IVText::WideToU8(const wStringType& wide_string)
+{
+    u8StringType result;
+
+    if (!wide_string.empty())
+    {
+        result.assign(wide_string.begin(), wide_string.end() - 1);
+    }
+
+    return result;
+}
+
+void IVText::FixCharacters(wStringType& wtext)
 {
     //bad character in IV stock text: 0x85 0x92 0x94 0x96 0x97 0xA0
     //bad character in EFLC stock text: 0x93
@@ -377,7 +372,7 @@ void IVText::FixCharacters(u8StringType& wtext)
     }
 }
 
-void IVText::LiteralToGame(u8StringType& wtext)
+void IVText::LiteralToGame(wStringType& wtext)
 {
     for (auto& character : wtext)
     {
@@ -393,7 +388,7 @@ void IVText::LiteralToGame(u8StringType& wtext)
     }
 }
 
-void IVText::GameToLiteral(u8StringType& wtext)
+void IVText::GameToLiteral(wStringType& wtext)
 {
     for (auto& character : wtext)
     {
@@ -411,11 +406,18 @@ void IVText::GameToLiteral(u8StringType& wtext)
 
 IVText::wStringType IVText::SpaceCEKB(const u8StringType& u8_text)
 {
-    //单字符token没有宽度，不算
-    //中/英/多字符token相互之间加空格
-    //~PAD_*~
-    //~INPUT_*~
+    //~[a-zA-Z]~不算
+    //~COL_*~不算
+
+    //中/英/token相互之间加空格
+    //~[0-9]~
+    //~ACCEPT~
     //~BLIP_*~
+    //~CANCEL~
+    //~INPUT_*~
+    //~MOUSE~
+    //~MOUSE_WHEEL~
+    //~PAD_*~
 
     return {};
 }
@@ -432,7 +434,6 @@ void IVText::LoadBinary(const PathType& input_binary)
     std::vector<CharType> datas;
 
     m_Data.clear();
-    m_Tokens.clear();
 
     auto tableIter = m_Data.end();
 
@@ -452,7 +453,7 @@ void IVText::LoadBinary(const PathType& input_binary)
 
     for (TableEntry& table : tables)
     {
-        tableIter = m_Data.emplace(table.Name, std::vector<EntryType>()).first;
+        tableIter = m_Data.emplace(table.Name, std::vector<TextEntry>()).first;
 
         file.Seek(table.Offset, BinaryFile::SeekMode::Begin);
 
@@ -473,19 +474,23 @@ void IVText::LoadBinary(const PathType& input_binary)
 
         for (auto& key : keys)
         {
-            u8StringType wtext;
+            TextEntry entry;
+
+            entry.hash = key.Hash;
             auto offset = key.Offset / 2;
 
             while (datas[offset] != 0)
             {
-                wtext += datas[offset];
+                entry.w_string.push_back(datas[offset]);
                 ++offset;
             }
+            entry.w_string.push_back(0);
 
-            FixCharacters(wtext);
-            GameToLiteral(wtext);
+            FixCharacters(entry.w_string);
+            GameToLiteral(entry.w_string);
+            entry.u8_string = WideToU8(entry.w_string);
 
-            tableIter->second.emplace_back(key.Hash, wtext);
+            tableIter->second.emplace_back(std::move(entry));
         }
     }
 }
@@ -510,7 +515,7 @@ void IVText::GenerateTexts(const PathType& output_texts) const
 
         for (auto& entry : table.second)
         {
-            line = fmt::sprintf("0x%08X=%s\n", entry.first, entry.second.cpp_str());
+            line = fmt::sprintf("0x%08X=%s\n", entry.hash, entry.u8_string.cpp_str());
             stream << ';' << line << line << '\n';
         }
 

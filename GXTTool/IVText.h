@@ -3,8 +3,10 @@
 
 struct IVTextTableSorting
 {
+    //保证'MAIN'是第一个
     bool operator()(const std::string& lhs, const std::string& rhs) const
     {
+        //确保两个'MAIN'比较结果是false
         if (rhs == "MAIN")
         {
             return false;
@@ -67,19 +69,26 @@ struct DataBlock
 class IVText
 {
 public:
-    typedef std::uint16_t CharType;
-    typedef std::uint32_t HashType;
-    typedef tiny_utf8::utf8_string u8StringType;
-    typedef std::basic_string<std::uint16_t> wStringType;
-    typedef std::pair<HashType, u8StringType> EntryType;
-    typedef std::pair<std::string, std::vector<EntryType>> TableType;
     typedef std::filesystem::path PathType;
+    typedef std::uint16_t CharType; //宽字符(GXT)类型
+    typedef std::uint32_t HashType; //GXT key类型
+    typedef std::string bStringType; //字节流类型
+    typedef tiny_utf8::utf8_string u8StringType; //转码用
+    typedef std::vector<std::uint16_t> wStringType; //GXT字符串类型(手动补0)
 
-    //不带参数，读取同一目录下GTA4.txt生成汉化补丁相关文件
+    //单条文本的数据
+    struct TextEntry
+    {
+        HashType hash; //key
+        u8StringType u8_string; //文本形式，(trademark用™表示)
+        wStringType w_string;   //gxt形式(trademark用0x99表示)
+    };
+
+    //不带参数，text目录转gxt
     void Process0Arg();
 
-    //文件, 目录，读取GXT文件并存放在指定目录下
-    //目录, 目录，读取文件夹内所有txt生成汉化补丁相关文件
+    //文件, 目录，gxt转文本
+    //目录, 目录，文本转gxt
     void Process2Args(const PathType& arg1, const PathType& arg2);
 
 private:
@@ -88,11 +97,8 @@ private:
 
     static bool IsNativeCharacter(char32_t character);
 
-    //收集文本中需要加到字库的字符
-    void CollectChars(const u8StringType& text);
-
-    //收集文本中的Token
-    void CollectTokens(const std::string& text, std::set<std::string>& tokens);
+    //收集文本中需要加到字库的字符(生成GXT的时候才干的)
+    void CollectChars(const bStringType& text);
 
     void LoadBinary(const PathType& input_binary);
     void LoadText(const PathType& input_text);
@@ -103,19 +109,22 @@ private:
     void GenerateCollection(const PathType& output_text) const;
     void GenerateTable(const PathType& output_binary) const;
 
+    //文本/GXT形式互转
+    static wStringType U8ToWide(const u8StringType& u8_string);
+    static u8StringType WideToU8(const wStringType& wide_string);
+
     //修正原版GXT中的混乱字符
-    static void FixCharacters(u8StringType& wtext);
+    static void FixCharacters(wStringType& wtext);
 
     //标准编码转到游戏编码
-    static void LiteralToGame(u8StringType& wtext);
+    static void LiteralToGame(wStringType& wtext);
 
     //游戏编码转到标准编码
-    static void GameToLiteral(u8StringType& wtext);
+    static void GameToLiteral(wStringType& wtext);
 
-    //在中/英/按键/BLIP之间添加空格(直接转换成写入gxt的状态)
+    //在中/英/按键/BLIP之间添加空格(生成GXT的时候用)
     static wStringType SpaceCEKB(const u8StringType& u8_text);
 
-    std::map<std::string, std::vector<EntryType>, IVTextTableSorting> m_Data;
-    std::set<std::string> m_Tokens;
+    std::map<std::string, std::vector<TextEntry>, IVTextTableSorting> m_Data;
     std::set<char32_t> m_Chars;
 };
