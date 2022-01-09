@@ -145,6 +145,8 @@
     <ClCompile Include="WhmIO.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="HTMLDocument.h" />
+    <ClInclude Include="pgBase.h" />
     <ClInclude Include="rscio.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
