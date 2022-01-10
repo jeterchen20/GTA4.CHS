@@ -1,5 +1,7 @@
 #pragma once
+#include "rscio.h"
 #include "pgBase.h"
+#include "grcTexturePC.h"
 
 enum HtmlNodeType :uint {
     Node_HtmlNode = 0,
@@ -137,10 +139,10 @@ struct HtmlRenderState {
     float               _f18;
     float               _f1C;
     uint                dwBgColor;
-    pgPtr               pBackgroundImage;
+    pgPtr<void>         pBackgroundImage;
     uint                _f28h;
     uint                _f28l;
-    HtmlAttrValue       _f30;   // TODO: background-repeat? 
+    HtmlAttrValue       _f30;
     uint                dwColor;
     HtmlAttrValue       eAlign;
     HtmlAttrValue       eValign;
@@ -188,41 +190,29 @@ struct CHtmlCssDeclaration {
     uint       m_eDataType; // data type (0 - int, 1 - float, .., 3 - color, ..., 6 - unused)    
 };
 
-struct pgPtr_CHtmlNode : pgPtr
+struct pgMaxArray_CHtmlCssDeclaration :pgMaxArray<CHtmlCssDeclaration>
 {
 
 };
 
-struct pgPtr_pgDictionary_grcTexturePC : pgPtr
+struct CHtmlCssSelector;
+struct pgPtr_CHtmlCssSelector :pgPtr<CHtmlCssSelector>
 {
 
 };
 
-struct pgObjectArray_CHtmlNode : pgPtr
-{
-
+struct CHtmlCssSelector {
+    HtmlTag                             m_eTag;
+    pgMaxArray_CHtmlCssDeclaration   m_aDeclarations;
+    pgPtr_CHtmlCssSelector              _fC;
 };
 
-struct pgObjectArray_CHtmlStylesheet : pgPtr
-{
-
-};
-
-//指向char[sCount]
-struct CCharCollection {
-    uint    fixupOffset : 28;
-    uint    fixupType : 4;
-    ushort  sCount;
-    ushort  sSize;
-};
-
-//TODO: 检查继承关系
 struct CHtmlNode
 {
-    uint                    vtbl;
-    HtmlNodeType            m_eNodeType;
-    pgPtr                   m_pParentNode;
-    pgObjectArray_CHtmlNode m_children;
+    uint vtbl;
+    HtmlNodeType m_eNodeType;
+    pgPtr<CHtmlNode> m_pParentNode;
+    pgMaxArray<CHtmlNode> m_children;
     HtmlRenderState m_renderState;
 };
 
@@ -231,39 +221,84 @@ struct CHtmlDataNode :CHtmlNode
     pgPtr_String m_pData;
 };
 
-struct CHtmlElementNode :CHtmlNode
+struct CCharCollection :pgCountArray<char>
+{
+
+};
+
+struct CPtrCollection :pgMaxArray<pgPtr_uint>
+{
+
+};
+
+struct CHtmlTableNode :CHtmlNode
 {
     HtmlTag         m_eHtmlTag;
     pgPtr_String    m_pszTagName;
     CCharCollection m_nodeParam;
+    pgPtr<void>   _fE8;
+    pgPtr<void>   _fEC;
+    pgPtr<void>   _fF0;
+    pgPtr<void>   _fF4;
+    pgPtr<void>   _fF8;
+    DWORD   m_dwCellCount;
+    DWORD   _f100;
 };
 
-struct CHtmlTableElementNode :CHtmlElementNode
+struct CHtmlTableElementNode :CHtmlNode
 {
+    HtmlTag         m_eHtmlTag;
+    pgPtr_String    m_pszTagName;
+    CCharCollection m_nodeParam;
     int    _fE8;
     int    _fEC;
 };
 
-struct CHtmlTableNode :CHtmlElementNode
+struct pgPtr_CHtmlNode :pgPtr<CHtmlNode>
 {
-    pgPtr   _fE8;
-    pgPtr   _fEC;
-    pgPtr   _fF0;
-    pgPtr   _fF4;
-    pgPtr   _fF8;
-    uint   m_dwCellCount;
-    uint   _f100;
+
+};
+
+struct pgSizeArray_CHtmlNode :pgSizeArray<pgPtr_CHtmlNode>
+{
+
+};
+
+struct CHtmlStylesheet;
+
+struct pgPtr_CHtmlStylesheet :pgPtr<CHtmlStylesheet>
+{
+
+};
+
+struct pgMaxArray_CHtmlStylesheet :pgMaxArray<pgPtr_CHtmlStylesheet>
+{
+
+};
+
+struct pgSizeArray_CHtmlCssSelector :pgSizeArray<pgPtr_CHtmlCssSelector>
+{
+
+};
+
+struct CHtmlStylesheet {
+    DWORD           _f0;    // unknown (hash?)
+    pgSizeArray_CHtmlCssSelector   _f4;
+    BYTE            _padC[3];
+    BYTE            _fF;
+    pgPtr_CHtmlStylesheet   m_pNext;
 };
 
 struct CHtmlDocument
 {
-    pgPtr_CHtmlNode                 m_pRootElement;
-    pgPtr                           m_pBody;
-    pgPtr_String                    m_pszTitle;
+    pgPtr_CHtmlNode m_pRootElement;
+    pgPtr<void> m_pBody;
+    pgPtr_String m_pszTitle;
     pgPtr_pgDictionary_grcTexturePC m_pTxd;
-    CPtrCollection                  _f10;
-    pgObjectArray_CHtmlNode         m_childNodes;
-    pgObjectArray_CHtmlStylesheet   m_pStylesheet;
-    uchar                            _pad[3];
-    uchar                            _f2B;
+    CPtrCollection _f10;
+    pgSizeArray_CHtmlNode m_childNodes;
+    pgMaxArray_CHtmlStylesheet m_pStylesheet;
+    uchar pad[3];
+    uchar _f2B;
 };
+VALIDATE_SIZE(CHtmlDocument, 0x2C);

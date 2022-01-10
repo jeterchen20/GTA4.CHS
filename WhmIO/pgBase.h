@@ -1,68 +1,86 @@
 #pragma once
+#include <cstdio>
+#include <iterator>
+#include <string>
+#include <vector>
+#include <stdexcept>
+#include <d3d9.h>
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned char uchar;
+typedef std::vector<uchar> buffer_type;
 
-//SparkIV.ResourceFile.cs
-enum ResourceType :uint
+enum ptr_element_type :uint
 {
-    TextureXBOX = 0x7, // xtd
-    ModelXBOX = 0x6D, // xdr
-    Generic = 0x01, // xhm / xad (Generic files as rsc?)
-    Bounds = 0x20, // xbd, wbd
-    Particles = 0x24, // xpfl
-    Particles2 = 0x1B, // xpfl
-
-    Texture = 0x8, // wtd
-    Model = 0x6E, // wdr
-    ModelFrag = 0x70, //wft
+    Cpu_Type = 5,
+    Gpu_Type = 6
 };
 
-enum CompressionType :ushort
-{
-    LZX = 0xF505,
-    Deflate = 0xDA78
-};
-
-struct RSCHeader
-{
-    uint magic;
-    ResourceType rtype;
-    uint flags;
-    //CompressionType ctype;
-};
-
-//type为5时，在文件中的Offset位置放着指向的对象，否则不读
-//以下所有都是一样的逻辑
+template <typename T>
 struct pgPtr
 {
-    int offset : 28;
-    int type : 4;
+    uint offset : 28; //低位
+    uint type : 4;    //高位，5表示内存内容(对象本身)，6表示显存内容(贴图，vertex等等)
+
+    T* get_pointer(buffer_type& buffer) const
+    {
+        return reinterpret_cast<T*>(&buffer[offset]);
+    }
+
+    const T* get_pointer(const buffer_type& buffer) const
+    {
+        return reinterpret_cast<const T*>(&buffer[offset]);
+    }
+
+    template <typename CustomType>
+    CustomType* get_pointer(buffer_type& buffer) const
+    {
+        return reinterpret_cast<CustomType*>(&buffer[offset]);
+    }
+
+    template <typename CustomType>
+    const CustomType* get_pointer(const buffer_type& buffer) const
+    {
+        return reinterpret_cast<const CustomType*>(&buffer[offset]);
+    }
 };
 
-//一个C风格字符串
-struct pgPtr_String : pgPtr
+//指向一个C String
+struct pgPtr_String : pgPtr<char>
+{
+    std::string read(const buffer_type &buffer) const
+    {
+        return std::string(reinterpret_cast<const char *>(&buffer[offset]));
+    }
+};
+
+//指向一个DWORD
+struct pgPtr_uint : pgPtr<uint>
 {
 
 };
 
-//一个DWORD
-struct pgPtr_DWORD : pgPtr
+//数组，占据的空间是size和count的较大者
+template <typename T>
+struct pgMaxArray : pgPtr<T>
 {
-
+    ushort count;
+    ushort size;
 };
 
-//一个pgPtr_DWORD数组，占据的空间是sCount和sSize的较大者*4
-struct CPtrCollection : pgPtr
+//一个数组，占据的空间是count
+template <typename T>
+struct pgCountArray : pgPtr<T>
 {
-    ushort  sCount;
-    ushort  sSize;
+    ushort count;
+    ushort size;
 };
 
-//一个pgPtr数组，占据的空间是size个对象的大小
-struct pgObjectArray : pgPtr
+//一个数组，占据的空间是size
+template <typename T>
+struct pgSizeArray : pgPtr<T>
 {
-    ushort  count;
-    ushort  size;
+    ushort count;
+    ushort size;
 };

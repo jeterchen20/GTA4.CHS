@@ -2,6 +2,7 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 #define NOMINMAX
+
 #pragma warning(disable:4244)
 
 #define VALIDATE_SIZE(expr, size) static_assert(sizeof(expr) == size, "Wrong size.")
@@ -37,11 +38,13 @@
 
 //vcpkg
 #include <fmt/printf.h>
+#include <zlib.h>
 
 typedef std::uint16_t GTAChar;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
+typedef unsigned long ulong;
 
 struct CRect
 {

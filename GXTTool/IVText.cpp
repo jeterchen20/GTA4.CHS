@@ -167,7 +167,7 @@ void IVText::LoadTexts(const PathType& input_texts)
 
 void IVText::GenerateBinary(const PathType& output_binary) const
 {
-    BinaryFile file(output_binary, BinaryFile::OpenMode::WriteOnly);
+    BinaryFile file(output_binary, "wb");
 
     std::vector<uint8_t> buffer;
     long writePostion;
@@ -242,7 +242,7 @@ void IVText::GenerateBinary(const PathType& output_binary) const
 
         dataBlock.Size = datas.size() * 2;
 
-        file.Seek(writePostion, BinaryFile::SeekMode::Begin);
+        file.Seek(writePostion, SEEK_SET);
 
         if (table.first == "MAIN")
         {
@@ -260,7 +260,7 @@ void IVText::GenerateBinary(const PathType& output_binary) const
         writePostion = file.Tell();
     }
 
-    file.Seek(4 + 8, BinaryFile::SeekMode::Begin);
+    file.Seek(4 + 8, SEEK_SET);
     file.WriteArray(tables);
 }
 
@@ -310,7 +310,7 @@ void IVText::GenerateTable(const PathType& output_binary) const
         ++data.pos.column;
     }
 
-    BinaryFile stream(output_binary, BinaryFile::OpenMode::WriteOnly);
+    BinaryFile stream(output_binary, "wb");
     stream.WriteArray(datas);
 }
 
@@ -437,7 +437,7 @@ void IVText::LoadBinary(const PathType& input_binary)
 
     auto tableIter = m_Data.end();
 
-    BinaryFile file(input_binary, BinaryFile::OpenMode::ReadOnly);
+    BinaryFile file(input_binary, "rb");
 
     if (!file)
     {
@@ -455,7 +455,7 @@ void IVText::LoadBinary(const PathType& input_binary)
     {
         tableIter = m_Data.emplace(table.Name, std::vector<TextEntry>()).first;
 
-        file.Seek(table.Offset, BinaryFile::SeekMode::Begin);
+        file.Seek(table.Offset, SEEK_SET);
 
         if (strcmp(table.Name, "MAIN") != 0)
         {

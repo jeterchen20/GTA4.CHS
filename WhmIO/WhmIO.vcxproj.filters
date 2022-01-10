@@ -32,5 +32,14 @@
     <ClInclude Include="pgBase.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="grcTexturePC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="index.whm" />
+    <None Include="iv-types.bth" />
+    <None Include="iv-whm.bt" />
+    <None Include="index.uncompressed" />
   </ItemGroup>
 </Project>
