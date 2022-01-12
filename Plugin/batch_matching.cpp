@@ -39,7 +39,12 @@ void batch_matching::perform_search()
         }
     };
 
-    std::vector search_threads(thread_count, std::thread(search_proc));
+    std::array<std::thread, thread_count> search_threads;
+
+    for (auto& thread : search_threads)
+    {
+        thread = std::thread(search_proc);
+    }
 
     for (auto& thread : search_threads)
     {
