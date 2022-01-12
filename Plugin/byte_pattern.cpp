@@ -19,7 +19,7 @@ memory_pointer byte_pattern::get(size_t index) const
     }
 }
 
-std::vector<memory_pointer> byte_pattern::get() const
+byte_pattern::result_type byte_pattern::get() const
 {
     return _results;
 }

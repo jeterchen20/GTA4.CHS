@@ -1,14 +1,14 @@
 #include "rscio.h"
 
-std::vector<uchar> rscio::read_rsc(const std::filesystem::path& filename)
+rsc_blocks rscio::read_rsc(const std::filesystem::path& filename)
 {
-    std::vector<uchar> uncompressed_bytes;
+    rsc_blocks blocks;
     BinaryFile file(filename, "rb");
 
     if (file)
     {
-        std::vector<uchar> compressed_bytes;
-        RscHeader header;
+        std::vector<uchar> compressed_bytes, uncompressed_bytes;
+        rsc_header header;
 
         file.Seek(0, SEEK_END);
         auto compressed_size = file.Tell() - sizeof(header);
@@ -16,40 +16,29 @@ std::vector<uchar> rscio::read_rsc(const std::filesystem::path& filename)
         file.Seek(0, SEEK_SET);
         file.Read(header);
 
-        auto cpu_size = header.flags.GetCpuSize();
-        auto gpu_size = header.flags.GetGpuSize();
-        ulong uncompressed_size = cpu_size + gpu_size;
+        std::cout << fmt::sprintf("virtual page size:%u, virtual size: %u", header.flags.GetVirtualPageSize(), header.flags.GetVirtualPageSize()) << std::endl;
+        std::cout << fmt::sprintf("physical page size:%u, physical size: %u", header.flags.GetPhysicalPageSize(), header.flags.GetPhysicalPageSize()) << std::endl;
+        std::cout << std::endl;
+        return blocks;
+
+        auto virtual_size = header.flags.GetVirtualSize();
+        auto physical_size = header.flags.GetPhysicalSize();
+        ulong uncompressed_size = virtual_size + physical_size;
+        blocks.virtual_block.resize(virtual_size);
+        blocks.physical_block.resize(physical_size);
         uncompressed_bytes.resize(uncompressed_size);
         file.Read(compressed_bytes.data(), compressed_size);
 
         uncompress(uncompressed_bytes.data(), &uncompressed_size, compressed_bytes.data(), compressed_size);
+        //将解压后的数据按照大小分块
+        std::memcpy(blocks.virtual_block.data(), compressed_bytes.data(), virtual_size);
+        std::memcpy(blocks.physical_block.data(), compressed_bytes.data() + virtual_size, physical_size);
     }
 
-    return uncompressed_bytes;
+    return blocks;
 }
 
-void rscio::write_rsc(const std::vector<uchar>& bytes, const std::filesystem::path& filename, uint virtual_size, uint physical_size)
+void rscio::write_rsc(const rsc_blocks& blocks, const std::filesystem::path& filename)
 {
-    std::vector<uchar> compressed;
-    auto compressed_size = compressBound(bytes.size());
-    compressed.resize(compressed_size);
-    compress(compressed.data(), &compressed_size, bytes.data(), bytes.size());
 
-    RscHeader header;
-
-    //构造header
-    header.magic = 0x05435352; //"RSC"5
-    header.type = rscio::RscType::Generic;
-    header.flags.u.flags = 0;
-
-    //TODO: 根据数据大小计算flags，单位页大小用原文件的值
-
-    BinaryFile file;
-    file.Open(filename, "wb");
-
-    if (file)
-    {
-        file.Write(header);
-        file.Write(compressed.data(), compressed_size);
-    }
 }

@@ -29,10 +29,16 @@
 #include <iterator>
 #include <algorithm>
 #include <chrono>
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <variant>
+
 #include "injector/hooking.hpp"
 #include "injector/calling.hpp"
 #include "injector/injector.hpp"
 #include "BinaryFile.hpp"
+#include "MemoryFile.hpp"
 
 #include "../common/tinyutf8.h"
 
@@ -64,3 +70,27 @@ struct CharacterData
     GTAChar code;
     CharacterPos pos;
 };
+
+union stack_var
+{
+    int i;
+    void* p;
+    float f;
+    unsigned int u;
+
+    explicit stack_var(int val) { i = val; }
+    explicit stack_var(void* val) { p = val; }
+    explicit stack_var(float val) { f = val; }
+    explicit stack_var(unsigned int val) { u = val; }
+
+    stack_var& operator=(int val) { i = val; }
+    stack_var& operator=(void* val) { p = val; }
+    stack_var& operator=(float val) { f = val; }
+    stack_var& operator=(unsigned int val) { u = val; }
+
+    operator int() const { return i; }
+    operator void* () const { return p; }
+    operator float() const { return f; }
+    operator unsigned int() const { return u; }
+};
+VALIDATE_SIZE(stack_var, 4);

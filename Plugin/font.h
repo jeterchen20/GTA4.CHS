@@ -116,6 +116,7 @@ public:
     virtual bool ProcessStringPart(float x, float y, const GTAChar* str_beg, const GTAChar* str_end, float spaces_width) const;
     virtual bool Func8() const;
 };
+VALIDATE_SIZE(CFontStringProcess, 4);
 
 class CFont
 {

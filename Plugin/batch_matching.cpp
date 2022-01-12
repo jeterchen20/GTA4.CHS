@@ -1,11 +1,8 @@
 #include "batch_matching.h"
 
-#include <thread>
-#include <future>
-
 void batch_matching::register_step(const char* pattern, std::size_t desired_size, callback_type callback)
 {
-    _steps.emplace_back(pattern, desired_size, callback, container_type{});
+    _steps.emplace_back(pattern, desired_size, callback, byte_pattern::result_type{});
 }
 
 void batch_matching::clear()
@@ -15,21 +12,36 @@ void batch_matching::clear()
 
 void batch_matching::perform_search()
 {
-    std::vector<std::thread> pattern_threads;
+    std::atomic_flag tasks_fetch_flag = ATOMIC_FLAG_INIT;
+    std::size_t next_step_index = 0;
 
-    for (auto& step : _steps)
+    auto search_proc = [&tasks_fetch_flag, &next_step_index, this]()
     {
-        auto search_proc = [&step]() {
-            byte_pattern pattern_obj;
+        byte_pattern pattern_obj;
 
-            pattern_obj.find_pattern(std::get<0>(step).c_str());
-            std::get<container_type>(step) = pattern_obj.get();
-        };
+        while (true)
+        {
+            if (tasks_fetch_flag.test_and_set())
+                continue;
 
-        pattern_threads.emplace_back(search_proc);
-    }
+            if (next_step_index >= _steps.size())
+            {
+                tasks_fetch_flag.clear();
+                return;
+            }
 
-    for (auto& thread : pattern_threads)
+            auto my_index = next_step_index;
+            ++next_step_index;
+            tasks_fetch_flag.clear();
+
+            pattern_obj.find_pattern(std::get<0>(_steps[my_index]).c_str());
+            std::get<byte_pattern::result_type>(_steps[my_index]) = pattern_obj.get();
+        }
+    };
+
+    std::vector search_threads(thread_count, std::thread(search_proc));
+
+    for (auto& thread : search_threads)
     {
         thread.join();
     }
@@ -40,7 +52,7 @@ bool batch_matching::is_all_succeed() const
     return std::all_of(_steps.begin(), _steps.end(),
         [](const step_type& step)
         {
-            return std::get<std::size_t>(step) == std::get<container_type>(step).size();
+            return std::get<std::size_t>(step) == std::get<byte_pattern::result_type>(step).size();
         });
 }
 
@@ -48,6 +60,6 @@ void batch_matching::run_callbacks()
 {
     for (auto& step : _steps)
     {
-        std::get<callback_type>(step)(std::get<container_type>(step));
+        std::get<callback_type>(step)(std::get<byte_pattern::result_type>(step));
     }
 }

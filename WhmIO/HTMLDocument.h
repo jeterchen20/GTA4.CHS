@@ -190,7 +190,7 @@ struct CHtmlCssDeclaration {
     uint       m_eDataType; // data type (0 - int, 1 - float, .., 3 - color, ..., 6 - unused)    
 };
 
-struct pgMaxArray_CHtmlCssDeclaration :pgMaxArray<CHtmlCssDeclaration>
+struct pgMaxArray_CHtmlCssDeclaration :pgObjectArray<CHtmlCssDeclaration>
 {
 
 };
@@ -209,24 +209,25 @@ struct CHtmlCssSelector {
 
 struct CHtmlNode
 {
-    uint vtbl;
+    virtual ~CHtmlNode() = default;
+
     HtmlNodeType m_eNodeType;
     pgPtr<CHtmlNode> m_pParentNode;
-    pgMaxArray<CHtmlNode> m_children;
+    pgObjectArray<CHtmlNode> m_children;
     HtmlRenderState m_renderState;
 };
 
 struct CHtmlDataNode :CHtmlNode
 {
-    pgPtr_String m_pData;
+    pgString m_pData;
 };
 
-struct CCharCollection :pgCountArray<char>
+struct CCharCollection :pgObjectArray<char>
 {
 
 };
 
-struct CPtrCollection :pgMaxArray<pgPtr_uint>
+struct CPtrCollection :pgPtrArray<uint>
 {
 
 };
@@ -234,7 +235,7 @@ struct CPtrCollection :pgMaxArray<pgPtr_uint>
 struct CHtmlTableNode :CHtmlNode
 {
     HtmlTag         m_eHtmlTag;
-    pgPtr_String    m_pszTagName;
+    pgString    m_pszTagName;
     CCharCollection m_nodeParam;
     pgPtr<void>   _fE8;
     pgPtr<void>   _fEC;
@@ -248,7 +249,7 @@ struct CHtmlTableNode :CHtmlNode
 struct CHtmlTableElementNode :CHtmlNode
 {
     HtmlTag         m_eHtmlTag;
-    pgPtr_String    m_pszTagName;
+    pgString    m_pszTagName;
     CCharCollection m_nodeParam;
     int    _fE8;
     int    _fEC;
@@ -259,7 +260,7 @@ struct pgPtr_CHtmlNode :pgPtr<CHtmlNode>
 
 };
 
-struct pgSizeArray_CHtmlNode :pgSizeArray<pgPtr_CHtmlNode>
+struct pgSizeArray_CHtmlNode :pgPtrArray<CHtmlNode>
 {
 
 };
@@ -271,12 +272,12 @@ struct pgPtr_CHtmlStylesheet :pgPtr<CHtmlStylesheet>
 
 };
 
-struct pgMaxArray_CHtmlStylesheet :pgMaxArray<pgPtr_CHtmlStylesheet>
+struct pgMaxArray_CHtmlStylesheet :pgPtrArray<CHtmlStylesheet>
 {
 
 };
 
-struct pgSizeArray_CHtmlCssSelector :pgSizeArray<pgPtr_CHtmlCssSelector>
+struct pgSizeArray_CHtmlCssSelector :pgPtrArray<CHtmlCssSelector>
 {
 
 };
@@ -292,13 +293,17 @@ struct CHtmlStylesheet {
 struct CHtmlDocument
 {
     pgPtr_CHtmlNode m_pRootElement;
-    pgPtr<void> m_pBody;
-    pgPtr_String m_pszTitle;
+    pgPtr_CHtmlNode m_pBody;
+    pgString m_pszTitle;
     pgPtr_pgDictionary_grcTexturePC m_pTxd;
-    CPtrCollection _f10;
+    CPtrCollection _f10; //有可能是全0，也要处理
     pgSizeArray_CHtmlNode m_childNodes;
     pgMaxArray_CHtmlStylesheet m_pStylesheet;
     uchar pad[3];
     uchar _f2B;
+
+    void ReadDocument(MemoryFile& file);
+    void WriteDocument(MemoryFile& file);
+    //获得所有文本数据
+    std::vector<std::string*> GetStringList();
 };
-VALIDATE_SIZE(CHtmlDocument, 0x2C);

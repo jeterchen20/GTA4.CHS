@@ -9,13 +9,27 @@ class BinaryFile
 {
 public:
     BinaryFile() :m_pFile(nullptr) {}
+    BinaryFile(const BinaryFile&) = delete;
+    BinaryFile& operator=(const BinaryFile&) = delete;
+
+    BinaryFile(BinaryFile&& rv) noexcept
+        :BinaryFile()
+    {
+        std::exchange(m_pFile, rv.m_pFile);
+    }
+
+    BinaryFile& operator=(BinaryFile&& rv) noexcept
+    {
+        Close();
+
+        std::exchange(m_pFile, rv.m_pFile);
+    }
 
     BinaryFile(const std::filesystem::path& filename, const char* mode)
         :BinaryFile()
     {
         Open(filename, mode);
     }
-
 
     bool Open(const std::filesystem::path& filename, const char* mode)
     {

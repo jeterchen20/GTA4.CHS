@@ -21,6 +21,15 @@
     <ClCompile Include="rscio.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="grcTexturePC.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pgBase.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HTMLDocument.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="rscio.h">
@@ -33,6 +42,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="grcTexturePC.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="rsc_header.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

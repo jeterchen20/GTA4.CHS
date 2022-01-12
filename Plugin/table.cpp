@@ -6,12 +6,12 @@ void CTable::LoadTable(const std::filesystem::path& filename)
 {
     std::vector<CharacterData> buffer;
 
-    BinaryFile file(filename, BinaryFile::OpenMode::ReadOnly);
+    BinaryFile file(filename,"rb");
 
     m_Table.clear();
-    file.Seek(0, BinaryFile::SeekMode::End);
+    file.Seek(0, SEEK_END);
     auto size = file.Tell();
-    file.Seek(0, BinaryFile::SeekMode::Begin);
+    file.Seek(0, SEEK_SET);
     file.ReadArray(size / sizeof(CharacterData), buffer);
 
     m_Table.reserve(buffer.size() * 2);

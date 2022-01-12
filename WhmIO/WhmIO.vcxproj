@@ -85,6 +85,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="grcTexturePC.cpp" />
+    <ClCompile Include="HTMLDocument.cpp" />
+    <ClCompile Include="pgBase.cpp" />
     <ClCompile Include="rscio.cpp" />
     <ClCompile Include="WhmIO.cpp" />
   </ItemGroup>
@@ -93,6 +96,7 @@
     <ClInclude Include="pgBase.h" />
     <ClInclude Include="rscio.h" />
     <ClInclude Include="grcTexturePC.h" />
+    <ClInclude Include="rsc_header.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="index.uncompressed" />

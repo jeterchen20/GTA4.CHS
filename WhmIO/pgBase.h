@@ -5,11 +5,11 @@
 #include <vector>
 #include <stdexcept>
 #include <d3d9.h>
+#include "../common/MemoryFile.hpp"
 
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned char uchar;
-typedef std::vector<uchar> buffer_type;
 
 enum ptr_element_type :uint
 {
@@ -17,70 +17,101 @@ enum ptr_element_type :uint
     Gpu_Type = 6
 };
 
+struct pgStreamable
+{
+
+
+};
+
+struct datBase :pgStreamable
+{
+    virtual ~datBase() = default;
+};
+
+//二进制文件中的指针
 template <typename T>
 struct pgPtr
 {
-    uint offset : 28; //低位
-    uint type : 4;    //高位，5表示内存内容(对象本身)，6表示显存内容(贴图，vertex等等)
-
-    T* get_pointer(buffer_type& buffer) const
+    union
     {
-        return reinterpret_cast<T*>(&buffer[offset]);
-    }
+        struct
+        {
+            uint offset : 28; //低位
+            ptr_element_type type : 4;    //高位，5表示内存内容(对象本身)，6表示显存内容(贴图，vertex等等)，显存内容不需要读
+        };
 
-    const T* get_pointer(const buffer_type& buffer) const
-    {
-        return reinterpret_cast<const T*>(&buffer[offset]);
-    }
+        uint p;
+    }u;
+    VALIDATE_SIZE(u, 4);
 
-    template <typename CustomType>
-    CustomType* get_pointer(buffer_type& buffer) const
+    T read(MemoryFile& file) const
     {
-        return reinterpret_cast<CustomType*>(&buffer[offset]);
-    }
+        T result;
 
-    template <typename CustomType>
-    const CustomType* get_pointer(const buffer_type& buffer) const
-    {
-        return reinterpret_cast<const CustomType*>(&buffer[offset]);
+        file.Seek(u.offset, SEEK_SET);
+        file.Read(result);
+        return result;
     }
 };
 
 //指向一个C String
-struct pgPtr_String : pgPtr<char>
+struct pgString : pgPtr<char>
 {
-    std::string read(const buffer_type &buffer) const
+    std::string read(MemoryFile& file) const
     {
-        return std::string(reinterpret_cast<const char *>(&buffer[offset]));
+        std::string result;
+
+        file.Seek(u.offset, SEEK_SET);
+
+        while (true)
+        {
+            char c;
+
+            file.Read(c);
+
+            if (c == 0)
+                break;
+
+            result.push_back(c);
+        }
+
+        return result;
     }
 };
 
-//指向一个DWORD
-struct pgPtr_uint : pgPtr<uint>
+//对象数组
+template <typename T>
+struct pgObjectArray : pgPtr<T>
 {
+    ushort count; //有效元素个数(std::vector的size)
+    ushort size;  //占据空间个数(std::vector的capacity)
 
+    std::vector<T> read(MemoryFile& file) const
+    {
+        std::vector<T> result;
+
+        //假设T是可以直接memcpy的类型
+        file.Seek(u.offset);
+        result.resize(count);
+        file.ReadArray(count, result);
+    }
 };
 
-//数组，占据的空间是size和count的较大者
+//对象指针数组
 template <typename T>
-struct pgMaxArray : pgPtr<T>
+struct pgPtrArray : pgObjectArray<pgPtr<T>>
 {
-    ushort count;
-    ushort size;
-};
+    std::vector<T> read(MemoryFile& file) const
+    {
+        std::vector<T> result;
 
-//一个数组，占据的空间是count
-template <typename T>
-struct pgCountArray : pgPtr<T>
-{
-    ushort count;
-    ushort size;
-};
+        auto ptrs = pgObjectArray<T>::read(file);
 
-//一个数组，占据的空间是size
-template <typename T>
-struct pgSizeArray : pgPtr<T>
-{
-    ushort count;
-    ushort size;
+        for (auto &ptr:ptrs)
+        {
+            result.push_back(ptr.read());
+        }
+
+        return result;
+    }
 };
