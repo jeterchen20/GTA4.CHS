@@ -4,11 +4,12 @@ void IVText::Process0Arg()
 {
     //test for SpaceCEKB
     std::wstring test_string = L"你~y~的~1~~MOUSE~不见了englisj~BLIP_14~中文~s~~MOUSE_WHEEL~啊。";
-    wStringType w_string;
 
+    wStringType w_string;
     w_string.assign(test_string.begin(), test_string.end());
+    w_string.push_back(0);
+
     auto transformed_w_string = IVText::SpaceCEKB(w_string);
-    auto pointer_for_debug = reinterpret_cast<const wchar_t*>(transformed_w_string.data());
 
     //text文件夹->gxt
     m_Data.clear();
@@ -437,11 +438,12 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
     //~PAD_*~
     enum class span_type
     {
-        SPAN_SPACE,
-        SPAN_ZERO_WIDTH_TOKEN,
-        SPAN_DRAWABLE_TOKEN,
-        SPAN_NATIVE_CHAR,
-        SPAN_CN_CHAR
+        SPAN_SPACE, //一个空格
+        SPAN_ZERO_WIDTH_TOKEN, //一个颜色类token
+        SPAN_DRAWABLE_TOKEN, //一个按键/雷达之类的token
+        SPAN_VALUE_PRINT_TOKEN, //数值格式化token，目前只有~1~
+        SPAN_NATIVE_WORD, //一个英语单词('~1~'被当作一个英语字符)
+        SPAN_CN_WORD //一个汉字
     };
 
     wStringType result;
@@ -451,53 +453,89 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
     std::vector<std::pair<span_type, std::span<wchar_t>>> string_spans;
 
     //先对文本进行分词
-    while (string_index < w_text.size())
+    while (string_index < w_string_for_view.size())
     {
-        auto c = w_text[string_index];
+        auto c = w_string_for_view[string_index];
 
         if (c == 0)
             break;
 
         if (c == '~')
         {
-            //Token
+            //一个Token
             auto token_end_index = string_index + 1;
-            while (w_text[token_end_index] != '~')
+            while (w_string_for_view[token_end_index] != '~')
             {
                 ++token_end_index;
             }
-            string_spans.emplace_back(span_type::SPAN_DRAWABLE_TOKEN, std::span(&w_text[string_index], token_end_index - string_index));
 
+            //~之间内容的长度
+            auto token_string_length = token_end_index - string_index - 1;
+            //基于已知的token内容简化逻辑
+            if (token_string_length > 0)
+            {
+                if (token_string_length == 1)
+                {
+                    string_spans.emplace_back(
+                        w_string_for_view[string_index + 1] == '1' ?
+                        span_type::SPAN_VALUE_PRINT_TOKEN ://是~1~
+                        span_type::SPAN_ZERO_WIDTH_TOKEN, //是~s~等单字符Token
+                        std::span(&w_string_for_view[string_index], token_string_length + 2));
+                }
+                else
+                {
+                    if (w_string_for_view[string_index + 1] == 'C' && w_string_for_view[string_index + 2] == 'O')
+                    {
+                        //~COL_*~类型
+                        string_spans.emplace_back(
+                            span_type::SPAN_ZERO_WIDTH_TOKEN,
+                            std::span(&w_string_for_view[string_index], token_string_length + 2));
+                    }
+                    else
+                    {
+                        //其他有宽度的类型
+                        string_spans.emplace_back(
+                            span_type::SPAN_DRAWABLE_TOKEN,
+                            std::span(&w_string_for_view[string_index], token_string_length + 2));
+                    }
+                }
+            }
+
+            //跳过第二个'~'
+            string_index = token_end_index + 1;
         }
         else if (c == ' ')
         {
-            //空格
-            string_spans.emplace_back(span_type::SPAN_SPACE, std::span(&w_text[string_index], 1));
+            //一个空格
+            string_spans.emplace_back(span_type::SPAN_SPACE, std::span(&w_string_for_view[string_index], 1));
             ++string_index;
         }
         else if (IsNativeCharacter(c))
         {
-            //非汉字(英语)字符
-            string_spans.emplace_back(span_type::SPAN_NATIVE_CHAR, std::span(&w_text[string_index], 1));
-            ++string_index;
+            //一个英语单词
+            //搜索可能剩余的英语单词
+            auto word_end_index = string_index + 1;
+            while (IsNormalNativeChar(w_string_for_view[word_end_index]))
+            {
+                ++word_end_index;
+            }
+
+            string_spans.emplace_back(span_type::SPAN_NATIVE_WORD, std::span(&w_string_for_view[string_index], word_end_index - string_index));
+            string_index = word_end_index;
         }
         else
         {
-            //汉字
-            string_spans.emplace_back(span_type::SPAN_CN_CHAR, std::span(&w_text[string_index], 1));
+            //一个汉字
+            string_spans.emplace_back(span_type::SPAN_CN_WORD, std::span(&w_string_for_view[string_index], 1));
             ++string_index;
         }
     }
 
-    //然后根据前后span的类型插入空格
-    std::size_t span_index = 0;
+    //然后根据前后span的类型决定插入空格
+    auto span_index = 0;
     for (; span_index < string_spans.size(); ++span_index)
     {
-        if (span_index == 0)
-        {
-            std::copy(string_spans[span_index].second.begin(), string_spans[span_index].second.end(), std::back_inserter(result));
-            continue;
-        }
+
     }
 
     //result.push_back(0);

@@ -104,3 +104,13 @@ inline std::filesystem::path relative_to_executable(HMODULE m, const std::filesy
     std::filesystem::path cpp_path{ c_path };
     return cpp_path.parent_path() / rest;
 }
+
+inline bool IsNativeChar(GTAChar c)
+{
+    return c < 0x100;
+}
+
+inline bool IsNormalNativeChar(GTAChar c)
+{
+    return (c < 0x100) && (c != 0) && (c != ' ') && (c != '~');
+}

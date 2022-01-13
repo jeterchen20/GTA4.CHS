@@ -123,8 +123,6 @@ class CFont
 public:
     static void* __fastcall LoadTextureCB(void*, int, uint);
 
-    static bool IsNaiveCharacter(GTAChar chr);
-
     static float GetCharacterSizeNormalDispatch(GTAChar chr);
     static float GetCHSCharacterSizeNormal();
 

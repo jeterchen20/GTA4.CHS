@@ -13,11 +13,6 @@ static const float fRatio = 4.0f;
 
 static void* pChsFont;
 
-bool CFont::IsNaiveCharacter(GTAChar chr)
-{
-    return chr < 0x100;
-}
-
 void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
 {
     void* result = CGame::Dictionary_GetElementByKey(pDictionary, hash);
@@ -46,7 +41,7 @@ const GTAChar* CFont::SkipWord(const GTAChar* text)
             break;
         }
 
-        if (!IsNaiveCharacter(chr))
+        if (!IsNativeChar(chr))
         {
             if (current == begin)
             {
@@ -90,7 +85,7 @@ __declspec(naked) void CFont::GetStringWidthHook()
         cmp ax, ' ';
         jz space;
         push eax;
-        call IsNaiveCharacter;
+        call IsNativeChar;
         add esp, 4;
         test al, al;
         movzx eax, word ptr[esi];
@@ -143,7 +138,7 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
         if (chr == 0)
             break;
 
-        bool is_chinese_char = IsNaiveCharacter(chr);
+        bool is_chinese_char = IsNativeChar(chr);
 
         if (chr == ' ' && !get_all)
             break;
@@ -834,7 +829,7 @@ float CFont::GetCHSCharacterSizeNormal()
 
 float CFont::GetCharacterSizeNormalDispatch(GTAChar chr)
 {
-    if (IsNaiveCharacter(chr + 0x20))
+    if (IsNativeChar(chr + 0x20))
     {
         return CGame::Font_GetCharacterSizeNormal(chr);
     }
@@ -858,7 +853,7 @@ float CFont::GetCHSCharacterSizeDrawing(bool use_extra_width)
 
 float CFont::GetCharacterSizeDrawingDispatch(GTAChar chr, bool use_extra_width)
 {
-    if (IsNaiveCharacter(chr + 0x20))
+    if (IsNativeChar(chr + 0x20))
     {
         return CGame::Font_GetCharacterSizeDrawing(chr, use_extra_width);
     }
@@ -919,7 +914,7 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
 
 void CFont::PrintCharDispatch(float x, float y, GTAChar chr, bool buffered)
 {
-    if (CGame::Addresses.pFont_RenderState->TokenType != 0 || IsNaiveCharacter(chr + 0x20))
+    if (CGame::Addresses.pFont_RenderState->TokenType != 0 || IsNativeChar(chr + 0x20))
     {
         CGame::Font_PrintChar(x, y, chr, buffered);
     }

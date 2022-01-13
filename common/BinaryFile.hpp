@@ -77,14 +77,14 @@ public:
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile&> Read(T& object)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> Read(T& object)
     {
         Read(&object, sizeof(object));
         return *this;
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile&> ReadArray(std::size_t count, std::vector<T>& objects)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> ReadArray(std::size_t count, std::vector<T>& objects)
     {
         objects.resize(count);
         Read(objects.data(), sizeof(T) * count);
@@ -98,14 +98,14 @@ public:
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile&> Write(const T& object)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> Write(const T& object)
     {
         Write(&object, sizeof(object));
         return *this;
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile&> WriteArray(const std::vector<T>& objects)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> WriteArray(const std::vector<T>& objects)
     {
         Write(objects.data(), sizeof(T) * objects.size());
         return *this;
