@@ -9,9 +9,9 @@ static const char* __stdcall GetTextFileName(int)
     return "CHINESE.GXT";
 }
 
-static void RegisterPatchSteps(batch_matching &batch_matcher)
+static void RegisterPatchSteps(batch_matching& batch_matcher)
 {
-    //变量和函数的地址
+    //获得变量和函数的地址
     batch_matcher.register_step("A1 ? ? ? ? 80 7C 24 08 00", 1, [](const byte_pattern::result_type& addresses)
         {
             CGame::Addresses.pGraphics_SetRenderState = addresses[0].p();
@@ -96,16 +96,22 @@ static void RegisterPatchSteps(batch_matching &batch_matcher)
         });
 
     //GetStringWidth
-    batch_matcher.register_step("B8 B4 10 00 00", 1, [](const byte_pattern::result_type& addresses)
+    batch_matcher.register_step("0F B7 06 83 F8 20", 1, [](const byte_pattern::result_type& addresses)
         {
-            injector::MakeJMP(addresses[0].i(-6), CFont::GetStringWidth);
+            injector::MakeCALL(addresses[0].i(), CFont::GetStringWidthHook);
         });
 
-    //ProcessString
-    batch_matcher.register_step("81 EC 8C 0A 00 00", 1, [](const byte_pattern::result_type& addresses)
-        {
-            injector::MakeJMP(addresses[0].i(), CFont::ProcessString);
-        });
+    //替换GetStringWidth函数
+    //batch_matcher.register_step("B8 B4 10 00 00", 1, [](const byte_pattern::result_type& addresses)
+    //    {
+    //        injector::MakeJMP(addresses[0].i(-6), CFont::GetStringWidth);
+    //    });
+
+    //替换ProcessString函数
+    //batch_matcher.register_step("81 EC 8C 0A 00 00", 1, [](const byte_pattern::result_type& addresses)
+    //    {
+    //        injector::MakeJMP(addresses[0].i(), CFont::ProcessString);
+    //    });
 
     //获取字符宽度
     batch_matcher.register_step("83 C0 E0 50 E8 ? ? ? ? D9 5C 24", 2, [](const byte_pattern::result_type& addresses)
@@ -138,8 +144,10 @@ static void RegisterPatchSteps(batch_matching &batch_matcher)
             injector::MakeCALL(addresses[0].i(5), CFont::PrintCharDispatch);
         });
 
+    //TODO: 重定向gxt/html路径
+    //TODO: 加载font_cn.wtd
 
-    //加载font_chs，即中文字库
+    //加载fonts.wtd中的font_chs
     batch_matcher.register_step("8B CE 50 E8 ? ? ? ? 80 3D ? ? ? ? 6A", 2, [](const byte_pattern::result_type& addresses)
         {
             injector::MakeCALL(addresses[0].i(3), CFont::LoadTextureCB);
@@ -156,6 +164,9 @@ static void RegisterPatchSteps(batch_matching &batch_matcher)
 
     //存档名字读双字节
 
+    //手机左右按钮异常换行
+
+    //
 }
 
 bool CPlugin::Init(HMODULE module)

@@ -193,7 +193,7 @@ private:
     {
         limit_offset(size);
 
-        if (m_bytes_opt->size() < size)
+        if (static_cast<long>(m_bytes_opt->size()) < size)
             m_bytes_opt->resize(size);
     }
 

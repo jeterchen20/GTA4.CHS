@@ -69,19 +69,16 @@ struct DataBlock
 class IVText
 {
 public:
-    typedef std::filesystem::path PathType;
-    typedef std::uint16_t CharType; //宽字符(GXT)类型
+    typedef std::filesystem::path PathType; //路径类型
+    typedef GTAChar CharType; //宽字符(GXT)类型
     typedef std::uint32_t HashType; //GXT key类型
-    typedef std::string bStringType; //字节流类型
     typedef tiny_utf8::utf8_string u8StringType; //转码用
-    typedef std::vector<std::uint16_t> wStringType; //GXT字符串类型(手动补0)
+    typedef std::vector<GTAChar> wStringType; //GXT字符串类型(手动补0)
 
-    //单条文本的数据
     struct TextEntry
     {
-        HashType hash; //key
-        u8StringType u8_string; //文本形式，(trademark用™表示)
-        wStringType w_string;   //gxt形式(trademark用0x99表示)
+        HashType hash;
+        u8StringType text;
     };
 
     //不带参数，text目录转gxt
@@ -97,8 +94,8 @@ private:
 
     static bool IsNativeCharacter(char32_t character);
 
-    //收集文本中需要加到字库的字符(生成GXT的时候才干的)
-    void CollectChars(const bStringType& text);
+    //收集文本中需要添加到字库的字符(生成GXT/字库的时候才干的)
+    void CollectChars();
 
     void LoadBinary(const PathType& input_binary);
     void LoadText(const PathType& input_text);
@@ -122,8 +119,8 @@ private:
     //游戏编码转到标准编码
     static void GameToLiteral(wStringType& wtext);
 
-    //在中/英/按键/BLIP之间添加空格(生成GXT的时候用)
-    static wStringType SpaceCEKB(const u8StringType& u8_text);
+    //在中/英/Token之间添加空格(生成GXT的时候用)
+    static wStringType SpaceCEKB(const wStringType& w_text);
 
     std::map<std::string, std::vector<TextEntry>, IVTextTableSorting> m_Data;
     std::set<char32_t> m_Chars;

@@ -13,26 +13,26 @@ void batch_matching::clear()
 void batch_matching::perform_search()
 {
     std::atomic_flag tasks_fetch_flag = ATOMIC_FLAG_INIT;
-    std::size_t next_step_index = 0;
+    std::size_t free_step_index = 0;
 
-    auto search_proc = [&tasks_fetch_flag, &next_step_index, this]()
+    auto search_proc = [&tasks_fetch_flag, &free_step_index, this]()
     {
         byte_pattern pattern_obj;
 
         while (true)
         {
-            if (tasks_fetch_flag.test_and_set())
+            if (tasks_fetch_flag.test_and_set(std::memory_order::memory_order_acq_rel))
                 continue;
 
-            if (next_step_index >= _steps.size())
+            if (free_step_index >= _steps.size())
             {
-                tasks_fetch_flag.clear();
+                tasks_fetch_flag.clear(std::memory_order::memory_order_release);
                 return;
             }
 
-            auto my_index = next_step_index;
-            ++next_step_index;
-            tasks_fetch_flag.clear();
+            auto my_index = free_step_index;
+            ++free_step_index;
+            tasks_fetch_flag.clear(std::memory_order::memory_order_release); //保证 ++free_step_index 先执行
 
             pattern_obj.find_pattern(std::get<0>(_steps[my_index]).c_str());
             std::get<byte_pattern::result_type>(_steps[my_index]) = pattern_obj.get();
