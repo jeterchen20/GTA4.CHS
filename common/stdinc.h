@@ -112,5 +112,5 @@ inline bool IsNativeChar(GTAChar c)
 
 inline bool IsNormalNativeChar(GTAChar c)
 {
-    return (c < 0x100) && (c != 0) && (c != ' ') && (c != '~');
+    return IsNativeChar(c) && (c != 0) && (c != ' ') && (c != '~');
 }

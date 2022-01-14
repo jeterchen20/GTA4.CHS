@@ -2,15 +2,6 @@
 
 void IVText::Process0Arg()
 {
-    //test for SpaceCEKB
-    std::wstring test_string = L"你~y~的~1~~MOUSE~不见了englisj~BLIP_14~中文~s~~MOUSE_WHEEL~啊。";
-
-    wStringType w_string;
-    w_string.assign(test_string.begin(), test_string.end());
-    w_string.push_back(0);
-
-    auto transformed_w_string = IVText::SpaceCEKB(w_string);
-
     //text文件夹->gxt
     m_Data.clear();
 
@@ -247,8 +238,8 @@ void IVText::GenerateBinary(const PathType& output_binary) const
             keyEntry.Hash = entry.hash;
             keyEntry.Offset = datas.size() * 2;
 
-            auto w_string = U8ToWide(entry.text);
-            std::copy(w_string.begin(), w_string.end(), std::back_inserter(datas));
+            auto w_string_to_write = SpaceCEKB(U8ToWide(entry.text));
+            std::copy(w_string_to_write.begin(), w_string_to_write.end(), std::back_inserter(datas));
 
             keys.push_back(keyEntry);
         }
@@ -425,7 +416,6 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
     //1. 保留原有空格
     //2. ~[A-Za-z]~/~COL_*~不是可绘制的token，保持原样
     //3. ~1~当作英语字符(如 '~1~%'视作一个整体)
-
     //4. 保证汉字和非汉字之间是空格
 
     //以下Token保证两侧都是空格
@@ -438,6 +428,7 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
     //~PAD_*~
     enum class span_type
     {
+        SPAN_PLACEHOLDER, //避免边界检查
         SPAN_SPACE, //一个空格
         SPAN_ZERO_WIDTH_TOKEN, //一个颜色类token
         SPAN_DRAWABLE_TOKEN, //一个按键/雷达之类的token
@@ -448,14 +439,14 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
     wStringType result;
 
-    std::wstring w_string_for_view(w_text.begin(), w_text.end() - 1);
-    std::size_t string_index = 0;
-    std::vector<std::pair<span_type, std::span<wchar_t>>> string_spans;
+    std::size_t text_index = 0;
+    std::vector<std::pair<span_type, std::span<const GTAChar>>> string_spans;
 
+    string_spans.emplace_back(span_type::SPAN_PLACEHOLDER, std::span<const GTAChar>{});
     //先对文本进行分词
-    while (string_index < w_string_for_view.size())
+    while (text_index < w_text.size() - 1)
     {
-        auto c = w_string_for_view[string_index];
+        auto c = w_text[text_index];
 
         if (c == 0)
             break;
@@ -463,84 +454,160 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
         if (c == '~')
         {
             //一个Token
-            auto token_end_index = string_index + 1;
-            while (w_string_for_view[token_end_index] != '~')
+            auto token_end_index = text_index + 1;
+            while (w_text[token_end_index] != '~')
             {
                 ++token_end_index;
             }
 
             //~之间内容的长度
-            auto token_string_length = token_end_index - string_index - 1;
+            auto token_string_length = token_end_index - text_index - 1;
             //基于已知的token内容简化逻辑
             if (token_string_length > 0)
             {
                 if (token_string_length == 1)
                 {
                     string_spans.emplace_back(
-                        w_string_for_view[string_index + 1] == '1' ?
+                        w_text[text_index + 1] == '1' ?
                         span_type::SPAN_VALUE_PRINT_TOKEN ://是~1~
                         span_type::SPAN_ZERO_WIDTH_TOKEN, //是~s~等单字符Token
-                        std::span(&w_string_for_view[string_index], token_string_length + 2));
+                        std::span(&w_text[text_index], token_string_length + 2));
                 }
                 else
                 {
-                    if (w_string_for_view[string_index + 1] == 'C' && w_string_for_view[string_index + 2] == 'O')
+                    if (w_text[text_index + 1] == 'C' && w_text[text_index + 2] == 'O')
                     {
                         //~COL_*~类型
                         string_spans.emplace_back(
                             span_type::SPAN_ZERO_WIDTH_TOKEN,
-                            std::span(&w_string_for_view[string_index], token_string_length + 2));
+                            std::span(&w_text[text_index], token_string_length + 2));
                     }
                     else
                     {
                         //其他有宽度的类型
                         string_spans.emplace_back(
                             span_type::SPAN_DRAWABLE_TOKEN,
-                            std::span(&w_string_for_view[string_index], token_string_length + 2));
+                            std::span(&w_text[text_index], token_string_length + 2));
                     }
                 }
             }
 
             //跳过第二个'~'
-            string_index = token_end_index + 1;
+            text_index = token_end_index + 1;
         }
         else if (c == ' ')
         {
             //一个空格
-            string_spans.emplace_back(span_type::SPAN_SPACE, std::span(&w_string_for_view[string_index], 1));
-            ++string_index;
+            string_spans.emplace_back(span_type::SPAN_SPACE, std::span(&w_text[text_index], 1));
+            ++text_index;
         }
         else if (IsNativeCharacter(c))
         {
             //一个英语单词
             //搜索可能剩余的英语单词
-            auto word_end_index = string_index + 1;
-            while (IsNormalNativeChar(w_string_for_view[word_end_index]))
+            auto word_end_index = text_index + 1;
+            while (IsNormalNativeChar(w_text[word_end_index]))
             {
                 ++word_end_index;
             }
 
-            string_spans.emplace_back(span_type::SPAN_NATIVE_WORD, std::span(&w_string_for_view[string_index], word_end_index - string_index));
-            string_index = word_end_index;
+            string_spans.emplace_back(span_type::SPAN_NATIVE_WORD, std::span(&w_text[text_index], word_end_index - text_index));
+            text_index = word_end_index;
         }
         else
         {
             //一个汉字
-            string_spans.emplace_back(span_type::SPAN_CN_WORD, std::span(&w_string_for_view[string_index], 1));
-            ++string_index;
+            string_spans.emplace_back(span_type::SPAN_CN_WORD, std::span(&w_text[text_index], 1));
+            ++text_index;
+        }
+    }
+    string_spans.emplace_back(span_type::SPAN_PLACEHOLDER, std::span<const GTAChar>{});
+
+
+    std::size_t span_index = 1;
+    for (; span_index < string_spans.size() - 1; ++span_index)
+    {
+        auto append_span_to_result = [&string_spans, &span_index, &result]
+        {
+            for (auto& span_element : string_spans[span_index].second)
+            {
+                result.push_back(span_element);
+            }
+        };
+
+        append_span_to_result();
+
+        //根据前后span的类型决定是否要跟随空格
+        auto prev_span_type = string_spans[span_index - 1].first;
+        auto next_span_type = string_spans[span_index + 1].first;
+        switch (string_spans[span_index].first)
+        {
+        case span_type::SPAN_PLACEHOLDER:
+        {
+            break;
+        }
+
+        case span_type::SPAN_SPACE:
+        {
+            break;
+        }
+
+        case span_type::SPAN_ZERO_WIDTH_TOKEN:
+        {
+            if (((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && prev_span_type != span_type::SPAN_CN_WORD) &&
+                (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && next_span_type != span_type::SPAN_CN_WORD)) ||
+                ((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN) &&
+                    (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN)))
+                result.push_back(' ');
+
+            break;
+        }
+
+        case span_type::SPAN_VALUE_PRINT_TOKEN:
+        {
+            if (next_span_type == span_type::SPAN_CN_WORD ||
+                next_span_type == span_type::SPAN_DRAWABLE_TOKEN)
+                result.push_back(' ');
+
+            break;
+        }
+
+        case span_type::SPAN_DRAWABLE_TOKEN:
+        {
+            result.push_back(' ');
+
+            break;
+        }
+
+        case span_type::SPAN_NATIVE_WORD:
+        {
+            result.push_back(' ');
+
+            break;
+        }
+
+        case span_type::SPAN_CN_WORD:
+        {
+            if (next_span_type == span_type::SPAN_VALUE_PRINT_TOKEN ||
+                next_span_type == span_type::SPAN_NATIVE_WORD ||
+                next_span_type == span_type::SPAN_DRAWABLE_TOKEN)
+                result.push_back(' ');
+
+            break;
+        }
+
+        default:
+        {
+            throw std::invalid_argument("Unexpected span_type.");
+        }
         }
     }
 
-    //然后根据前后span的类型决定插入空格
-    auto span_index = 0;
-    for (; span_index < string_spans.size(); ++span_index)
-    {
+    //TODO: 将连续的空格变成一个
 
-    }
+    result.push_back(0);
+    auto w_pointer_for_debug_view = reinterpret_cast<wchar_t*>(result.data());
 
-    //result.push_back(0);
-
-    result = w_text;
     return result;
 }
 
