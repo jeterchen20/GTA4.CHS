@@ -96,6 +96,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="gta_aslr.h" />
     <ClInclude Include="plugin.h" />
+    <ClInclude Include="save_title.h" />
     <ClInclude Include="table.h" />
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +107,7 @@
     <ClCompile Include="game.cpp" />
     <ClCompile Include="gta_aslr.cpp" />
     <ClCompile Include="plugin.cpp" />
+    <ClCompile Include="save_title.cpp" />
     <ClCompile Include="table.cpp" />
   </ItemGroup>
   <ItemGroup>

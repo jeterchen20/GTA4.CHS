@@ -36,6 +36,9 @@
     <ClInclude Include="gta_aslr.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="save_title.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="byte_pattern.cpp">
@@ -60,6 +63,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="gta_aslr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="save_title.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
