@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <unordered_map>
+#include <unordered_set>
 #include <string>
 #include <iterator>
 #include <algorithm>
@@ -52,6 +53,7 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
+typedef unsigned long long uint64;
 
 struct CRect
 {
