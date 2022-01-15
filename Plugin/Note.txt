@@ -5,12 +5,13 @@
 8C5510 将双字节字符串截断成单字节字符串
 909F50 将单字节字符串扩展成双字节字符串
 
+
 -------------1.2.0.43----------------------
 从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
 94ABD4
 
-ESC菜单抬头文本
+ESC菜单Header文本
 5AD2D4 地图
 5AD367 简报
 5AD409 统计
@@ -19,8 +20,8 @@ ESC菜单抬头文本
 5AD5BC 显示
 5AD64C 画面
 5ADAF1 游戏
+通过断CFont_SetColor寻找控制Header颜色的逻辑
 
-尝试在内存中构造grcTexturePC，为freetype渲染到grcTexturePC做准备
 
 不让标点符号出现在行首..
 
@@ -37,11 +38,7 @@ ROMBLIP-0xA88586FC
 ;0x9899E5EE=按~PAD_Y~保存游戏进度。
 0x9899E5EE=~z~~BLIP_29~中文English~PAD_UP~中文~BLIP_29~English小地图~y~上~s~闪烁的~BLIP_29~表示这间公寓的入口。你可以在这里保存游戏进度。
 
-GXTTool通过扩展名确定参数是文件还是文件夹
-
 922D80 RenderFontBuffer?
-
-请在分支中频繁提交..
 
 调试原版代码，理解warp_x/x/centre_wrap/a44/a70的关系
 调试现有ProcessString找问题

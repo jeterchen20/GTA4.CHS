@@ -3,6 +3,7 @@
 #include "table.h"
 #include "game.h"
 #include "batch_matching.h"
+#include "save_title.h"
 
 static const char* __stdcall GetTextFileName(int)
 {
@@ -90,10 +91,10 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
     //GetMaxWordWidth
-    batch_matcher.register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const byte_pattern::result_type& addresses)
-        {
-            injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
-        });
+    //batch_matcher.register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const byte_pattern::result_type& addresses)
+    //    {
+    //        injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
+    //    });
 
     //GetStringWidth
     batch_matcher.register_step("0F B7 06 83 F8 20", 1, [](const byte_pattern::result_type& addresses)
@@ -160,11 +161,23 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeJMP(addresses[0].i(), GetTextFileName);
         });
 
-    //Esc菜单抬头热区
 
-    //存档名字读双字节
+    //存档名字缓存
+    batch_matcher.register_step("", 1, [](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(), misc_patch::gtaTruncateString);
+        });
 
-    //手机左右按钮异常换行
+    batch_matcher.register_step("", 1, [](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(), misc_patch::gtaExpandString);
+        });
+
+    //Esc菜单Header间距
+
+    //Esc菜单Header热区
+
+    //手机左右按钮异常换行(增大wrap)
 
     //
 }
@@ -181,7 +194,7 @@ bool CPlugin::Init(HMODULE module)
     batch_matcher.perform_search();
     if (batch_matcher.is_all_succeed())
     {
-        GlobalTable.LoadTable(std::filesystem::path{ PluginPath }.parent_path() / "GTA4.CHS/table.dat");
+        GlobalTable.LoadTable(relative_to_executable(module, "GTA4.CHS/table.dat"));
         batch_matcher.run_callbacks();
         return true;
     }

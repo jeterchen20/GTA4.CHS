@@ -43,9 +43,8 @@ namespace misc_patch
     std::enable_if_t<std::is_integral_v<T>, std::vector<T>> get_string_vector(const T* str)
     {
         std::vector<T> result;
-        auto string_span = get_string_span(str);
 
-        result.assign(string_span.begin(), string_span.end());
+        std::ranges::copy(get_string_span(str), std::back_inserter(result));
 
         return result;
     }
@@ -72,10 +71,10 @@ namespace misc_patch
                     if (c == 0)
                         break;
 
-                    //如果低字节恰好是0，就随便用一个整数填充，防止结果中出现意外的0
+                    //如果低字节恰好是0，就随便用一个整数填充，防止结果中出现意外的0，最好是非ASCII
                     //游戏也只是用结果进行字符串比较，应该没有问题
-                    if ((c & 0xFF) == 0)
-                        c |= 0x43;
+                    if ((c & 0xFFu) == 0)
+                        c |= 0xA7u;
 
                     dst[copied_size] = static_cast<uchar>(c);
                     ++copied_size;
@@ -85,9 +84,9 @@ namespace misc_patch
                 //注意要以实际复制的长度取dst
                 string_map.emplace(fnv_1a(std::span(dst, copied_size)), get_string_vector(src));
             }
-
-            dst[copied_size] = 0;
         }
+
+        dst[copied_size] = 0;
 
         return dst;
     }

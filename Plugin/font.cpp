@@ -106,7 +106,9 @@ __declspec(naked) void CFont::GetStringWidthHook()
     chs:
         test cl, cl; //get all
         jnz normal;
-        mov dx, word ptr[esp + 0x12]; //has char1 & has char 2
+        //mov dl, [esp + 0x12]; //has char1
+        //test dl, dl;
+        mov dx, [esp + 0x12]; //has char1 & has char 2
         test dx, dx;
         mov edx, 807Eh;
         jz normal;
