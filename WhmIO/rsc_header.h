@@ -15,27 +15,27 @@ enum rsc_type :uint
     ModelFrag = 0x70, //wft
 };
 
-//block´óĞ¡ÊÇ256n
-//block°üº¬ËùÓĞpage
+//blockå¤§å°æ˜¯256n
+//blockåŒ…å«æ‰€æœ‰page
 struct rsc_blocks
 {
     std::vector<uchar> virtual_block;
     std::vector<uchar> physical_block;
 };
 
-//pageµ¥Î»´óĞ¡ÊÇ2^n
+//pageå•ä½å¤§å°æ˜¯2^n
 struct rsc_flag
 {
     union
     {
         struct
         {
-            uint virtual1xPageFlag : 1;     //4¸öĞ¡Ò³ÃæµÄ¿ª¹Ø
+            uint virtual1xPageFlag : 1;     //4ä¸ªå°é¡µé¢çš„å¼€å…³
             uint virtual2xPageFlag : 1;
             uint virtual4xPageFlag : 1;
             uint virtual8xPageFlag : 1;
-            uint virtual16xPageCount : 7;   //´óÒ³ÃæµÄ¸öÊı
-            uint virtual1xPageSize : 4;     //ÓÃÓÚ¾ö¶¨µ¥Î»Ò³´óĞ¡((2^virtual1xPageSize)*256)
+            uint virtual16xPageCount : 7;   //å¤§é¡µé¢çš„ä¸ªæ•°
+            uint virtual1xPageSize : 4;     //ç”¨äºå†³å®šå•ä½é¡µå¤§å°((2^virtual1xPageSize)*256)
 
             uint physical1xPageFlag : 1;
             uint physical2xPageFlag : 1;
@@ -82,7 +82,7 @@ struct rsc_flag
 };
 VALIDATE_SIZE(rsc_flag, 4);
 
-//TODO: ĞèÒª´¦Àí--¶ÁÈ¡ºÍĞ´ÈëÊ±¸Ä±äpgPtr
+//TODO: éœ€è¦å¤„ç†--è¯»å–å’Œå†™å…¥æ—¶æ”¹å˜pgPtr
 struct rsc_header
 {
     uint magic;

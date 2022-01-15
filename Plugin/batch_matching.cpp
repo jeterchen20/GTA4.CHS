@@ -1,4 +1,4 @@
-#include "batch_matching.h"
+ï»¿#include "batch_matching.h"
 
 void batch_matching::register_step(const char* pattern, std::size_t desired_size, callback_type callback)
 {
@@ -32,7 +32,7 @@ void batch_matching::perform_search()
 
             auto my_index = free_step_index;
             ++free_step_index;
-            tasks_fetch_flag.clear(std::memory_order::memory_order_release); //±£Ö¤ ++free_step_index ÏÈÖ´ĞĞ
+            tasks_fetch_flag.clear(std::memory_order::memory_order_release); //ä¿è¯ ++free_step_index å…ˆæ‰§è¡Œ
 
             pattern_obj.find_pattern(std::get<0>(_steps[my_index]).c_str());
             std::get<byte_pattern::result_type>(_steps[my_index]) = pattern_obj.get();

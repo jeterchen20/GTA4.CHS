@@ -28,7 +28,7 @@ struct datBase :pgStreamable
     virtual ~datBase() = default;
 };
 
-//¶ş½øÖÆÎÄ¼şÖĞµÄÖ¸Õë
+//äºŒè¿›åˆ¶æ–‡ä»¶ä¸­çš„æŒ‡é’ˆ
 template <typename T>
 struct pgPtr
 {
@@ -36,8 +36,8 @@ struct pgPtr
     {
         struct
         {
-            uint offset : 28; //µÍÎ»
-            ptr_element_type type : 4;    //¸ßÎ»£¬5±íÊ¾ÄÚ´æÄÚÈİ(¶ÔÏó±¾Éí)£¬6±íÊ¾ÏÔ´æÄÚÈİ(ÌùÍ¼£¬vertexµÈµÈ)£¬ÏÔ´æÄÚÈİ²»ĞèÒª¶Á
+            uint offset : 28; //ä½ä½
+            ptr_element_type type : 4;    //é«˜ä½ï¼Œ5è¡¨ç¤ºå†…å­˜å†…å®¹(å¯¹è±¡æœ¬èº«)ï¼Œ6è¡¨ç¤ºæ˜¾å­˜å†…å®¹(è´´å›¾ï¼Œvertexç­‰ç­‰)ï¼Œæ˜¾å­˜å†…å®¹ä¸éœ€è¦è¯»
         };
 
         uint p;
@@ -54,7 +54,7 @@ struct pgPtr
     }
 };
 
-//Ö¸ÏòÒ»¸öC String
+//æŒ‡å‘ä¸€ä¸ªC String
 struct pgString : pgPtr<char>
 {
     std::string read(MemoryFile& file) const
@@ -79,25 +79,25 @@ struct pgString : pgPtr<char>
     }
 };
 
-//¶ÔÏóÊı×é
+//å¯¹è±¡æ•°ç»„
 template <typename T>
 struct pgObjectArray : pgPtr<T>
 {
-    ushort count; //ÓĞĞ§ÔªËØ¸öÊı(std::vectorµÄsize)
-    ushort size;  //Õ¼¾İ¿Õ¼ä¸öÊı(std::vectorµÄcapacity)
+    ushort count; //æœ‰æ•ˆå…ƒç´ ä¸ªæ•°(std::vectorçš„size)
+    ushort size;  //å æ®ç©ºé—´ä¸ªæ•°(std::vectorçš„capacity)
 
     std::vector<T> read(MemoryFile& file) const
     {
         std::vector<T> result;
 
-        //¼ÙÉèTÊÇ¿ÉÒÔÖ±½ÓmemcpyµÄÀàĞÍ
+        //å‡è®¾Tæ˜¯å¯ä»¥ç›´æ¥memcpyçš„ç±»å‹
         file.Seek(u.offset);
         result.resize(count);
         file.ReadArray(count, result);
     }
 };
 
-//¶ÔÏóÖ¸ÕëÊı×é
+//å¯¹è±¡æŒ‡é’ˆæ•°ç»„
 template <typename T>
 struct pgPtrArray : pgObjectArray<pgPtr<T>>
 {

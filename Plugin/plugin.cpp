@@ -161,7 +161,6 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeJMP(addresses[0].i(), GetTextFileName);
         });
 
-
     //存档名字缓存
     batch_matcher.register_step("", 1, [](const byte_pattern::result_type& addresses)
         {
@@ -177,7 +176,7 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
 
     //Esc菜单Header热区
 
-    //手机左右按钮异常换行(增大wrap)
+    //手机右下角功能键异常换行(增大wrap)
 
     //
 }

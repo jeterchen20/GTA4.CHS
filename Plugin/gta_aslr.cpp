@@ -12,6 +12,6 @@ std::uintptr_t gta_aslr(std::uintptr_t address)
 {
     std::call_once(get_module_base_flag, get_module_base);
 
-    //addressÊÇidaÀïµÃµ½µÄµØÖ·£¬»ùÖ·ÊÇ0x400000
+    //addressæ˜¯idaé‡Œå¾—åˆ°çš„åœ°å€ï¼ŒåŸºå€æ˜¯0x400000
     return (address - 0x400000u) + module_base;
 }

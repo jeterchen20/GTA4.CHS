@@ -1,4 +1,4 @@
-#include "rscio.h"
+ï»¿#include "rscio.h"
 
 rsc_blocks rscio::read_rsc(const std::filesystem::path& filename)
 {
@@ -30,7 +30,7 @@ rsc_blocks rscio::read_rsc(const std::filesystem::path& filename)
         file.Read(compressed_bytes.data(), compressed_size);
 
         uncompress(uncompressed_bytes.data(), &uncompressed_size, compressed_bytes.data(), compressed_size);
-        //½«½âÑ¹ºóµÄÊı¾İ°´ÕÕ´óĞ¡·Ö¿é
+        //å°†è§£å‹åçš„æ•°æ®æŒ‰ç…§å¤§å°åˆ†å—
         std::memcpy(blocks.virtual_block.data(), compressed_bytes.data(), virtual_size);
         std::memcpy(blocks.physical_block.data(), compressed_bytes.data() + virtual_size, physical_size);
     }

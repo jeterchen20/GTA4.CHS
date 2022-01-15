@@ -1,1 +1,1 @@
-[GTA4三合一版汉化项目](https://github.com/GTAIV-Complete-Edition-text)
+适用于GTA4三合一版本(1.2.0.43或以上)的汉化补丁

@@ -2,7 +2,7 @@
 
 namespace misc_patch
 {
-    std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
+    std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key鏄崟瀛楄妭瀛楃涓茬殑hash, value鏄師濮嬪瀛楃涓茬殑鍐呭
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, std::size_t> fnv_1a(std::span<T> seq)
@@ -71,8 +71,8 @@ namespace misc_patch
                     if (c == 0)
                         break;
 
-                    //如果低字节恰好是0，就随便用一个整数填充，防止结果中出现意外的0，最好是非ASCII
-                    //游戏也只是用结果进行字符串比较，应该没有问题
+                    //濡傛灉浣庡瓧鑺傛伆濂芥槸0锛屽氨闅忎究鐢ㄤ竴涓暣鏁板～鍏咃紝闃叉缁撴灉涓嚭鐜版剰澶栫殑0锛屾渶濂芥槸闈濧SCII
+                    //娓告垙涔熷彧鏄敤缁撴灉杩涜瀛楃涓叉瘮杈冿紝搴旇娌℃湁闂
                     if ((c & 0xFFu) == 0)
                         c |= 0xA7u;
 
@@ -80,8 +80,8 @@ namespace misc_patch
                     ++copied_size;
                 }
 
-                //将dst的hash和src的数据存入map，供gtaExpandString查找
-                //注意要以实际复制的长度取dst
+                //灏哾st鐨刪ash鍜宻rc鐨勬暟鎹瓨鍏ap锛屼緵gtaExpandString鏌ユ壘
+                //娉ㄦ剰瑕佷互瀹為檯澶嶅埗鐨勯暱搴﹀彇dst
                 string_map.emplace(fnv_1a(std::span(dst, copied_size)), get_string_vector(src));
             }
         }
