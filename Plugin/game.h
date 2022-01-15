@@ -2,6 +2,8 @@
 #include "../common/stdinc.h"
 #include "font.h"
 
+#define GAME_ADDRESS_USED //方便IDE查找地址引用
+
 struct StockAddresses
 {
     IDirect3D9** ppDirect3D9;
