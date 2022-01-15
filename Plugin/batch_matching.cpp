@@ -12,6 +12,7 @@ void batch_matching::clear()
 
 void batch_matching::perform_search()
 {
+#if 0
     std::atomic_flag tasks_fetch_flag = ATOMIC_FLAG_INIT;
     std::size_t free_step_index = 0;
 
@@ -50,6 +51,15 @@ void batch_matching::perform_search()
     {
         thread.join();
     }
+#else
+    byte_pattern pattern_obj;
+
+    for (auto& step : _steps)
+    {
+        pattern_obj.find_pattern(std::get<0>(step).c_str());
+        std::get<byte_pattern::result_type>(step) = pattern_obj.get();
+    }
+#endif
 }
 
 bool batch_matching::is_all_succeed() const

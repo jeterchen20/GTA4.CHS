@@ -72,52 +72,6 @@ const GTAChar* CFont::SkipSpaces(const GTAChar* text)
     return text;
 }
 
-__declspec(naked) void CFont::GetStringWidthHook()
-{
-    static void* ret_addr;
-
-    __asm
-    {
-        pop ret_addr;
-
-        movzx eax, word ptr[esi];
-        mov cl, [ebp + 0xC];
-        cmp ax, ' ';
-        jz space;
-        push eax;
-        call IsNativeChar;
-        add esp, 4;
-        test al, al;
-        movzx eax, word ptr[esi];
-        mov cl, [ebp + 0xC];
-        jnz normal;
-        jmp chs;
-
-    space:
-        add ret_addr, 0x3;
-        push ret_addr;
-        ret;
-
-    normal:
-        add ret_addr, 0xB;
-        push ret_addr;
-        ret;
-
-    chs:
-        test cl, cl; //get all
-        jnz normal;
-        //mov dl, [esp + 0x12]; //has char1
-        //test dl, dl;
-        mov dx, [esp + 0x12]; //has char1 & has char 2
-        test dx, dx;
-        mov edx, 807Eh;
-        jz normal;
-        add ret_addr, 0x22E;
-        push ret_addr;
-        ret;
-    }
-}
-
 float CFont::GetStringWidth(const GTAChar* text, bool get_all)
 {
     if (text == nullptr)
@@ -240,7 +194,7 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
     return std::max(current_line_width, max_line_width);
 }
 
-void CFont::ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor)
+void CFont::ProcessStringOriginal(float x, float y, const GTAChar* text, CFontStringProcess* processor)
 {
     auto text_pointer = text;
 

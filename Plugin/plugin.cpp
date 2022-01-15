@@ -90,28 +90,22 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             CGame::Addresses.pFont_GetActualLineHeight = addresses[0].p();
         });
 
-    //GetMaxWordWidth
+    //替换GetMaxWordWidth
     //batch_matcher.register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const byte_pattern::result_type& addresses)
     //    {
     //        injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
     //    });
 
-    //GetStringWidth
-    batch_matcher.register_step("0F B7 06 83 F8 20", 1, [](const byte_pattern::result_type& addresses)
-        {
-            injector::MakeCALL(addresses[0].i(), CFont::GetStringWidthHook);
-        });
-
-    //替换GetStringWidth函数
+    //替换GetStringWidth
     //batch_matcher.register_step("B8 B4 10 00 00", 1, [](const byte_pattern::result_type& addresses)
     //    {
     //        injector::MakeJMP(addresses[0].i(-6), CFont::GetStringWidth);
     //    });
 
-    //替换ProcessString函数
+    //替换ProcessString
     //batch_matcher.register_step("81 EC 8C 0A 00 00", 1, [](const byte_pattern::result_type& addresses)
     //    {
-    //        injector::MakeJMP(addresses[0].i(), CFont::ProcessString);
+    //        injector::MakeJMP(addresses[0].i(), CFont::ProcessStringOriginal);
     //    });
 
     //获取字符宽度
@@ -162,14 +156,14 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
     //存档名字缓存
-    batch_matcher.register_step("", 1, [](const byte_pattern::result_type& addresses)
+    batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [](const byte_pattern::result_type& addresses)
         {
-            injector::MakeCALL(addresses[0].i(), misc_patch::gtaTruncateString);
+            injector::MakeCALL(addresses[0].i(13), misc_patch::gtaTruncateString);
         });
 
-    batch_matcher.register_step("", 1, [](const byte_pattern::result_type& addresses)
+    batch_matcher.register_step("8D 84 24 4C 01 00 00 50 8D 44 24 1C 50 E8", 1, [](const byte_pattern::result_type& addresses)
         {
-            injector::MakeCALL(addresses[0].i(), misc_patch::gtaExpandString);
+            injector::MakeCALL(addresses[0].i(13), misc_patch::gtaExpandString);
         });
 
     //Esc菜单Header间距

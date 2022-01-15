@@ -1,4 +1,4 @@
-#include "gta_aslr.h"
+﻿#include "gta_aslr.h"
 
 static std::once_flag get_module_base_flag;
 static std::uintptr_t module_base;

@@ -132,13 +132,12 @@ public:
     static void PrintCharDispatch(float x, float y, GTAChar chr, bool buffered);
     static void PrintCHSChar(float x, float y, GTAChar chr);
 
-    static __declspec(noinline) const GTAChar* SkipWord(const GTAChar* text);
-    static __declspec(noinline) const GTAChar* SkipSpaces(const GTAChar* text);
+    static const GTAChar* SkipWord(const GTAChar* text);
+    static const GTAChar* SkipSpaces(const GTAChar* text);
 
-    static void GetStringWidthHook();
     static float GetStringWidth(const GTAChar* text, bool get_all);
     //数组大小检查导致IDA分析出错
-    static __declspec(safebuffers) void ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor);
-    static __declspec(safebuffers) void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor);
+    static __declspec(safebuffers) void ProcessStringOriginal(float x, float y, const GTAChar* text, CFontStringProcess* processor); //还原的原始函数
+    static __declspec(safebuffers) void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor); //汉化的排版函数
     static float GetMaxWordWidth(const GTAChar *text);
 };
