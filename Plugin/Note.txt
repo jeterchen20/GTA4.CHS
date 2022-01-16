@@ -1,12 +1,16 @@
 ﻿Esc菜单鼠标指向只变色一个词
-将文本span_type部分抽取成公用函数，给游戏排版函数使用
-
-游戏要显示存档列表的时候才会读取存档任务名
-8C5510 将双字节字符串截断成单字节字符串 8C92DE
-909F50 将单字节字符串扩展成双字节字符串 8B3DA5
 加载存档时的"载入中-任务名"还是炸裂
+将文本span_type部分抽取成公用函数，给游戏排版函数使用
+用老补丁测试一下加空格的效果(替换SkipWord+GetStringWidthHook=老补丁)
+让91F4A0返回true会不会有奇效
 
 -------------1.2.0.43----------------------
+8C5510 将双字节字符串截断成单字节字符串 8C92DE
+909F50 将单字节字符串扩展成双字节字符串 8B3DA5
+922D80 RenderFontBuffer?
+119BFC8 2个FontBuffer
+每个FontBuffer 2048字节，包含一个CFontRenderState对象和要绘制的文本
+
 从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
 94ABD4
@@ -22,7 +26,6 @@ ESC菜单Header文本
 5ADAF1 游戏
 通过断CFont_SetColor寻找控制Header颜色的逻辑
 
-
 不让标点符号出现在行首..
 
 调试原版GetStringWidth和ProcessString理解逻辑
@@ -31,14 +34,12 @@ ESC菜单Header文本
 MAIN-0x9899E5EE
 ROMBLIP-0xA88586FC
 
-//原版测试文本: 
+//原版测试文本:
 0x9899E5EE=text ~BLIP_29~ ~INPUT_NEXT_CAMERA~ after ~PAD_UP~multi ~r~ spa~PAD_DOWN~ces ~y~text after multi spaces text after multi spaces text after multi spaces.
 
 ;0x9899E5EE=Press ~PAD_Y~ to save your game.
 ;0x9899E5EE=按~PAD_Y~保存游戏进度。
 0x9899E5EE=~z~~BLIP_29~中文English~PAD_UP~中文~BLIP_29~English小地图~y~上~s~闪烁的~BLIP_29~表示这间公寓的入口。你可以在这里保存游戏进度。
-
-922D80 RenderFontBuffer?
 
 调试原版代码，理解warp_x/x/centre_wrap/a44/a70的关系
 调试现有ProcessString找问题

@@ -56,6 +56,8 @@ public:
     static int Font_ParseToken(const GTAChar* text, GTAChar* text_to_show, TokenStruct* token_data);
 
     static const GTAChar* Font_ProcessToken(const GTAChar* text, int* color, bool get_color, char* color_code, int* key_number, bool* is_new_line_token, GTAChar* text_to_show, TokenStruct* token_data);
+
     static void Font_AddTokenStringWidth(const GTAChar* text, float* width, int render_index);
+
     static float Font_GetActualLineHeight();
 };

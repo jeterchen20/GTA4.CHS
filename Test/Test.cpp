@@ -1,18 +1,13 @@
-﻿#include "../Plugin/save_title.h"
+﻿#include "../common/stdinc.h"
+
+void Test()
+{
+
+}
 
 int main()
 {
-    std::array<std::thread, 4> search_threads;
-
-    for (auto& thread : search_threads)
-    {
-        thread = std::thread([]{});
-    }
-
-    for (auto& thread : search_threads)
-    {
-        thread.join();
-    }
+    Test();
 
     return 0;
 }

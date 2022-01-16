@@ -90,19 +90,31 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             CGame::Addresses.pFont_GetActualLineHeight = addresses[0].p();
         });
 
-    //替换GetMaxWordWidth
+    //获取字符串宽度
+    batch_matcher.register_step("0F B7 06 83 F8 20", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(), CFont::GetStringWidthHook);
+        });
+
+    //跳过单词
+    batch_matcher.register_step("57 8B 7C 24 08 85 FF 75 04 33 C0 5F C3 56", 1, [](const std::vector<memory_pointer>& addresses)
+        {
+            injector::MakeJMP(addresses[0].i(), CFont::SkipWord);
+        });
+
+    //TODO: 替换GetMaxWordWidth
     //batch_matcher.register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const byte_pattern::result_type& addresses)
     //    {
     //        injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
     //    });
 
-    //替换GetStringWidth
+    //TODO: 替换GetStringWidth
     //batch_matcher.register_step("B8 B4 10 00 00", 1, [](const byte_pattern::result_type& addresses)
     //    {
     //        injector::MakeJMP(addresses[0].i(-6), CFont::GetStringWidth);
     //    });
 
-    //替换ProcessString
+    //TODO: 替换ProcessString
     //batch_matcher.register_step("81 EC 8C 0A 00 00", 1, [](const byte_pattern::result_type& addresses)
     //    {
     //        injector::MakeJMP(addresses[0].i(), CFont::ProcessStringOriginal);
@@ -139,8 +151,7 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeCALL(addresses[0].i(5), CFont::PrintCharDispatch);
         });
 
-    //TODO: 重定向gxt/html路径
-    //TODO: 加载font_cn.wtd
+    //TODO: 重定向html路径，达到移除asi即可恢复原版
 
     //加载fonts.wtd中的font_chs
     batch_matcher.register_step("8B CE 50 E8 ? ? ? ? 80 3D ? ? ? ? 6A", 2, [](const byte_pattern::result_type& addresses)
@@ -177,22 +188,16 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
 
 bool CPlugin::Init(HMODULE module)
 {
-    wchar_t PluginPath[512];
-    GetModuleFileNameW(module, PluginPath, 512);
-
     batch_matching batch_matcher;
 
     RegisterPatchSteps(batch_matcher);
 
     batch_matcher.perform_search();
-    if (batch_matcher.is_all_succeed())
-    {
-        GlobalTable.LoadTable(relative_to_executable(module, "GTA4.CHS/table.dat"));
-        batch_matcher.run_callbacks();
-        return true;
-    }
-    else
-    {
+
+    if (!batch_matcher.is_all_succeed())
         return false;
-    }
+
+    GlobalTable.LoadTable(relative_to_executable(module, "GTA4.CHS/table.dat"));
+    batch_matcher.run_callbacks();
+    return true;
 }

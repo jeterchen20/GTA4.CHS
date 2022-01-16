@@ -44,7 +44,7 @@ namespace misc_patch
     {
         std::vector<T> result;
 
-        std::ranges::copy(get_string_span(str), std::back_inserter(result));
+        ranges::copy(get_string_span(str), std::back_inserter(result));
 
         return result;
     }
@@ -101,13 +101,13 @@ namespace misc_patch
 
         if (wide_string_it != string_map.end())
         {
-            std::ranges::copy(wide_string_it->second, dst);
+            ranges::copy(wide_string_it->second, dst);
             dst[wide_string_it->second.size()] = 0;
         }
         else
         {
             auto src_span = get_string_span(src);
-            std::ranges::copy(src_span, dst);
+            ranges::copy(src_span, dst);
             dst[src_span.size()] = 0;
         }
     }

@@ -47,6 +47,7 @@
 //vcpkg
 #include <fmt/printf.h>
 #include <zlib.h>
+#include <range/v3/algorithm.hpp>
 
 typedef std::uint16_t GTAChar;
 typedef unsigned char uchar;
@@ -80,21 +81,19 @@ union stack_var
     void* p;
     float f;
     unsigned int u;
+    bool b;
 
     explicit stack_var(int val) { i = val; }
     explicit stack_var(void* val) { p = val; }
     explicit stack_var(float val) { f = val; }
     explicit stack_var(unsigned int val) { u = val; }
+    explicit stack_var(bool val) { b = val; }
 
-    stack_var& operator=(int val) { i = val; }
-    stack_var& operator=(void* val) { p = val; }
-    stack_var& operator=(float val) { f = val; }
-    stack_var& operator=(unsigned int val) { u = val; }
-
-    operator int() const { return i; }
-    operator void* () const { return p; }
-    operator float() const { return f; }
-    operator unsigned int() const { return u; }
+    stack_var& operator=(int val) { i = val; return *this; }
+    stack_var& operator=(void* val) { p = val; return *this; }
+    stack_var& operator=(float val) { f = val; return *this; }
+    stack_var& operator=(unsigned int val) { u = val; return *this; }
+    stack_var& operator=(bool val) { b = val; return *this; }
 };
 VALIDATE_SIZE(stack_var, 4);
 

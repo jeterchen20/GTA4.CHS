@@ -96,6 +96,14 @@ public:
 };
 VALIDATE_SIZE(CFontRenderState, 0x38);
 
+class CFontBuffer
+{
+public:
+    CFontRenderState render_state;
+    GTAChar buffer[996];
+};
+VALIDATE_SIZE(CFontBuffer, 2048);
+
 struct TokenStruct
 {
     int f0[4];
@@ -134,10 +142,13 @@ public:
 
     static const GTAChar* SkipWord(const GTAChar* text);
     static const GTAChar* SkipSpaces(const GTAChar* text);
+    static void GetStringWidthHook();
 
     static float GetStringWidth(const GTAChar* text, bool get_all);
+
     //数组大小检查导致IDA分析出错
     static __declspec(safebuffers) void ProcessStringOriginal(float x, float y, const GTAChar* text, CFontStringProcess* processor); //还原的原始函数
     static __declspec(safebuffers) void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor); //汉化的排版函数
+
     static float GetMaxWordWidth(const GTAChar *text);
 };

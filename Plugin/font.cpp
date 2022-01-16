@@ -72,6 +72,54 @@ const GTAChar* CFont::SkipSpaces(const GTAChar* text)
     return text;
 }
 
+__declspec(naked) void CFont::GetStringWidthHook()
+{
+    static void* retaddr;
+
+    __asm
+    {
+        pop retaddr; //91BE45
+
+        movzx eax, word ptr[esi];
+        mov cl, [ebp + 0xC];
+        cmp ax, ' ';
+        jz space;
+        push eax;
+        call IsNativeChar;
+        add esp, 4;
+        test al, al;
+        movzx eax, word ptr[esi];
+        mov cl, [ebp + 0xC];
+        jnz normal;
+        jmp chs;
+
+    space:
+        add retaddr, 0x3;
+        push retaddr;
+        ret;
+
+    normal:
+        add retaddr, 0xB;
+        push retaddr;
+        ret;
+
+    chs:
+        test cl, cl; //get all
+        jnz normal;
+#if 1
+        mov dl, [esp + 0x12]; //has char
+        test dl, dl;
+#else
+        mov dx, [esp + 0x12]; //has char1 & has char 2
+        test dx, dx;
+#endif
+        jz normal;
+        add retaddr, 0x22E;
+        push retaddr;
+        ret;
+    }
+}
+
 float CFont::GetStringWidth(const GTAChar* text, bool get_all)
 {
     if (text == nullptr)
@@ -82,7 +130,6 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
     bool had_width = false;
     auto render_index = CGame::Font_GetRenderIndex();
     auto& using_details = CGame::Addresses.pFont_Details[render_index];
-    auto single_char_width = CGame::Font_GetCharacterSizeNormal(0);
     auto text_pointer = text;
     GTAChar token_string[64];
     TokenStruct token_data;
@@ -94,7 +141,7 @@ float CFont::GetStringWidth(const GTAChar* text, bool get_all)
         if (chr == 0)
             break;
 
-        bool is_chinese_char = IsNativeChar(chr);
+        bool is_chinese_char = !IsNativeChar(chr);
 
         if (chr == ' ' && !get_all)
             break;
@@ -321,7 +368,6 @@ void CFont::ProcessStringOriginal(float x, float y, const GTAChar* text, CFontSt
                 }
 
                 text_pointer = SkipSpaces(skiped_word_pointer);
-
 
                 if (!using_details.bIgnoreWidthLimit)
                 {
