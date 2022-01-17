@@ -4,8 +4,7 @@ namespace misc_patch
 {
     std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
 
-    template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, std::size_t> fnv_1a(std::span<T> seq)
+    std::size_t fnv_1a(std::span<const uchar> seq)
     {
         static constexpr uint64 fnv_prime = 16777619ui64;
 
@@ -13,7 +12,7 @@ namespace misc_patch
 
         for (auto& element : seq)
         {
-            result ^= static_cast<uchar>(element);
+            result ^= element;
             result = static_cast<uint>((result * fnv_prime) % 4294967296ui64);
         }
 
@@ -21,7 +20,7 @@ namespace misc_patch
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, std::span<const T>> get_string_span(const T* str)
+    std::enable_if_t<std::is_integral_v<T>, std::span<const uchar>> get_string_span(const T* str)
     {
         std::size_t size = 0;
 
@@ -36,7 +35,7 @@ namespace misc_patch
             }
         }
 
-        return { str,size };
+        return { reinterpret_cast<const uchar*>(str), size * sizeof(T) };
     }
 
     template <typename T>
@@ -110,5 +109,21 @@ namespace misc_patch
             ranges::copy(src_span, dst);
             dst[src_span.size()] = 0;
         }
+    }
+
+    void gtaTruncateString2(const GTAChar* src, uchar* dst)
+    {
+        tiny_utf8::utf8_string u8_string;
+
+        auto src_span = get_string_span(src);
+        u8_string.assign(src_span.begin(), src_span.end());
+
+        std::copy_n(u8_string.c_str(), u8_string.size(), dst);
+        dst[u8_string.size()] = 0;
+    }
+
+    void gtaExpandString2(const uchar* src, GTAChar* dst)
+    {
+
     }
 }

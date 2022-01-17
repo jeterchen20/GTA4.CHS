@@ -92,6 +92,7 @@
   <ItemGroup>
     <ClInclude Include="batch_matching.h" />
     <ClInclude Include="byte_pattern.h" />
+    <ClInclude Include="class_pointer.hpp" />
     <ClInclude Include="font.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="gta_aslr.h" />

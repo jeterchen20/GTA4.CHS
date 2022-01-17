@@ -39,6 +39,9 @@
     <ClInclude Include="save_title.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="class_pointer.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="byte_pattern.cpp">

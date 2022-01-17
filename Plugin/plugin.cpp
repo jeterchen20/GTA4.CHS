@@ -102,24 +102,6 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeJMP(addresses[0].i(), CFont::SkipWord);
         });
 
-    //TODO: 替换GetMaxWordWidth
-    //batch_matcher.register_step("51 56 8B 74 24 0C 85 F6 75 05 D9 EE 5E 59 C3 66", 1, [](const byte_pattern::result_type& addresses)
-    //    {
-    //        injector::MakeJMP(addresses[0].i(), CFont::GetMaxWordWidth);
-    //    });
-
-    //TODO: 替换GetStringWidth
-    //batch_matcher.register_step("B8 B4 10 00 00", 1, [](const byte_pattern::result_type& addresses)
-    //    {
-    //        injector::MakeJMP(addresses[0].i(-6), CFont::GetStringWidth);
-    //    });
-
-    //TODO: 替换ProcessString
-    //batch_matcher.register_step("81 EC 8C 0A 00 00", 1, [](const byte_pattern::result_type& addresses)
-    //    {
-    //        injector::MakeJMP(addresses[0].i(), CFont::ProcessStringOriginal);
-    //    });
-
     //获取字符宽度
     batch_matcher.register_step("83 C0 E0 50 E8 ? ? ? ? D9 5C 24", 2, [](const byte_pattern::result_type& addresses)
         {
@@ -166,6 +148,7 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeJMP(addresses[0].i(), GetTextFileName);
         });
 
+#if 0
     //存档名字缓存
     batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [](const byte_pattern::result_type& addresses)
         {
@@ -176,6 +159,18 @@ static void RegisterPatchSteps(batch_matching& batch_matcher)
         {
             injector::MakeCALL(addresses[0].i(13), misc_patch::gtaExpandString);
         });
+#else
+    //替换字符串缩窄扩展函数
+    batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeJMP(injector::GetBranchDestination(addresses[0].i(13)), misc_patch::gtaTruncateString);
+        });
+
+    batch_matcher.register_step("8D 84 24 4C 01 00 00 50 8D 44 24 1C 50 E8", 1, [](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeJMP(injector::GetBranchDestination(addresses[0].i(13)), misc_patch::gtaExpandString);
+        });
+#endif
 
     //Esc菜单Header间距
 

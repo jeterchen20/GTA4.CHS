@@ -415,7 +415,7 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
     //1. 保留原有空格
     //2. ~[A-Za-z]~/~COL_*~不是可绘制的token，保持原样
-    //3. ~1~当作英语字符(如 '~1~%'视作一个整体)
+    //3. ~1~当作英语字符(如 '~1~%' / '%~1~'视作一个整体)
     //4. 保证汉字和非汉字之间是空格
 
     //以下Token保证两侧都是空格
@@ -523,7 +523,6 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
     }
     string_spans.emplace_back(span_type::SPAN_PLACEHOLDER, std::span<const GTAChar>{});
 
-
     std::size_t span_index = 1;
     for (; span_index < string_spans.size() - 1; ++span_index)
     {
@@ -554,10 +553,10 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
         case span_type::SPAN_ZERO_WIDTH_TOKEN:
         {
-            if (((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && prev_span_type != span_type::SPAN_CN_WORD) &&
+            if ((((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && prev_span_type != span_type::SPAN_CN_WORD) &&
                 (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && next_span_type != span_type::SPAN_CN_WORD)) ||
                 ((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN) &&
-                    (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN)))
+                    (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN))) && next_span_type != span_type::SPAN_SPACE)
                 result.push_back(' ');
 
             break;
@@ -565,8 +564,8 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
         case span_type::SPAN_VALUE_PRINT_TOKEN:
         {
-            if (next_span_type == span_type::SPAN_CN_WORD ||
-                next_span_type == span_type::SPAN_DRAWABLE_TOKEN)
+            if ((next_span_type == span_type::SPAN_CN_WORD ||
+                next_span_type == span_type::SPAN_DRAWABLE_TOKEN) && next_span_type != span_type::SPAN_SPACE)
                 result.push_back(' ');
 
             break;
@@ -574,23 +573,27 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
         case span_type::SPAN_DRAWABLE_TOKEN:
         {
-            result.push_back(' ');
+            if (next_span_type != span_type::SPAN_PLACEHOLDER && next_span_type != span_type::SPAN_SPACE)
+                result.push_back(' ');
 
             break;
         }
 
         case span_type::SPAN_NATIVE_WORD:
         {
-            result.push_back(' ');
+            if (next_span_type != span_type::SPAN_PLACEHOLDER && 
+                next_span_type != span_type::SPAN_SPACE && 
+                next_span_type != span_type::SPAN_VALUE_PRINT_TOKEN)
+                result.push_back(' ');
 
             break;
         }
 
         case span_type::SPAN_CN_WORD:
         {
-            if (next_span_type == span_type::SPAN_VALUE_PRINT_TOKEN ||
+            if ((next_span_type == span_type::SPAN_VALUE_PRINT_TOKEN ||
                 next_span_type == span_type::SPAN_NATIVE_WORD ||
-                next_span_type == span_type::SPAN_DRAWABLE_TOKEN)
+                next_span_type == span_type::SPAN_DRAWABLE_TOKEN) && next_span_type != span_type::SPAN_SPACE)
                 result.push_back(' ');
 
             break;
