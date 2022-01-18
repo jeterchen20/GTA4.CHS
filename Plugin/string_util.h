@@ -1,13 +1,18 @@
-#pragma once
+﻿#pragma once
 #include "../common/stdinc.h"
 
-namespace misc_patch
+namespace string_util
 {
-    //���ʼ�
+    //字符串哈希函数
+    std::size_t hash_string(const std::string& str);
+    std::size_t hash_string(const char* str);
+    std::size_t hash_string(const GTAChar *str);
+
+    //非邮件
     uchar* gtaTruncateString(uchar* dst, const GTAChar* src, unsigned size);
     void gtaExpandString(const uchar* src, GTAChar* dst);
 
-    //�ʼ�
+    //邮件
     void gtaTruncateString2(const GTAChar* src, uchar* dst);
     void gtaExpandString2(const uchar* src, GTAChar* dst);
 }

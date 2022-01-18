@@ -10,5 +10,3 @@ public:
 private:
     std::unordered_map<uint, CharacterPos> m_Table;
 };
-
-extern CTable GlobalTable;

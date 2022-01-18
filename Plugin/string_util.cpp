@@ -1,10 +1,10 @@
-#include "save_title.h"
+﻿#include "string_util.h"
 
-namespace misc_patch
+namespace string_util
 {
     std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
 
-    std::size_t fnv_1a(std::span<const uchar> seq)
+    std::size_t hash_string(std::span<const uchar> seq)
     {
         static constexpr uint64 fnv_prime = 16777619ui64;
 
@@ -17,6 +17,16 @@ namespace misc_patch
         }
 
         return result;
+    }
+
+    std::size_t hash_string(std::span<const char> seq)
+    {
+        return hash_string(std::span(reinterpret_cast<const uchar*>(seq.data()), seq.size()));
+    }
+
+    std::span<const char> get_string_span(const std::string& str)
+    {
+        return { str };
     }
 
     template <typename T>
@@ -51,7 +61,22 @@ namespace misc_patch
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, std::size_t> hash_string(const T* str)
     {
-        return fnv_1a(get_string_span(str));
+        return hash_string(get_string_span(str));
+    }
+
+    std::size_t hash_string(const std::string& str)
+    {
+        return hash_string(get_string_span(str));
+    }
+
+    std::size_t hash_string(const char* str)
+    {
+        return hash_string(get_string_span(str));
+    }
+
+    std::size_t hash_string(const GTAChar* str)
+    {
+        return hash_string(get_string_span(str));
     }
 
     //8C5510
@@ -81,7 +106,7 @@ namespace misc_patch
 
                 //将dst的hash和src的数据存入map，供gtaExpandString查找
                 //注意要以实际复制的长度取dst
-                string_map.emplace(fnv_1a(std::span(dst, copied_size)), get_string_vector(src));
+                string_map.emplace(hash_string(std::span(dst, copied_size)), get_string_vector(src));
             }
         }
 
@@ -124,6 +149,9 @@ namespace misc_patch
 
     void gtaExpandString2(const uchar* src, GTAChar* dst)
     {
-
+        //TODO: 处理单独的0xA9，但目前游戏中没出现这种情况
+        tiny_utf8::utf8_string u8_string(reinterpret_cast<const char*>(src));
+        ranges::copy(u8_string, dst);
+        dst[u8_string.length()] = 0;
     }
 }

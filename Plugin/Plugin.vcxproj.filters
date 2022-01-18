@@ -36,10 +36,13 @@
     <ClInclude Include="gta_aslr.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="save_title.h">
+    <ClInclude Include="class_pointer.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="class_pointer.hpp">
+    <ClInclude Include="file_redirect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="string_util.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -68,7 +71,10 @@
     <ClCompile Include="gta_aslr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="save_title.cpp">
+    <ClCompile Include="file_redirect.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="string_util.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

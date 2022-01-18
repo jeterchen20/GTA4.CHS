@@ -97,15 +97,6 @@ union stack_var
 };
 VALIDATE_SIZE(stack_var, 4);
 
-inline std::filesystem::path relative_to_executable(HMODULE m, const std::filesystem::path& rest)
-{
-    wchar_t c_path[512];
-
-    ::GetModuleFileNameW(m, c_path, 512);
-    std::filesystem::path cpp_path{ c_path };
-    return cpp_path.parent_path() / rest;
-}
-
 inline bool IsNativeChar(GTAChar c)
 {
     return c < 0x100;

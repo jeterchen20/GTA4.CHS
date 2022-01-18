@@ -1,7 +1,5 @@
 ﻿#include "table.h"
 
-CTable GlobalTable;
-
 void CTable::LoadTable(const std::filesystem::path& filename)
 {
     std::vector<CharacterData> buffer;
