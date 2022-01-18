@@ -4,14 +4,21 @@ namespace string_util
 {
     std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
 
-    std::size_t hash_string(std::span<const uchar> seq)
+    template <typename T>
+    std::enable_if_t<std::is_integral_v<T>, std::size_t> hash_seq(std::span<const T> seq, bool case_sens)
     {
         static constexpr uint64 fnv_prime = 16777619ui64;
 
+        auto real_seq = std::span(reinterpret_cast<const uchar*>(seq.data()), seq.size() * sizeof(T));
+
         std::size_t result = 2166136261u;
 
-        for (auto& element : seq)
+        for (auto element : real_seq)
         {
+            //hash不区分大小写
+            if (!case_sens && element >= 'a' && element <= 'z')
+                element -= 0x20;
+
             result ^= element;
             result = static_cast<uint>((result * fnv_prime) % 4294967296ui64);
         }
@@ -19,18 +26,13 @@ namespace string_util
         return result;
     }
 
-    std::size_t hash_string(std::span<const char> seq)
+    std::span<const uchar> get_string_span(const std::string& str)
     {
-        return hash_string(std::span(reinterpret_cast<const uchar*>(seq.data()), seq.size()));
-    }
-
-    std::span<const char> get_string_span(const std::string& str)
-    {
-        return { str };
+        return { reinterpret_cast<const uchar*>(str.c_str()), str.size() };
     }
 
     template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, std::span<const uchar>> get_string_span(const T* str)
+    std::enable_if_t<std::is_integral_v<T>, std::span<const T>> get_string_span(const T* str)
     {
         std::size_t size = 0;
 
@@ -45,7 +47,7 @@ namespace string_util
             }
         }
 
-        return { reinterpret_cast<const uchar*>(str), size * sizeof(T) };
+        return { str, size };
     }
 
     template <typename T>
@@ -58,25 +60,19 @@ namespace string_util
         return result;
     }
 
-    template <typename T>
-    std::enable_if_t<std::is_integral_v<T>, std::size_t> hash_string(const T* str)
+    std::size_t hash_string(const std::string& str, bool case_sens)
     {
-        return hash_string(get_string_span(str));
+        return hash_seq(get_string_span(str), case_sens);
     }
 
-    std::size_t hash_string(const std::string& str)
+    std::size_t hash_string(const char* str, bool case_sens)
     {
-        return hash_string(get_string_span(str));
+        return hash_seq(get_string_span(str), case_sens);
     }
 
-    std::size_t hash_string(const char* str)
+    std::size_t hash_string(const GTAChar* str, bool case_sens)
     {
-        return hash_string(get_string_span(str));
-    }
-
-    std::size_t hash_string(const GTAChar* str)
-    {
-        return hash_string(get_string_span(str));
+        return hash_seq(get_string_span(str), case_sens);
     }
 
     //8C5510
@@ -106,7 +102,7 @@ namespace string_util
 
                 //将dst的hash和src的数据存入map，供gtaExpandString查找
                 //注意要以实际复制的长度取dst
-                string_map.emplace(hash_string(std::span(dst, copied_size)), get_string_vector(src));
+                string_map.emplace(hash_seq(std::span<const uchar>(dst, copied_size), true), get_string_vector(src));
             }
         }
 
@@ -121,7 +117,9 @@ namespace string_util
         if (src == nullptr || dst == nullptr)
             return;
 
-        auto wide_string_it = string_map.find(hash_string(src));
+        auto src_span = get_string_span(src);
+
+        auto wide_string_it = string_map.find(hash_seq(src_span, true));
 
         if (wide_string_it != string_map.end())
         {
@@ -130,7 +128,6 @@ namespace string_util
         }
         else
         {
-            auto src_span = get_string_span(src);
             ranges::copy(src_span, dst);
             dst[src_span.size()] = 0;
         }

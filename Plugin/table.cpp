@@ -16,7 +16,7 @@ void CTable::LoadTable(const std::filesystem::path& filename)
 
     for (auto& entry : buffer)
     {
-        m_Table.insert_or_assign(entry.code, entry.pos);
+        m_Table.emplace(entry.code, entry.pos);
     }
 }
 

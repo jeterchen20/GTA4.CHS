@@ -4,9 +4,9 @@
 namespace string_util
 {
     //字符串哈希函数
-    std::size_t hash_string(const std::string& str);
-    std::size_t hash_string(const char* str);
-    std::size_t hash_string(const GTAChar *str);
+    std::size_t hash_string(const std::string& str, bool case_sens);
+    std::size_t hash_string(const char* str, bool case_sens);
+    std::size_t hash_string(const GTAChar* str, bool case_sens);
 
     //非邮件
     uchar* gtaTruncateString(uchar* dst, const GTAChar* src, unsigned size);

@@ -1,8 +1,6 @@
 ﻿#include "game.h"
 #include "plugin.h"
 
-CGame game;
-
 void CGame::Graphics_SetRenderState(void* texture, int arg4)
 {
     injector::cstd<void(void*, int)>::call(game_addr.fnGraphics_SetRenderState, texture, arg4);

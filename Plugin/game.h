@@ -62,5 +62,3 @@ public:
 
     float Font_GetActualLineHeight();
 };
-
-extern CGame game;

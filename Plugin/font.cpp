@@ -1,5 +1,4 @@
 ﻿#include "font.h"
-#include "game.h"
 #include "plugin.h"
 #include "table.h"
 
@@ -15,9 +14,9 @@ static void* pChsFont;
 
 void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
 {
-    void* result = game.Dictionary_GetElementByKey(pDictionary, hash);
+    void* result = plugin.game.Dictionary_GetElementByKey(pDictionary, hash);
 
-    pChsFont = game.Dictionary_GetElementByKey(pDictionary, game.Hash_HashStringFromSeediCase("font_chs"));
+    pChsFont = plugin.game.Dictionary_GetElementByKey(pDictionary, plugin.game.Hash_HashStringFromSeediCase("font_chs"));
 
     return result;
 }
@@ -123,17 +122,17 @@ __declspec(naked) void CFont::GetStringWidthHook()
 
 float CFont::GetCHSCharacterSizeNormal()
 {
-    uchar index = game.Font_GetRenderIndex();
+    uchar index = plugin.game.Font_GetRenderIndex();
 
     
-    return ((fChsWidth / *game.game_addr.pFont_ResolutionX + game.game_addr.pFont_Details[index].fEdgeSize2) * game.game_addr.pFont_Details[index].fScaleX);
+    return ((fChsWidth / *plugin.game.game_addr.pFont_ResolutionX + plugin.game.game_addr.pFont_Details[index].fEdgeSize2) * plugin.game.game_addr.pFont_Details[index].fScaleX);
 }
 
 float CFont::GetCharacterSizeNormalDispatch(GTAChar chr)
 {
     if (IsNativeChar(chr + 0x20))
     {
-        return game.Font_GetCharacterSizeNormal(chr);
+        return plugin.game.Font_GetCharacterSizeNormal(chr);
     }
     else
     {
@@ -150,14 +149,14 @@ float CFont::GetCHSCharacterSizeDrawing(bool use_extra_width)
         extrawidth = 1.0f;
     }
 
-    return (((fChsWidth + extrawidth) / *game.game_addr.pFont_ResolutionX + game.game_addr.pFont_RenderState->fEdgeSize) * game.game_addr.pFont_RenderState->fScaleX);
+    return (((fChsWidth + extrawidth) / *plugin.game.game_addr.pFont_ResolutionX + plugin.game.game_addr.pFont_RenderState->fEdgeSize) * plugin.game.game_addr.pFont_RenderState->fScaleX);
 }
 
 float CFont::GetCharacterSizeDrawingDispatch(GTAChar chr, bool use_extra_width)
 {
     if (IsNativeChar(chr + 0x20))
     {
-        return game.Font_GetCharacterSizeDrawing(chr, use_extra_width);
+        return plugin.game.Font_GetCharacterSizeDrawing(chr, use_extra_width);
     }
     else
     {
@@ -174,16 +173,16 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
         return;
     }
 
-    if (-(GetCHSCharacterSizeDrawing(true) / game.game_addr.pFont_RenderState->fScaleX) > x || x > 1.0f)
+    if (-(GetCHSCharacterSizeDrawing(true) / plugin.game.game_addr.pFont_RenderState->fScaleX) > x || x > 1.0f)
     {
         return;
     }
 
-    auto pos = game.table.GetCharPos(chr);
+    auto pos = plugin.game.table.GetCharPos(chr);
 
     float sprite_width = fSpriteWidth / fTextureResolution;
-    float character_width = (fChsWidth / *game.game_addr.pFont_ResolutionX + game.game_addr.pFont_RenderState->fEdgeSize) * game.game_addr.pFont_RenderState->fScaleX;
-    float character_height = game.game_addr.pFont_RenderState->fScaleY * 0.06558f;
+    float character_width = (fChsWidth / *plugin.game.game_addr.pFont_ResolutionX + plugin.game.game_addr.pFont_RenderState->fEdgeSize) * plugin.game.game_addr.pFont_RenderState->fScaleX;
+    float character_height = plugin.game.game_addr.pFont_RenderState->fScaleY * 0.06558f;
 
     screenrect.fBottomLeftX = x;
     screenrect.fBottomLeftY = y + character_height;
@@ -199,26 +198,26 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
     texturerect.fBottomLeftX = pos.column / fTextureColumnsCount;
     texturerect.fTopRightX = pos.column / fTextureColumnsCount + sprite_width;
 
-    switch (game.game_addr.pFont_RenderState->nFont)
+    switch (plugin.game.game_addr.pFont_RenderState->nFont)
     {
     case 0:
     case 1:
     case 3:
-        game.Graphics_SetRenderState(pChsFont);
+        plugin.game.Graphics_SetRenderState(pChsFont);
         break;
 
     default:
         break;
     }
 
-    game.Font_Render2DPrimitive(&screenrect, &texturerect, game.game_addr.pFont_RenderState->field_18, false);
+    plugin.game.Font_Render2DPrimitive(&screenrect, &texturerect, plugin.game.game_addr.pFont_RenderState->field_18, false);
 }
 
 void CFont::PrintCharDispatch(float x, float y, GTAChar chr, bool buffered)
 {
-    if (game.game_addr.pFont_RenderState->TokenType != 0 || IsNativeChar(chr + 0x20))
+    if (plugin.game.game_addr.pFont_RenderState->TokenType != 0 || IsNativeChar(chr + 0x20))
     {
-        game.Font_PrintChar(x, y, chr, buffered);
+        plugin.game.Font_PrintChar(x, y, chr, buffered);
     }
     else
     {

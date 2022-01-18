@@ -1,10 +1,6 @@
 ﻿#pragma once
 #include "../common/stdinc.h"
 
-HANDLE WINAPI RedirectCreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
-                                  LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition,
-                                  DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
-
 class file_redirect
 {
 public:
@@ -18,5 +14,3 @@ public:
 private:
     std::unordered_map<std::size_t, std::string> m_redirect_table;
 };
-
-extern file_redirect redirector;
