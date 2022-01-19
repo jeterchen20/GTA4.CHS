@@ -267,8 +267,6 @@ HANDLE WINAPI RedirectCreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWOR
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes,
     HANDLE hTemplateFile)
 {
-    auto result = CreateFileA(plugin.redirector.redirect_path(lpFileName), dwDesiredAccess, dwShareMode, lpSecurityAttributes,
+    return CreateFileA(plugin.redirector.redirect_path(lpFileName), dwDesiredAccess, dwShareMode, lpSecurityAttributes,
         dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
-
-    return result;
 }

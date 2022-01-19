@@ -1,30 +1,23 @@
-﻿Esc菜单鼠标指向只变色一个词
-看看5D5FE9处转换的是啥
+﻿-----------issue list-----------
+手机右功能键异常换行
+
+Esc菜单Header热区
+
+Esc菜单Header间距
+
+TBoGT/TLAD文件夹重定位不正确，大概要分成3个哈希表，然后读游戏的episode
+
+邮件回复打字效果显示不正确 可能是5D60F5处理的
+实现打字效果，可能需要utf8cpp流式解析utf8
 替换11734E8变成自己开辟的缓冲区，即可只使用转码式字符串缩窄扩展函数
 
-带</br>之类标签的网页文本乱码，断8C56F0查看后续处理
-www.libertytreeonline.com/news.html
-LCT_PAR_26_1
-5D8999 获取网页文章文本
-避免替换<br/>为~n~
-把GetMaxWordWidth加回来
-5D88F0 跟html node解析有关的
-邮件乱码 EM_14_39
-5E7B46 获取邮件正文
-接着的91EBC0又是一个缩窄函数，但没有指定大小的
-5E4484转移数据
-4132E0 解析邮件html的
-41352D转移字节
-5E4440 将字符串储存到自己的内存中
-5E5261 貌似是取出一个字符，可能要替换成utf8版本
-5E5205搬运字节的，可能要插入utf8解码，并额外增加esi
-5D5FE9 扩展字符串的--就是实际要绘制的字符串
-5E5250 替换xml字符(如&nbsp/&gt/&copy等)。
+邮件中的</br>标签无效，断8C56F0查看后续处理
+或替换成~n~
 
 如遇到&copy返回0xA9(原版字库中的copyright)，导致gtaExpandString2直接转码出问题，可能需要gtaExpandString2单独判断leading 0xA9
 目前没发现有copyright，先放着
 
--------------1.2.0.43----------------------
+----------------------reverse note----------------------
 从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
 
@@ -40,9 +33,3 @@ ESC菜单Header文本
 通过断CFont_SetColor寻找控制Header颜色的逻辑
 
 不让标点符号出现在行首..需要重写排版函数
-
-独立的中文字库(font_chs.wtd)，放在GTA4.CHS/中
-5B6030 接受一个字符串，创建texture directory?
-8DFDF0 接受一个文件名,读取wtd
-然后连着调用 5B6110 8E01C0
-或者..直接构造grcTexturePC

@@ -27,8 +27,8 @@ void file_redirect::scan_files()
             //windows不区分大小写
             m_redirect_table.emplace(string_util::hash_string(substitue_full_path_string, false), full_path_string);
 
-            //TODO: 研究用releative_path_string不行的原因
-            m_redirect_table.emplace(string_util::hash_string(substitue_relative_path_string, false), full_path_string);
+            //用VS F5时当前目录是项目位置，所以重定向会失败
+            m_redirect_table.emplace(string_util::hash_string(substitue_relative_path_string, false), releative_path_string);
         }
     }
 }
