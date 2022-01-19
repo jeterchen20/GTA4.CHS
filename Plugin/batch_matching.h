@@ -18,6 +18,7 @@ public:
     void register_step(const char *pattern, std::size_t desired_size, callback_type callback);
     void clear();
     void perform_search();
+    void perform_search_mt();
     bool is_all_succeed() const;
     void run_callbacks() const;
 

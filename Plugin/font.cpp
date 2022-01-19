@@ -10,13 +10,14 @@ static const float fTextureRowsCount = 51.2f;
 static const float fTextureColumnsCount = 64.0f;
 static const float fRatio = 4.0f;
 
-static void* pChsFont;
+static void* pChsTextureDictionary;
+static void* pChsTexture;
 
 void* __fastcall CFont::LoadTextureCB(void* pDictionary, int, uint hash)
 {
     void* result = plugin.game.Dictionary_GetElementByKey(pDictionary, hash);
 
-    pChsFont = plugin.game.Dictionary_GetElementByKey(pDictionary, plugin.game.Hash_HashStringFromSeediCase("font_chs"));
+    pChsTexture = plugin.game.Dictionary_GetElementByKey(pDictionary, plugin.game.Hash_HashStringFromSeediCase("font_chs"));
 
     return result;
 }
@@ -203,7 +204,7 @@ void CFont::PrintCHSChar(float x, float y, GTAChar chr)
     case 0:
     case 1:
     case 3:
-        plugin.game.Graphics_SetRenderState(pChsFont);
+        plugin.game.Graphics_SetRenderState(pChsTexture);
         break;
 
     default:

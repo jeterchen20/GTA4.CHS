@@ -21,6 +21,51 @@ void batch_matching::perform_search()
     }
 }
 
+void batch_matching::perform_search_mt()
+{
+    constexpr std::size_t thread_count = 4;
+
+    std::atomic_flag tasks_fetch_flag = ATOMIC_FLAG_INIT;
+    std::size_t free_step_index = 0;
+
+    auto search_proc = [&tasks_fetch_flag, &free_step_index, this]()
+    {
+        byte_pattern pattern_obj;
+
+        while (true)
+        {
+            if (tasks_fetch_flag.test_and_set(std::memory_order::memory_order_acq_rel))
+                continue;
+
+            if (free_step_index >= _steps.size())
+            {
+                break;
+            }
+
+            auto my_index = free_step_index;
+            ++free_step_index;
+            tasks_fetch_flag.clear(std::memory_order::memory_order_release); //拿到自己的任务后就要释放锁
+
+            pattern_obj.find_pattern(_steps[my_index].pattern.c_str());
+            _steps[my_index].result = pattern_obj.get();
+        }
+
+        tasks_fetch_flag.clear(std::memory_order::memory_order_release);
+    };
+
+    std::array<std::thread, thread_count> search_threads;
+
+    for (auto& thread : search_threads)
+    {
+        thread = std::thread(search_proc);
+    }
+
+    for (auto& thread : search_threads)
+    {
+        thread.join();
+    }
+}
+
 bool batch_matching::is_all_succeed() const
 {
     return ranges::all_of(_steps,

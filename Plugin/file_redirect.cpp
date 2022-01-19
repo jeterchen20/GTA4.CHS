@@ -26,15 +26,16 @@ void file_redirect::scan_files()
 
             //windows不区分大小写
             m_redirect_table.emplace(string_util::hash_string(substitue_full_path_string, false), full_path_string);
-            m_redirect_table.emplace(string_util::hash_string(substitue_relative_path_string, false), releative_path_string);
+
+            //TODO: 研究用releative_path_string不行的原因
+            m_redirect_table.emplace(string_util::hash_string(substitue_relative_path_string, false), full_path_string);
         }
     }
 }
 
 const char* file_redirect::redirect_path(const char* original_path) const
 {
-    auto hash = string_util::hash_string(original_path, false);
-    auto table_it = m_redirect_table.find(hash);
+    auto table_it = m_redirect_table.find(string_util::hash_string(original_path, false));
 
     return
         table_it == m_redirect_table.end() ?

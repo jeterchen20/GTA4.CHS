@@ -48,6 +48,7 @@
 #include <fmt/printf.h>
 #include <zlib.h>
 #include <range/v3/algorithm.hpp>
+#include <range/v3/view.hpp>
 
 typedef std::uint16_t GTAChar;
 typedef unsigned char uchar;

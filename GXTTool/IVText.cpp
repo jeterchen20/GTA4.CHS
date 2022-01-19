@@ -2,19 +2,25 @@
 
 void IVText::Process0Arg()
 {
-    //text文件夹->gxt
-    m_Data.clear();
+    wchar_t c_path[512];
 
     auto hmodule = GetModuleHandleW(NULL);
 
-    LoadTexts(relative_to_executable(hmodule, "text"));
+    ::GetModuleFileNameW(hmodule, c_path, 512);
+    std::filesystem::path cpp_path{ c_path };
+    auto root = cpp_path.parent_path();
+
+    //text文件夹->gxt
+    m_Data.clear();
+
+    LoadTexts(root / "text");
 
     if (!m_Data.empty())
     {
-        GenerateBinary(relative_to_executable(hmodule, "chinese.gxt"));
+        GenerateBinary(root / "chinese.gxt");
         CollectChars();
-        GenerateCollection(relative_to_executable(hmodule, "characters.txt"));
-        GenerateTable(relative_to_executable(hmodule, "table.dat"));
+        GenerateCollection(root / "characters.txt");
+        GenerateTable(root / "table.dat");
     }
 }
 
@@ -22,8 +28,6 @@ void IVText::Process2Args(const PathType& arg1, const PathType& arg2)
 {
     //指定路径的文件夹/gxt互转
     m_Data.clear();
-
-    auto hmodule = GetModuleHandleW(NULL);
 
     if (is_directory(arg1))
     {
@@ -129,7 +133,7 @@ void IVText::LoadText(const PathType& input_text)
                 auto b_string = matches.str(2);
                 entry.text = b_string;
 
-                if ((std::count(b_string.begin(), b_string.end(), '~') % 2) != 0)
+                if ((ranges::count(b_string, '~') % 2) != 0)
                 {
                     std::cout << filename << ": " << "第" << line_no << "行的 \'~\' 个数不是偶数！" << std::endl;
                 }
@@ -239,7 +243,7 @@ void IVText::GenerateBinary(const PathType& output_binary) const
             keyEntry.Offset = datas.size() * 2;
 
             auto w_string_to_write = SpaceCEKB(U8ToWide(entry.text));
-            std::copy(w_string_to_write.begin(), w_string_to_write.end(), std::back_inserter(datas));
+            ranges::copy(w_string_to_write, std::back_inserter(datas));
 
             keys.push_back(keyEntry);
         }
@@ -581,8 +585,8 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
 
         case span_type::SPAN_NATIVE_WORD:
         {
-            if (next_span_type != span_type::SPAN_PLACEHOLDER && 
-                next_span_type != span_type::SPAN_SPACE && 
+            if (next_span_type != span_type::SPAN_PLACEHOLDER &&
+                next_span_type != span_type::SPAN_SPACE &&
                 next_span_type != span_type::SPAN_VALUE_PRINT_TOKEN)
                 result.push_back(' ');
 

@@ -53,11 +53,7 @@ namespace string_util
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, std::vector<T>> get_string_vector(const T* str)
     {
-        std::vector<T> result;
-
-        ranges::copy(get_string_span(str), std::back_inserter(result));
-
-        return result;
+        return ranges::to<std::vector>(get_string_span(str));
     }
 
     std::size_t hash_string(const std::string& str, bool case_sens)

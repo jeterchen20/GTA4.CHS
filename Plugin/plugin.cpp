@@ -150,7 +150,7 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
 #if 1
-    //存档名字缓存
+    //替换存档标题的字符串缩窄扩展函数
     batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [this](const byte_pattern::result_type& addresses)
         {
             injector::MakeCALL(addresses[0].i(13), string_util::gtaTruncateString);
@@ -160,8 +160,21 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
         {
             injector::MakeCALL(addresses[0].i(13), string_util::gtaExpandString);
         });
+
+    //替换邮件界面的字符串缩窄扩展函数
+    batch_matcher.register_step("8B F8 8D 44 24 08 50 57 E8", 1, [this](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(8), string_util::gtaTruncateString2);
+        });
+
+    batch_matcher.register_step("74 0A 50 55 E8", 2, [this](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(4), string_util::gtaExpandString2);
+            injector::MakeCALL(addresses[1].i(4), string_util::gtaExpandString2);
+        });
+
 #else
-    //替换字符串缩窄扩展函数
+    //替换所有字符串缩窄扩展函数
     batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [this](const byte_pattern::result_type& addresses)
         {
             injector::MakeJMP(injector::GetBranchDestination(addresses[0].i(13)), string_util::gtaTruncateString);
@@ -233,7 +246,11 @@ bool CPlugin::Init()
 
     RegisterPatchSteps(batch_matcher);
 
+#if 1
     batch_matcher.perform_search();
+#else
+    batch_matcher.perform_search_mt();
+#endif
 
     if (!batch_matcher.is_all_succeed())
         return false;
@@ -250,6 +267,8 @@ HANDLE WINAPI RedirectCreateFileA(LPCSTR lpFileName, DWORD dwDesiredAccess, DWOR
     LPSECURITY_ATTRIBUTES lpSecurityAttributes, DWORD dwCreationDisposition, DWORD dwFlagsAndAttributes,
     HANDLE hTemplateFile)
 {
-    return CreateFileA(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes,
+    auto result = CreateFileA(plugin.redirector.redirect_path(lpFileName), dwDesiredAccess, dwShareMode, lpSecurityAttributes,
         dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+
+    return result;
 }

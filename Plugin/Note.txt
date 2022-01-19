@@ -1,6 +1,6 @@
 ﻿Esc菜单鼠标指向只变色一个词
-
-fnv_1a函数应该只接受span<const uchar>，GTAChar需要转换
+看看5D5FE9处转换的是啥
+替换11734E8变成自己开辟的缓冲区，即可只使用转码式字符串缩窄扩展函数
 
 带</br>之类标签的网页文本乱码，断8C56F0查看后续处理
 www.libertytreeonline.com/news.html
@@ -24,8 +24,6 @@ LCT_PAR_26_1
 如遇到&copy返回0xA9(原版字库中的copyright)，导致gtaExpandString2直接转码出问题，可能需要gtaExpandString2单独判断leading 0xA9
 目前没发现有copyright，先放着
 
-尝试在全局对象构造函数中hook，看能否创建线程
-
 -------------1.2.0.43----------------------
 从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
@@ -42,3 +40,9 @@ ESC菜单Header文本
 通过断CFont_SetColor寻找控制Header颜色的逻辑
 
 不让标点符号出现在行首..需要重写排版函数
+
+独立的中文字库(font_chs.wtd)，放在GTA4.CHS/中
+5B6030 接受一个字符串，创建texture directory?
+8DFDF0 接受一个文件名,读取wtd
+然后连着调用 5B6110 8E01C0
+或者..直接构造grcTexturePC
