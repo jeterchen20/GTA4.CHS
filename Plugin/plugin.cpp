@@ -94,13 +94,13 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
     //获取字符串宽度
-    batch_matcher.register_step("0F B7 06 83 F8 20", 1, [this](const std::vector<memory_pointer>& addresses)
+    batch_matcher.register_step("0F B7 06 83 F8 20", 1, [this](const byte_pattern::result_type& addresses)
         {
             injector::MakeCALL(addresses[0].i(), CFont::GetStringWidthHook);
         });
 
     //跳过单词
-    batch_matcher.register_step("57 8B 7C 24 08 85 FF 75 04 33 C0 5F C3 56", 1, [this](const std::vector<memory_pointer>& addresses)
+    batch_matcher.register_step("57 8B 7C 24 08 85 FF 75 04 33 C0 5F C3 56", 1, [this](const byte_pattern::result_type& addresses)
         {
             injector::MakeJMP(addresses[0].i(), CFont::SkipWord);
         });
