@@ -190,21 +190,10 @@ struct CHtmlCssDeclaration {
     uint       m_eDataType; // data type (0 - int, 1 - float, .., 3 - color, ..., 6 - unused)    
 };
 
-struct pgMaxArray_CHtmlCssDeclaration :pgObjectArray<CHtmlCssDeclaration>
-{
-
-};
-
-struct CHtmlCssSelector;
-struct pgPtr_CHtmlCssSelector :pgPtr<CHtmlCssSelector>
-{
-
-};
-
 struct CHtmlCssSelector {
     HtmlTag                             m_eTag;
-    pgMaxArray_CHtmlCssDeclaration   m_aDeclarations;
-    pgPtr_CHtmlCssSelector              _fC;
+    pgObjectArray<CHtmlCssDeclaration>   m_aDeclarations;
+    pgPtr<CHtmlCssSelector>              _fC;
 };
 
 struct CHtmlNode
@@ -221,22 +210,13 @@ struct CHtmlDataNode :CHtmlNode
 {
     pgString m_pData;
 };
-
-struct CCharCollection :pgObjectArray<char>
-{
-
-};
-
-struct CPtrCollection :pgPtrArray<uint>
-{
-
-};
+VALIDATE_SIZE(CHtmlDataNode, 224);
 
 struct CHtmlTableNode :CHtmlNode
 {
     HtmlTag         m_eHtmlTag;
     pgString    m_pszTagName;
-    CCharCollection m_nodeParam;
+    pgObjectArray<char> m_nodeParam;
     pgPtr<void>   _fE8;
     pgPtr<void>   _fEC;
     pgPtr<void>   _fF0;
@@ -245,60 +225,47 @@ struct CHtmlTableNode :CHtmlNode
     DWORD   m_dwCellCount;
     DWORD   _f100;
 };
+VALIDATE_SIZE(CHtmlTableNode, 260);
+
+struct CHtmlElementNode :CHtmlNode
+{
+    HtmlTag         m_eHtmlTag;
+    pgString    m_pszTagName;
+    pgObjectArray<char> m_nodeParam;
+    int    _fE8;
+    int    _fEC;
+};
+VALIDATE_SIZE(CHtmlElementNode, 232);
 
 struct CHtmlTableElementNode :CHtmlNode
 {
     HtmlTag         m_eHtmlTag;
     pgString    m_pszTagName;
-    CCharCollection m_nodeParam;
+    pgObjectArray<char> m_nodeParam;
     int    _fE8;
     int    _fEC;
 };
-
-struct pgPtr_CHtmlNode :pgPtr<CHtmlNode>
-{
-
-};
-
-struct pgSizeArray_CHtmlNode :pgPtrArray<CHtmlNode>
-{
-
-};
+VALIDATE_SIZE(CHtmlTableElementNode, 240);
 
 struct CHtmlStylesheet;
 
-struct pgPtr_CHtmlStylesheet :pgPtr<CHtmlStylesheet>
-{
-
-};
-
-struct pgMaxArray_CHtmlStylesheet :pgPtrArray<CHtmlStylesheet>
-{
-
-};
-
-struct pgSizeArray_CHtmlCssSelector :pgPtrArray<CHtmlCssSelector>
-{
-
-};
-
 struct CHtmlStylesheet {
     DWORD           _f0;    // unknown (hash?)
-    pgSizeArray_CHtmlCssSelector   _f4;
+    pgObjectArray<CHtmlCssSelector>   _f4;
     BYTE            _padC[3];
     BYTE            _fF;
-    pgPtr_CHtmlStylesheet   m_pNext;
+    pgPtr<CHtmlStylesheet>   m_pNext;
 };
 
 struct CHtmlDocument
 {
-    pgPtr_CHtmlNode m_pRootElement;
-    pgPtr_CHtmlNode m_pBody;
+    pgPtr<CHtmlNode> m_pRootElement;
+    pgPtr<CHtmlNode> m_pBody;
     pgString m_pszTitle;
     pgPtr_pgDictionary_grcTexturePC m_pTxd;
-    CPtrCollection _f10; //有可能是全0，也要处理
-    pgSizeArray_CHtmlNode m_childNodes;
-    pgMaxArray_CHtmlStylesheet m_pStylesheet;
+    pgPtrArray<void> _f10; //有可能是全0，也要处理
+    pgObjectArray<CHtmlNode>  m_childNodes;
+    pgObjectArray<CHtmlStylesheet> m_pStylesheet;
     uchar pad[3];
     uchar _f2B;
 

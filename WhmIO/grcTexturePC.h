@@ -8,14 +8,16 @@ struct pgPtr_OffsetMap :pgPtr<std::array<uint, 132>>
 
 struct grcTexturePC
 {
-    uint vtbl;
+    virtual ~grcTexturePC() = default;
+
+    //uint vtbl;
     pgPtr_OffsetMap m_pOffsetMap;
     uchar    _f8;
     uchar    m_nbDepth;
     ushort    _fA;
     uint   _fC;
     uint   _f10;
-    pgPtr_String    m_pszName;
+    pgString    m_pszName;
     uint   m_piTexture;
     ushort    m_wWidth;
     ushort    m_wHeight;
@@ -34,32 +36,12 @@ struct grcTexturePC
     uchar    _f4F;
 };
 
-struct pgPtr_grcTexturePC :pgPtr<grcTexturePC>
-{
-
-};
-
-struct pgSizeArray_uint :pgSizeArray<uint>
-{
-
-};
-
-struct pgSizeArray_grcTexturePC :pgSizeArray<pgPtr_grcTexturePC>
-{
-
-};
-
 struct pgDictionary_grcTexturePC
 {
     uint           vtbl;
     pgPtr_OffsetMap m_pOffsetMap;
     uint           m_pParent;
     uint           m_dwUsageCount;
-    pgSizeArray_uint   m_hashes;
-    pgSizeArray_grcTexturePC    m_data;
-};
-
-struct pgPtr_pgDictionary_grcTexturePC :pgPtr<pgDictionary_grcTexturePC>
-{
-
+    pgObjectArray<uint>   m_hashes;
+    pgObjectArray<grcTexturePC>    m_data;
 };

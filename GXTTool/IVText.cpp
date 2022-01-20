@@ -1,4 +1,5 @@
 ﻿#include "IVText.h"
+#include "additional_chars.h"
 
 void IVText::Process0Arg()
 {
@@ -34,6 +35,7 @@ void IVText::Process2Args(const PathType& arg1, const PathType& arg2)
         create_directories(arg2);
         LoadTexts(arg1);
         GenerateBinary(arg2 / "chinese.gxt");
+        CollectChars();
         GenerateCollection(arg2 / "characters.txt");
         GenerateTable(arg2 / "table.dat");
     }
@@ -85,6 +87,26 @@ void IVText::CollectChars()
             }
         }
     }
+
+    auto span_to_add = additional_chars::GetAddChars();
+
+    m_Chars.insert(span_to_add.begin(), span_to_add.end());
+
+    //排除不用记录的字符
+    for (auto it = m_Chars.begin(); it != m_Chars.end();)
+    {
+        if (IsNativeCharacter(*it))
+        {
+            it = m_Chars.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    //排除全角空格
+    m_Chars.erase(0x3000);
 }
 
 void IVText::LoadText(const PathType& input_text)
@@ -555,6 +577,7 @@ IVText::wStringType IVText::SpaceCEKB(const IVText::wStringType& w_text)
             break;
         }
 
+        //为了处理 "汉字~s~~BLIP_24~" 这类情况才写得这么哆嗦
         case span_type::SPAN_ZERO_WIDTH_TOKEN:
         {
             if ((((prev_span_type != span_type::SPAN_PLACEHOLDER && prev_span_type != span_type::SPAN_ZERO_WIDTH_TOKEN && prev_span_type != span_type::SPAN_CN_WORD) &&

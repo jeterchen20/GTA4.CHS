@@ -149,7 +149,6 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeJMP(addresses[0].i(), GetTextFileName);
         });
 
-#if 1
     //替换存档标题的字符串缩窄扩展函数
     batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [this](const byte_pattern::result_type& addresses)
         {
@@ -161,7 +160,7 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeCALL(addresses[0].i(13), string_util::gtaExpandString);
         });
 
-    //替换邮件界面的字符串缩窄扩展函数
+    //替换邮件/网页的字符串缩窄扩展函数
     batch_matcher.register_step("8B F8 8D 44 24 08 50 57 E8", 1, [this](const byte_pattern::result_type& addresses)
         {
             injector::MakeCALL(addresses[0].i(8), string_util::gtaTruncateString2);
@@ -173,30 +172,21 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeCALL(addresses[1].i(4), string_util::gtaExpandString2);
         });
 
-#else
-    //替换所有字符串缩窄扩展函数
-    batch_matcher.register_step("6A 3C 05 ? ? ? ? 50 68 ? ? ? ? E8", 1, [this](const byte_pattern::result_type& addresses)
-        {
-            injector::MakeJMP(injector::GetBranchDestination(addresses[0].i(13)), string_util::gtaTruncateString);
-        });
-
-    batch_matcher.register_step("8D 84 24 4C 01 00 00 50 8D 44 24 1C 50 E8", 1, [this](const byte_pattern::result_type& addresses)
-        {
-            injector::MakeJMP(injector::GetBranchDestination(addresses[0].i(13)), string_util::gtaExpandString);
-        });
-#endif
+    //邮件回复的逐字出现效果
 
     //Esc菜单Header间距
 
     //Esc菜单Header热区
 
-    //手机右下角功能键异常换行(增大wrap)
+    //手机右下角功能键异常换行(减小x坐标)
 
-    //重定向GTA4.CHS中存在的文件路径
+    //用plugins/GTA4.CHS/redirect/中存在的文件替代游戏文件
     batch_matcher.register_step("83 C4 04 50 FF 15 ? ? ? ? 8B F0", 6, [this](const byte_pattern::result_type& addresses)
         {
             injector::WriteMemory(*addresses[0].p<void*>(6), &RedirectCreateFileA, true);
         });
+
+    //资料片文件重定向
 }
 
 std::filesystem::path CPlugin::GetModuleFolder(HMODULE m)

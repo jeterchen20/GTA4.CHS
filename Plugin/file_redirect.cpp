@@ -33,7 +33,7 @@ void file_redirect::scan_files()
     }
 }
 
-const char* file_redirect::redirect_path(const char* original_path) const
+const char* file_redirect::redirect_path(const char* original_path, game_episode episode) const
 {
     auto table_it = m_redirect_table.find(string_util::hash_string(original_path, false));
 

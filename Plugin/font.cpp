@@ -125,7 +125,7 @@ float CFont::GetCHSCharacterSizeNormal()
 {
     uchar index = plugin.game.Font_GetRenderIndex();
 
-    
+
     return ((fChsWidth / *plugin.game.game_addr.pFont_ResolutionX + plugin.game.game_addr.pFont_Details[index].fEdgeSize2) * plugin.game.game_addr.pFont_Details[index].fScaleX);
 }
 
@@ -168,6 +168,10 @@ float CFont::GetCharacterSizeDrawingDispatch(GTAChar chr, bool use_extra_width)
 void CFont::PrintCHSChar(float x, float y, GTAChar chr)
 {
     CRect screenrect, texturerect;
+
+    //跳过全角空格
+    if (chr == 0x3000)
+        return;
 
     if (y < -0.06558f || y > 1.0f)
     {
