@@ -160,6 +160,12 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
             injector::MakeCALL(addresses[0].i(13), string_util::gtaExpandString);
         });
 
+    //替换加载黑屏右下角的字符串扩展函数
+    batch_matcher.register_step("FF 35 ? ? ? ? E8 ? ? ? ? 83 C4 0C 50 E8", 1, [this](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(15), string_util::gtaExpandString);
+        });
+
     //替换邮件/网页的字符串缩窄扩展函数
     batch_matcher.register_step("8B F8 8D 44 24 08 50 57 E8", 1, [this](const byte_pattern::result_type& addresses)
         {

@@ -1,4 +1,8 @@
 ﻿-----------issue list-----------
+file_redirect功能与MOD额外文件(如GTAIV.EFLC.FusionFix.img)的兼容性问题，需要把额外的文件放到重定向目录，或者直接移除重定向功能
+
+把reverse note做成即使所有pattern失效也有用的文档，然后移除byte_pattern
+
 把U+3000从字库中排除，但要保证显示正常
 
 手机右功能键异常换行
@@ -7,13 +11,11 @@ Esc菜单Header热区
 
 Esc菜单Header间距
 
-TBoGT/TLAD文件夹重定位不正确，大概要分成3个哈希表，然后读游戏的episode
-
 邮件回复打字效果显示不正确 可能是5D60F5处理的
 实现打字效果，可能需要utf8cpp流式解析utf8
 替换11734E8变成自己开辟的缓冲区，即可只使用转码式字符串缩窄扩展函数
 
-网页/邮件字符过度压扁
+(看心情)网页/邮件字符过度压扁
 
 邮件中的</br>标签无效，断8C56F0查看后续处理
 或替换成~n~
@@ -22,14 +24,14 @@ TBoGT/TLAD文件夹重定位不正确，大概要分成3个哈希表，然后读
 目前没发现有copyright，先放着
 
 ----------------------reverse note----------------------
+8CBF74 获取加载黑屏右下角文字
+
 8DD88F 绘制邮件/网页的文字，跟邮件回复效果有关，[this+8]是要绘制的字符数
 
 5D5FE9 网页文字扩展
 5D60F5 貌似没用到的网页文字扩展
 
 sub_91EAC0(GTAChar *dst, const GTAChar *src, int size); size为-1时则全部复制
-
-貌似sub_8C5100计算了一堆路径，里面用了rage::fiDeviceRelative虚函数
 
 从"~%c~"找到CFont_ProcessString
 绘制手机屏幕文本
