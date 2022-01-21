@@ -104,6 +104,7 @@ public:
         return *this;
     }
 
+    //TODO: std::span<T>
     template <typename T>
     std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> WriteArray(const std::vector<T>& objects)
     {

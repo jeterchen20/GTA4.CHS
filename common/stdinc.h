@@ -45,6 +45,9 @@
 #include "../common/tinyutf8.h"
 
 //vcpkg
+#ifndef _DEBUG
+#define FMT_HEADER_ONLY
+#endif
 #include <fmt/printf.h>
 #include <zlib.h>
 #include <range/v3/algorithm.hpp>

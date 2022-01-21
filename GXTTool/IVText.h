@@ -69,6 +69,8 @@ struct DataBlock
 class IVText
 {
 public:
+    static constexpr unsigned Texture_CharsPerLine = 64;
+
     typedef std::filesystem::path PathType; //路径类型
     typedef GTAChar CharType; //宽字符(GXT)类型
     typedef std::uint32_t HashType; //GXT key类型
@@ -125,15 +127,3 @@ private:
     std::map<std::string, std::vector<TextEntry>, IVTextTableSorting> m_Data;
     std::set<char32_t> m_Chars;
 };
-
-template <std::size_t Value>
-struct is_pow_of_2 :std::conditional_t<(Value > 1) & !(Value & (Value - 1)), std::true_type, std::false_type>
-{
-
-};
-
-template <std::size_t Value>
-std::enable_if_t<is_pow_of_2<Value>::value, std::size_t> round_up_to_pow_of_2(std::size_t value)
-{
-    return (value + Value - 1u) & (~(Value - 1u));
-}

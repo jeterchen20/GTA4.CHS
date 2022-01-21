@@ -301,7 +301,7 @@ void IVText::GenerateCollection(const PathType& output_text) const
 
     for (auto character : m_Chars)
     {
-        if (count == 64)
+        if (count == Texture_CharsPerLine)
         {
             u8_text += L'\n';
             count = 0;
@@ -314,7 +314,7 @@ void IVText::GenerateCollection(const PathType& output_text) const
 
     std::ofstream stream(output_text, std::ios::trunc);
 
-    std::copy(u8_text.c_str(), u8_text.c_str() + u8_text.size(), std::ostreambuf_iterator<char>(stream));
+    std::copy_n(u8_text.c_str(), u8_text.size(), std::ostreambuf_iterator(stream));
 }
 
 void IVText::GenerateTable(const PathType& output_binary) const
@@ -329,7 +329,7 @@ void IVText::GenerateTable(const PathType& output_binary) const
     for (auto chr : m_Chars)
     {
         data.code = chr;
-        if (data.pos.column == 64)
+        if (data.pos.column == Texture_CharsPerLine)
         {
             ++data.pos.row;
             data.pos.column = 0;

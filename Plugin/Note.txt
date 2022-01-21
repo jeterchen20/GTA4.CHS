@@ -1,9 +1,9 @@
 ﻿-----------issue list-----------
+尝试减少字库方块高度到70(绘制时修正y轴)
+
 file_redirect功能与MOD额外文件(如GTAIV.EFLC.FusionFix.img)的兼容性问题，需要把额外的文件放到重定向目录，或者直接移除重定向功能
 
 把reverse note做成即使所有pattern失效也有用的文档，然后移除byte_pattern
-
-把U+3000从字库中排除，但要保证显示正常
 
 手机右功能键异常换行
 
