@@ -209,6 +209,7 @@ struct CHtmlNode
 struct CHtmlDataNode :CHtmlNode
 {
     pgString m_pData;
+    pgPtr<void> m_fDC;
 };
 VALIDATE_SIZE(CHtmlDataNode, 224);
 
@@ -262,7 +263,7 @@ struct CHtmlDocument
     pgPtr<CHtmlNode> m_pRootElement;
     pgPtr<CHtmlNode> m_pBody;
     pgString m_pszTitle;
-    pgPtr_pgDictionary_grcTexturePC m_pTxd;
+    pgPtr<pgDictionary<grcTexturePC>> m_pTxd;
     pgPtrArray<void> _f10; //有可能是全0，也要处理
     pgObjectArray<CHtmlNode>  m_childNodes;
     pgObjectArray<CHtmlStylesheet> m_pStylesheet;

@@ -10,7 +10,6 @@ struct grcTexturePC
 {
     virtual ~grcTexturePC() = default;
 
-    //uint vtbl;
     pgPtr_OffsetMap m_pOffsetMap;
     uchar    _f8;
     uchar    m_nbDepth;
@@ -36,12 +35,14 @@ struct grcTexturePC
     uchar    _f4F;
 };
 
-struct pgDictionary_grcTexturePC
+template <typename T>
+struct pgDictionary
 {
-    uint           vtbl;
+    virtual ~pgDictionary() = default;
+
     pgPtr_OffsetMap m_pOffsetMap;
     uint           m_pParent;
     uint           m_dwUsageCount;
     pgObjectArray<uint>   m_hashes;
-    pgObjectArray<grcTexturePC>    m_data;
+    pgObjectArray<T>    m_data;
 };

@@ -26,7 +26,7 @@ CharacterPos CTable::GetCharPos(GTAChar chr) const
 
     if (it == m_Table.end())
     {
-        return CharacterPos{ 50,63 }; //字库中此位置绘制白色方块
+        return { 50,63 }; //字库中此位置绘制白色方块
     }
     else
     {

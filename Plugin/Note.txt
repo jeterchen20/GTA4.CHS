@@ -49,5 +49,5 @@ ESC菜单Header文本
 
 不让标点符号出现在行首..需要重写排版函数
 
-5E6D60 根据字符串创建CHtmlNode
+5D6E60 根据字符串创建CHtmlNode
 FE0B70 HtmlNode子类的虚函数表->找到构造函数->找到对象大小
