@@ -179,6 +179,10 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
     //邮件回复的逐字出现效果
+    //batch_matcher.register_step("", 1, [this](const byte_pattern::result_type& addresses)
+    //    {
+    //
+    //    });
 
     //Esc菜单Header间距
 
