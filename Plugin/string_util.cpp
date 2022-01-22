@@ -2,7 +2,8 @@
 
 namespace string_util
 {
-    std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
+    static std::unordered_map<std::size_t, std::vector<GTAChar>> string_map; //key是单字节字符串的hash, value是原始宽字符串的内容
+    constexpr uchar pad_byte = 0xA7u; //用于填充的垃圾值
 
     template <typename T>
     std::enable_if_t<std::is_integral_v<T>, std::size_t> hash_seq(std::span<const T> seq, bool case_sens)
@@ -90,7 +91,7 @@ namespace string_util
                     //如果低字节恰好是0，就随便用一个整数填充，防止结果中出现意外的0，最好是非ASCII
                     //游戏也只是用结果进行字符串比较，应该没有问题
                     if ((c & 0xFFu) == 0)
-                        c |= 0xA7u;
+                        c |= pad_byte;
 
                     dst[copied_size] = static_cast<uchar>(c);
                     ++copied_size;
@@ -129,6 +130,7 @@ namespace string_util
         }
     }
 
+    //91EBC0
     void gtaTruncateString2(const GTAChar* src, uchar* dst)
     {
         tiny_utf8::utf8_string u8_string;
@@ -146,5 +148,26 @@ namespace string_util
         tiny_utf8::utf8_string u8_string(reinterpret_cast<const char*>(src));
         ranges::copy(u8_string, dst);
         dst[u8_string.length()] = 0;
+    }
+
+    //91EAC0
+    uchar* gtaTruncateString3(uchar* dst, const GTAChar* src, int size)
+    {
+        //调用这个函数的地方size是-1，所以先忽略
+
+        tiny_utf8::utf8_string u8_string;
+
+        auto src_span = get_string_span(src);
+        u8_string.assign(src_span.begin(), src_span.end());
+        auto ptr = u8_string.data();
+
+        for (std::size_t byte_index = 0; byte_index < u8_string.size(); ++byte_index)
+        {
+            dst[byte_index * 2] = ptr[byte_index];
+            dst[byte_index * 2 + 1] = pad_byte;
+        }
+        dst[u8_string.size() * 2] = 0;
+
+        return dst;
     }
 }

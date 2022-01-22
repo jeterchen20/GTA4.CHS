@@ -79,9 +79,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="Note.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

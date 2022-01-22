@@ -179,9 +179,14 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
         });
 
     //邮件回复的逐字出现效果
+    batch_matcher.register_step("51 03 FF E8", 1, [this](const byte_pattern::result_type& addresses)
+        {
+            injector::MakeCALL(addresses[0].i(3), string_util::gtaTruncateString3);
+        });
+
     //batch_matcher.register_step("", 1, [this](const byte_pattern::result_type& addresses)
     //    {
-    //
+    //        injector::MakeCALL(addresses[0].i(4), string_util::gtaExpandString2);
     //    });
 
     //Esc菜单Header间距
@@ -190,13 +195,11 @@ void CPlugin::RegisterPatchSteps(batch_matching& batch_matcher)
 
     //手机右下角功能键异常换行(减小x坐标)
 
-    //用plugins/GTA4.CHS/redirect/中存在的文件替代游戏文件
+    //游戏文件重定向
     batch_matcher.register_step("83 C4 04 50 FF 15 ? ? ? ? 8B F0", 6, [this](const byte_pattern::result_type& addresses)
         {
             injector::WriteMemory(*addresses[0].p<void*>(6), &RedirectCreateFileA, true);
         });
-
-    //资料片文件重定向
 }
 
 std::filesystem::path CPlugin::GetModuleFolder(HMODULE m)
