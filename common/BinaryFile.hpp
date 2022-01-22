@@ -8,52 +8,34 @@
 class BinaryFile
 {
 public:
-    enum class OpenMode
-    {
-        ReadOnly,
-        WriteOnly,
-        ReadWrite
-    };
+    BinaryFile() :m_pFile(nullptr) {}
+    BinaryFile(const BinaryFile&) = delete;
+    BinaryFile& operator=(const BinaryFile&) = delete;
 
-    enum class SeekMode
+    BinaryFile(BinaryFile&& rv) noexcept
+        :BinaryFile()
     {
-        Begin,
-        Current,
-        End
-    };
-
-    BinaryFile() = default;
-
-    BinaryFile(const std::filesystem::path &filename, OpenMode method)
-    {
-        Open(filename, method);
+        std::exchange(m_pFile, rv.m_pFile);
     }
 
-    bool Open(const std::filesystem::path &filename, OpenMode method)
+    BinaryFile& operator=(BinaryFile&& rv) noexcept
     {
-        const char *method_str;
-
         Close();
 
-        switch (method)
-        {
-        case OpenMode::ReadOnly:
-            method_str = "rb";
-            break;
+        std::exchange(m_pFile, rv.m_pFile);
+    }
 
-        case OpenMode::WriteOnly:
-            method_str = "wb";
-            break;
+    BinaryFile(const std::filesystem::path& filename, const char* mode)
+        :BinaryFile()
+    {
+        Open(filename, mode);
+    }
 
-        case OpenMode::ReadWrite:
-            method_str = "rb+";
-            break;
+    bool Open(const std::filesystem::path& filename, const char* mode)
+    {
+        Close();
 
-        default:
-            return false;
-        }
-
-        m_pFile = std::fopen(filename.string().c_str(), method_str);
+        m_pFile = std::fopen(filename.string().c_str(), mode);
         return (m_pFile != nullptr);
     }
 
@@ -76,29 +58,9 @@ public:
         return Opened();
     }
 
-    BinaryFile &Seek(long offset, SeekMode mode)
+    BinaryFile& Seek(long offset, int mode)
     {
-        int temp;
-
-        switch (mode)
-        {
-        case SeekMode::Begin:
-            temp = SEEK_SET;
-            break;
-
-        case SeekMode::Current:
-            temp = SEEK_CUR;
-            break;
-
-        case SeekMode::End:
-            temp = SEEK_END;
-            break;
-
-        default:
-            return *this;
-        }
-
-        fseek(m_pFile, offset, temp);
+        fseek(m_pFile, offset, mode);
 
         return *this;
     }
@@ -108,47 +70,48 @@ public:
         return ftell(m_pFile);
     }
 
-    BinaryFile &Read(void *buffer, std::size_t size)
+    BinaryFile& Read(void* buffer, std::size_t size)
     {
         std::fread(buffer, size, 1, m_pFile);
         return *this;
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile &> Read(T &object)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> Read(T& object)
     {
         Read(&object, sizeof(object));
         return *this;
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile &> ReadArray(std::size_t count, std::vector<T> &objects)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> ReadArray(std::size_t count, std::vector<T>& objects)
     {
         objects.resize(count);
         Read(objects.data(), sizeof(T) * count);
         return *this;
     }
 
-    BinaryFile &Write(const void *buffer, std::size_t size)
+    BinaryFile& Write(const void* buffer, std::size_t size)
     {
         std::fwrite(buffer, size, 1, m_pFile);
         return *this;
     }
 
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile &> Write(const T &object)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> Write(const T& object)
     {
         Write(&object, sizeof(object));
         return *this;
     }
 
+    //TODO: std::span<T>
     template <typename T>
-    std::enable_if_t<std::is_pod_v<T>, BinaryFile &> WriteArray(const std::vector<T> &objects)
+    std::enable_if_t<std::is_trivially_copyable_v<T>, BinaryFile&> WriteArray(const std::vector<T>& objects)
     {
         Write(objects.data(), sizeof(T) * objects.size());
         return *this;
     }
 
 private:
-    std::FILE * m_pFile = nullptr;
+    std::FILE* m_pFile;
 };

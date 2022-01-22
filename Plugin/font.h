@@ -96,6 +96,14 @@ public:
 };
 VALIDATE_SIZE(CFontRenderState, 0x38);
 
+class CFontBuffer
+{
+public:
+    CFontRenderState render_state;
+    GTAChar buffer[996];
+};
+VALIDATE_SIZE(CFontBuffer, 2048);
+
 struct TokenStruct
 {
     int f0[4];
@@ -116,13 +124,12 @@ public:
     virtual bool ProcessStringPart(float x, float y, const GTAChar* str_beg, const GTAChar* str_end, float spaces_width) const;
     virtual bool Func8() const;
 };
+VALIDATE_SIZE(CFontStringProcess, 4);
 
 class CFont
 {
 public:
     static void* __fastcall LoadTextureCB(void*, int, uint);
-
-    static bool IsNaiveCharacter(GTAChar chr);
 
     static float GetCharacterSizeNormalDispatch(GTAChar chr);
     static float GetCHSCharacterSizeNormal();
@@ -133,11 +140,7 @@ public:
     static void PrintCharDispatch(float x, float y, GTAChar chr, bool buffered);
     static void PrintCHSChar(float x, float y, GTAChar chr);
 
-    static DECLSPEC_NOINLINE const GTAChar* SkipWord(const GTAChar* text);
-    static DECLSPEC_NOINLINE const GTAChar* SkipSpaces(const GTAChar* text);
-
-    static float GetStringWidth(const GTAChar* text, bool get_all);
-    static DECLSPEC_SAFEBUFFERS void ProcessString(float x, float y, const GTAChar* text, CFontStringProcess* processor); //数组大小检查导致IDA分析出错
-    static DECLSPEC_SAFEBUFFERS void ProcessStringRemake(float x, float y, const GTAChar* text, CFontStringProcess* processor); //数组大小检查导致IDA分析出错
-    static float GetMaxWordWidth(const GTAChar *text);
+    static const GTAChar* SkipWord(const GTAChar* text);
+    static const GTAChar* SkipSpaces(const GTAChar* text);
+    static void GetStringWidthHook();
 };

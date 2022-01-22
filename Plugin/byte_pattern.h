@@ -51,27 +51,9 @@ private:
 
 class byte_pattern
 {
-    std::pair<std::intptr_t, std::intptr_t> _range;
-    std::vector<std::uint8_t> _pattern;
-    std::vector<std::uint8_t> _mask;
-    std::vector<memory_pointer> _results;
-    double _spent;
-    std::string _literal;
-
-    std::ptrdiff_t _bmbc[256];
-
-    static std::vector<std::string> split_pattern(const char* literal);
-    static std::pair<uint8_t, uint8_t> parse_sub_pattern(const std::string& sub);
-    void transform_pattern(const char* literal);
-
-    void get_module_range(memory_pointer module);
-
-    void bm_preprocess();
-    void bm_search();
-
-    static std::string make_bytes_literal(memory_pointer pointer, std::size_t length);
-
 public:
+    typedef std::vector<memory_pointer> result_type;
+
     byte_pattern();
 
     byte_pattern& set_pattern(const char* pattern_literal);
@@ -87,7 +69,7 @@ public:
     byte_pattern& find_pattern(const void* pattern_binary, std::size_t size);
 
     memory_pointer get(std::size_t index) const;
-    std::vector<memory_pointer> get() const;
+    result_type get() const;
     memory_pointer get_first() const;
 
     std::size_t count() const;
@@ -103,4 +85,25 @@ public:
             fn(p);
         }
     }
+
+private:
+    std::pair<std::intptr_t, std::intptr_t> _range;
+    std::vector<std::uint8_t> _pattern;
+    std::vector<std::uint8_t> _mask;
+    result_type _results;
+    double _spent;
+    std::string _literal;
+
+    std::ptrdiff_t _bmbc[256];
+
+    static std::vector<std::string> split_pattern(const char* literal);
+    static std::pair<uint8_t, uint8_t> parse_sub_pattern(const std::string& sub);
+    void transform_pattern(const char* literal);
+
+    void get_module_range(memory_pointer module);
+
+    void bm_preprocess();
+    void bm_search();
+
+    static std::string make_bytes_literal(memory_pointer pointer, std::size_t length);
 };

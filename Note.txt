@@ -1,0 +1,59 @@
+﻿-----------issue list-----------
+尝试减少字库方块高度到70(绘制时修正y轴)
+
+file_redirect功能与MOD额外文件(如GTAIV.EFLC.FusionFix.img)的兼容性问题，需要把额外的文件放到重定向目录，或者直接移除重定向功能
+
+把reverse note做成即使所有pattern失效也有用的文档，然后移除byte_pattern
+
+手机右功能键异常换行
+
+Esc菜单Header热区
+
+Esc菜单Header间距
+
+邮件回复打字效果显示不正确 可能是5D60F5处理的
+实现打字效果，可能需要utf8cpp流式解析utf8
+替换11734E8变成自己开辟的缓冲区，即可只使用转码式字符串缩窄扩展函数
+
+(看心情)网页/邮件字符过度压扁
+
+邮件中的</br>标签无效，断8C56F0查看后续处理
+或替换成~n~
+
+如遇到&copy返回0xA9(原版字库中的copyright)，导致gtaExpandString2直接转码出问题，可能需要gtaExpandString2单独判断leading 0xA9
+目前没发现有copyright，先放着
+
+----------------------reverse note----------------------
+5E7A72 读取邮件回复文本，arg_8是绘制的字符数？
+5E7ACD 将html标签和文本组合在一起，结果标签是ascii，文本是utf16
+
+413332 读到跟标签组合的文本 然后在41352D变成单字节写入
+
+86D466 获取文本长度并储存
+B8F27B 读取邮件回复文本"ER_0_4_0"
+
+8DD88F 绘制邮件/网页的文字，跟邮件回复效果有关
+
+5D5FE9 网页文字扩展
+5D60F5 貌似没用到的网页文字扩展
+
+sub_91EAC0(GTAChar *dst, const GTAChar *src, int size); size为-1时则全部复制
+
+从"~%c~"找到CFont_ProcessString
+绘制手机屏幕文本
+
+ESC菜单Header文本
+5AD2D4 地图
+5AD367 简报
+5AD409 统计
+5AD49C 控制
+5AD52C 音频
+5AD5BC 显示
+5AD64C 画面
+5ADAF1 游戏
+通过断CFont_SetColor寻找控制Header颜色的逻辑
+
+不让标点符号出现在行首..需要重写排版函数
+
+5D6E60 根据字符串创建CHtmlNode
+FE0B70 HtmlNode子类的虚函数表->找到构造函数->找到对象大小

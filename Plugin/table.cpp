@@ -1,24 +1,22 @@
 ﻿#include "table.h"
 
-CTable GlobalTable;
-
 void CTable::LoadTable(const std::filesystem::path& filename)
 {
     std::vector<CharacterData> buffer;
 
-    BinaryFile file(filename, BinaryFile::OpenMode::ReadOnly);
+    BinaryFile file(filename,"rb");
 
     m_Table.clear();
-    file.Seek(0, BinaryFile::SeekMode::End);
+    file.Seek(0, SEEK_END);
     auto size = file.Tell();
-    file.Seek(0, BinaryFile::SeekMode::Begin);
+    file.Seek(0, SEEK_SET);
     file.ReadArray(size / sizeof(CharacterData), buffer);
 
     m_Table.reserve(buffer.size() * 2);
 
     for (auto& entry : buffer)
     {
-        m_Table.insert_or_assign(entry.code, entry.pos);
+        m_Table.emplace(entry.code, entry.pos);
     }
 }
 
@@ -28,7 +26,7 @@ CharacterPos CTable::GetCharPos(GTAChar chr) const
 
     if (it == m_Table.end())
     {
-        return CharacterPos{ 50,63 }; //字库中此位置绘制白色方块
+        return { 50,63 }; //字库中此位置绘制白色方块
     }
     else
     {

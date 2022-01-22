@@ -24,6 +24,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <SupportLTL>false</SupportLTL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -56,6 +57,12 @@
     <TargetName>GTA4.CHS</TargetName>
     <TargetExt>.asi</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Label="Vcpkg">
+    <VcpkgEnabled>true</VcpkgEnabled>
+  </PropertyGroup>
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <VcpkgUseStatic>true</VcpkgUseStatic>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -63,7 +70,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -79,7 +86,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;PLUGIN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -92,9 +99,13 @@
   <ItemGroup>
     <ClInclude Include="batch_matching.h" />
     <ClInclude Include="byte_pattern.h" />
+    <ClInclude Include="class_pointer.hpp" />
     <ClInclude Include="font.h" />
     <ClInclude Include="game.h" />
+    <ClInclude Include="gta_aslr.h" />
     <ClInclude Include="plugin.h" />
+    <ClInclude Include="file_redirect.h" />
+    <ClInclude Include="string_util.h" />
     <ClInclude Include="table.h" />
   </ItemGroup>
   <ItemGroup>
@@ -103,11 +114,11 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="font.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="gta_aslr.cpp" />
     <ClCompile Include="plugin.cpp" />
+    <ClCompile Include="file_redirect.cpp" />
+    <ClCompile Include="string_util.cpp" />
     <ClCompile Include="table.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="Note.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
